@@ -44,6 +44,7 @@ router.get("/discord/state", async (_req, res) => {
     autoPost: cfg.autoPost,
     schedulerRunning: isStarted(),
     ownerHandle: cfg.ownerHandle,
+    ownerMention: cfg.ownerMention,
     serverName: cfg.serverName,
     publicBaseUrl: cfg.publicBaseUrl || publicBaseUrlFromEnv(),
     detectedPublicBaseUrl: publicBaseUrlFromEnv(),
@@ -54,12 +55,14 @@ router.get("/discord/state", async (_req, res) => {
 router.post("/discord/config", async (req, res) => {
   const body = req.body as {
     ownerHandle?: string;
+    ownerMention?: string;
     serverName?: string;
     autoPost?: boolean;
     publicBaseUrl?: string;
   };
   const next = await updateConfig({
     ...(body.ownerHandle !== undefined ? { ownerHandle: body.ownerHandle } : {}),
+    ...(body.ownerMention !== undefined ? { ownerMention: body.ownerMention } : {}),
     ...(body.serverName !== undefined ? { serverName: body.serverName } : {}),
     ...(body.publicBaseUrl !== undefined ? { publicBaseUrl: body.publicBaseUrl } : {}),
     ...(body.autoPost !== undefined ? { autoPost: body.autoPost } : {}),
@@ -119,6 +122,32 @@ router.post("/discord/test", async (req, res) => {
     logger.error({ err, ch }, "test send failed");
     res.status(500).json({ ok: false, error: (err as Error).message });
   }
+});
+
+router.post("/discord/burst", async (req, res) => {
+  const body = req.body as { channel?: string; count?: number };
+  const ch = body.channel as ChannelKey | undefined;
+  if (!ch || !CHANNEL_KEYS.includes(ch)) {
+    res.status(400).json({ ok: false, error: "invalid channel" });
+    return;
+  }
+  const count = Math.max(1, Math.min(5, Number(body.count) || 3));
+  const results: { ok: boolean; error?: string }[] = [];
+  for (let i = 0; i < count; i++) {
+    try {
+      const payload = await GENERATORS[ch]();
+      const out = await sendToChannel(ch, payload);
+      results.push({ ok: out.ok, error: out.error });
+    } catch (err) {
+      results.push({ ok: false, error: (err as Error).message });
+    }
+    if (i < count - 1) {
+      // 6–14s jitter so it looks like a real conversation, not spam
+      const delay = 6000 + Math.floor(Math.random() * 8000);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  res.json({ ok: true, channel: ch, results });
 });
 
 router.post("/discord/post-all", async (_req, res) => {

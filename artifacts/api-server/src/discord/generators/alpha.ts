@@ -1,7 +1,7 @@
 import type { WebhookPayload } from "../poster";
 import { renderUrl } from "../poster";
 import { COLORS, pick, randInt } from "../data";
-import { loadConfig } from "../config";
+import { loadConfig, dmTarget } from "../config";
 
 const NARRATIVES = [
   "AI agents",
@@ -28,6 +28,7 @@ const THESIS_OPENERS = [
 
 export async function alphaLoungePost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const dm = dmTarget(cfg);
   const n = pick(NARRATIVES);
   const opener = pick(THESIS_OPENERS);
   const bullets = [
@@ -51,7 +52,7 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
           `**Narrative:** ${n}\n` +
           `**Why now:**\n${picks.join("\n")}\n\n` +
           `Specific tickers + entries posted in **VIP**.\n` +
-          `DM ${cfg.ownerHandle} to upgrade.`,
+          `DM ${dm} to upgrade.`,
         image: { url: img },
         footer: { text: `${cfg.serverName} • Alpha Lounge` },
         timestamp: new Date().toISOString(),

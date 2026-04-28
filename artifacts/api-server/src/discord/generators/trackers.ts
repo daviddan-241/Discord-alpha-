@@ -12,7 +12,7 @@ import {
   randomSolAddr,
   shortAddr,
 } from "../data";
-import { loadConfig } from "../config";
+import { loadConfig, dmTarget } from "../config";
 
 const WHALE_TAGS = [
   "Smart Money #1",
@@ -139,6 +139,7 @@ export async function gasTrackerPost(): Promise<WebhookPayload> {
 
 export async function alertsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const dm = dmTarget(cfg);
   const variants = [
     {
       title: "📡 ALERT — Whale cluster forming",
@@ -146,7 +147,7 @@ export async function alertsPost(): Promise<WebhookPayload> {
         `Multiple top wallets just rotated into the same low-cap on ${pick(CHAINS)}.\n` +
         `Pattern matches ${randInt(2, 6)} previous winners.\n\n` +
         `Public chart will catch up in ~${randInt(15, 90)} minutes. VIP got the CA already.\n\n` +
-        `Want it now? DM ${cfg.ownerHandle}.`,
+        `Want it now? DM ${dm}.`,
       color: COLORS.pink,
     },
     {
@@ -168,7 +169,7 @@ export async function alertsPost(): Promise<WebhookPayload> {
       desc:
         `New VIP-only call just dropped. Public preview in 💎 vip-snipes.\n` +
         `${randInt(8, 22)} VIP members already filled.\n\n` +
-        `DM ${cfg.ownerHandle} to be on the next one in time.`,
+        `DM ${dm} to be on the next one in time.`,
       color: COLORS.vipPurple,
     },
   ];

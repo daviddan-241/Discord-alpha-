@@ -199,8 +199,16 @@ export const DASHBOARD_HTML = `<!doctype html>
         <input id="serverName" type="text" placeholder="Apex Alpha" />
       </div>
       <div>
-        <label for="ownerHandle">Your DM handle (where users contact you for VIP)</label>
+        <label for="ownerHandle">Your DM handle (shown in image embeds)</label>
         <input id="ownerHandle" type="text" placeholder="@your_handle" />
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <label for="ownerMention">Your Discord user mention (used in CTAs — actually pings you)</label>
+      <input id="ownerMention" type="text" placeholder="&lt;@1035212407213133856&gt;" />
+      <div class="help" style="margin-top:6px;">
+        Right-click your name in Discord → <b>Copy User ID</b> → paste as <code>&lt;@THE_ID&gt;</code>.
+        When set, "DM …" lines in posts become a real mention so users tap and DM you instantly.
       </div>
     </div>
     <div style="margin-top:12px;">
@@ -323,6 +331,7 @@ function renderChannels() {
         '<button data-act="clear" data-key="' + ch.key + '">Clear</button>' +
         '<button data-act="preview" data-key="' + ch.key + '">Preview</button>' +
         '<button class="primary" data-act="test" data-key="' + ch.key + '">Send now</button>' +
+        (ch.oneShot ? '' : '<button data-act="burst" data-key="' + ch.key + '" title="Send 3 different posts spaced 6–14s apart">Burst ×3</button>') +
       '</div>';
     root.appendChild(div);
   }
@@ -365,6 +374,7 @@ function renderTopBar() {
   $("okRate").textContent = state.history.length ? Math.round((ok * 100) / state.history.length) + "%" : "—";
   $("autoPost").checked = state.autoPost;
   $("ownerHandle").value = state.ownerHandle || "";
+  $("ownerMention").value = state.ownerMention || "";
   $("serverName").value = state.serverName || "";
   $("publicBaseUrl").value = state.publicBaseUrl || "";
   $("detectedUrl").textContent = state.detectedPublicBaseUrl || "(none — deploy first)";
@@ -405,6 +415,12 @@ async function onChannelAction(ev) {
       const out = await api("/discord/test", { method: "POST", body: JSON.stringify({ channel: key }) });
       if (out.ok) { toast("Sent to " + key, "ok"); }
       else { toast("Send failed: " + (out.error || "?"), "bad"); }
+      await refresh();
+    } else if (act === "burst") {
+      toast("Burst started — 3 posts incoming over ~30s", "ok");
+      const out = await api("/discord/burst", { method: "POST", body: JSON.stringify({ channel: key, count: 3 }) });
+      const ok = (out.results || []).filter((r) => r.ok).length;
+      toast("Burst done: " + ok + "/" + (out.results || []).length + " sent", ok ? "ok" : "bad");
       await refresh();
     }
   } catch (err) {
@@ -483,6 +499,7 @@ $("saveSettings").addEventListener("click", async () => {
       method: "POST",
       body: JSON.stringify({
         ownerHandle: $("ownerHandle").value.trim(),
+        ownerMention: $("ownerMention").value.trim(),
         serverName: $("serverName").value.trim() || "Apex Alpha",
         publicBaseUrl: $("publicBaseUrl").value.trim(),
       }),

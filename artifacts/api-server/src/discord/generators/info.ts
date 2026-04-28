@@ -1,10 +1,11 @@
 import type { WebhookPayload } from "../poster";
 import { renderUrl } from "../poster";
 import { COLORS } from "../data";
-import { loadConfig } from "../config";
+import { loadConfig, dmTarget } from "../config";
 
 export async function welcomePost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const dm = dmTarget(cfg);
   const img = await renderUrl("info", {
     tag: "WELCOME",
     title: `WELCOME TO ${cfg.serverName.toUpperCase()}`,
@@ -25,7 +26,7 @@ export async function welcomePost(): Promise<WebhookPayload> {
           `**📡 alerts** — when it's urgent, you'll know.\n\n` +
           `Step 1 — read **📜 rules**\n` +
           `Step 2 — react in **✅ get-verified**\n` +
-          `Step 3 — DM ${cfg.ownerHandle} when you're ready for VIP.\n\n` +
+          `Step 3 — DM ${dm} when you're ready for VIP.\n\n` +
           `If you're here to print, you're in the right place.`,
         image: { url: img },
         footer: { text: `${cfg.serverName} • Welcome` },
@@ -36,6 +37,7 @@ export async function welcomePost(): Promise<WebhookPayload> {
 
 export async function rulesPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const dm = dmTarget(cfg);
   const img = await renderUrl("info", {
     tag: "RULES",
     title: "HOUSE RULES",
@@ -57,7 +59,7 @@ export async function rulesPost(): Promise<WebhookPayload> {
           "**6.** No leaking VIP signals. Permanent ban + IP block.\n" +
           "**7.** Keep chat in chat. Use ⛽ gas-tracker for gas, 📊 price-bot for prices.\n" +
           "**8.** Ask once. Mods will answer when free.\n\n" +
-          `Need help? DM ${cfg.ownerHandle} — never anyone else claiming to be staff.`,
+          `Need help? DM ${dm} — never anyone else claiming to be staff.`,
         image: { url: img },
         footer: { text: `${cfg.serverName} • Rules` },
       },
@@ -67,6 +69,7 @@ export async function rulesPost(): Promise<WebhookPayload> {
 
 export async function getVerifiedPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const dm = dmTarget(cfg);
   const img = await renderUrl("info", {
     tag: "VERIFY",
     title: "GET VERIFIED",
@@ -78,17 +81,24 @@ export async function getVerifiedPost(): Promise<WebhookPayload> {
     embeds: [
       {
         color: COLORS.green,
-        title: "✅ Get Verified",
+        title: "✅ Get Verified — required to enter",
         description:
-          "React with ✅ below to unlock the rest of the server.\n\n" +
-          "By verifying you confirm:\n" +
-          "• You read **📜 rules**\n" +
-          "• You're 18+\n" +
-          "• You understand crypto trading carries risk\n\n" +
-          "Verified members get access to **📊 free-calls**, **📈 live-trades**, **🐋 whale-tracker**, and the rest of the public rooms.\n\n" +
-          `Want VIP? After you verify, DM ${cfg.ownerHandle} directly.`,
+          `**Right now you can only see this channel.** Verify to unlock the rest of ${cfg.serverName}.\n\n` +
+          "**How to verify**\n" +
+          "1. Read **📜 rules** above.\n" +
+          "2. React **✅** to this message.\n" +
+          "3. The bot gives you the **@Verified** role automatically.\n" +
+          "4. Refresh Discord — every other channel appears.\n\n" +
+          "**By reacting ✅ you confirm**\n" +
+          "• You read and accept the rules.\n" +
+          "• You are 18+.\n" +
+          "• You understand crypto trading carries risk.\n" +
+          "• You will not leak VIP signals.\n\n" +
+          "**What unlocks after verify**\n" +
+          "📊 free-calls · 📈 live-trades · 🐋 whale-tracker · 🏆 proof-results · 📡 alerts · 💬 chat rooms · 🤖 bot-commands\n\n" +
+          `**Want the early signal?** After verifying, DM ${dm} for VIP.`,
         image: { url: img },
-        footer: { text: "React ✅ to continue" },
+        footer: { text: "React ✅ to continue • Without it you stay locked out" },
       },
     ],
   };
@@ -96,6 +106,7 @@ export async function getVerifiedPost(): Promise<WebhookPayload> {
 
 export async function botCommandsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const dm = dmTarget(cfg);
   const img = await renderUrl("info", {
     tag: "COMMANDS",
     title: "BOT COMMANDS",
@@ -116,7 +127,7 @@ export async function botCommandsPost(): Promise<WebhookPayload> {
           { name: "`!ca <ticker>`", value: "Lookup contract address.", inline: true },
           { name: "`!gas`", value: "Solana + ETH fees right now.", inline: true },
           { name: "`!whales <ticker>`", value: "Top wallet activity.", inline: true },
-          { name: "`!vip`", value: `DM info for ${cfg.ownerHandle}.`, inline: true },
+          { name: "`!vip`", value: `DM info for ${dm}.`, inline: true },
           { name: "`!stats`", value: "Caller hit-rate this week.", inline: true },
           { name: "`!proof`", value: "Random recent W from the pile.", inline: true },
           { name: "`!rules`", value: "Show server rules.", inline: true },

@@ -90,6 +90,11 @@ export const CHANNEL_META: Record<ChannelKey, ChannelMeta> = {
 export type DiscordConfig = {
   webhooks: Record<string, string>;
   ownerHandle: string;
+  /**
+   * Discord user mention like `<@1035212407213133856>` — when set, posts use
+   * this in CTAs so the owner gets a real ping. Falls back to `ownerHandle`.
+   */
+  ownerMention: string;
   serverName: string;
   autoPost: boolean;
   publicBaseUrl: string;
@@ -98,10 +103,19 @@ export type DiscordConfig = {
 const DEFAULT_CONFIG: DiscordConfig = {
   webhooks: {},
   ownerHandle: "@apex_owner",
+  ownerMention: "<@1035212407213133856>",
   serverName: "Apex Alpha",
   autoPost: true,
   publicBaseUrl: "",
 };
+
+/**
+ * The "DM CTA" string used in posts — prefers the real Discord mention
+ * (which actually pings) and falls back to the readable handle.
+ */
+export function dmTarget(cfg: Pick<DiscordConfig, "ownerMention" | "ownerHandle">): string {
+  return (cfg.ownerMention && cfg.ownerMention.trim()) || cfg.ownerHandle;
+}
 
 let cached: DiscordConfig | null = null;
 
