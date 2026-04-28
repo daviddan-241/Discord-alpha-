@@ -88,6 +88,22 @@ router.post("/discord/webhook", async (req, res) => {
   res.json({ ok: true });
 });
 
+router.post("/discord/preview", async (req, res) => {
+  const body = req.body as { channel?: string };
+  const ch = body.channel as ChannelKey | undefined;
+  if (!ch || !CHANNEL_KEYS.includes(ch)) {
+    res.status(400).json({ ok: false, error: "invalid channel" });
+    return;
+  }
+  try {
+    const payload = await GENERATORS[ch]();
+    res.json({ ok: true, channel: ch, payload });
+  } catch (err) {
+    logger.error({ err, ch }, "preview generation failed");
+    res.status(500).json({ ok: false, error: (err as Error).message });
+  }
+});
+
 router.post("/discord/test", async (req, res) => {
   const body = req.body as { channel?: string };
   const ch = body.channel as ChannelKey | undefined;

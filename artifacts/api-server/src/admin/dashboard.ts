@@ -4,6 +4,7 @@ export const DASHBOARD_HTML = `<!doctype html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Apex Auto-Poster — Control Panel</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.ico" />
 <style>
   :root {
     --bg: #0b0d12;
@@ -142,6 +143,42 @@ export const DASHBOARD_HTML = `<!doctype html>
   .toast.show { opacity: 1; transform: translateY(0); }
   .toast.ok { background: #052e16; border-color: #14532d; }
   .toast.bad { background: #2d0606; border-color: #7f1d1d; }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(2, 4, 10, 0.72);
+    display: none; align-items: center; justify-content: center; z-index: 50;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    width: 100%; max-width: 640px; max-height: 86vh; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .modal-head {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .modal-head h3 { margin: 0; font-size: 15px; }
+  .modal-body {
+    padding: 16px 18px; overflow-y: auto;
+  }
+  .modal-foot {
+    padding: 12px 18px; border-top: 1px solid var(--border);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+  .embed {
+    border-left: 4px solid var(--purple);
+    background: #0d1018; border-radius: 6px;
+    padding: 12px 14px; margin-top: 8px;
+  }
+  .embed-title { font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 6px; }
+  .embed-desc { white-space: pre-wrap; font-size: 13px; line-height: 1.5; color: #cbd5e1; }
+  .embed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .embed-field b { display: block; font-size: 11.5px; color: #fff; }
+  .embed-field span { font-size: 12.5px; color: var(--muted); white-space: pre-wrap; }
+  .embed-img { margin-top: 10px; max-width: 100%; border-radius: 6px; border: 1px solid var(--border); }
+  .embed-footer { font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+  .msg-content { white-space: pre-wrap; font-size: 13.5px; line-height: 1.55; color: var(--text); }
 </style>
 </head>
 <body>
@@ -218,6 +255,21 @@ export const DASHBOARD_HTML = `<!doctype html>
 
 <div class="toast" id="toast"></div>
 
+<div class="modal-overlay" id="previewModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="previewTitle">Preview</h3>
+      <div style="flex:1"></div>
+      <span class="badge" id="previewMeta"></span>
+    </div>
+    <div class="modal-body" id="previewBody"></div>
+    <div class="modal-foot">
+      <button id="previewRegen">Generate another</button>
+      <button id="previewClose">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const $ = (id) => document.getElementById(id);
 let state = null;
@@ -269,6 +321,7 @@ function renderChannels() {
       '<div class="channel-actions">' +
         '<button data-act="save" data-key="' + ch.key + '">Save</button>' +
         '<button data-act="clear" data-key="' + ch.key + '">Clear</button>' +
+        '<button data-act="preview" data-key="' + ch.key + '">Preview</button>' +
         '<button class="primary" data-act="test" data-key="' + ch.key + '">Send now</button>' +
       '</div>';
     root.appendChild(div);
@@ -346,6 +399,8 @@ async function onChannelAction(ev) {
       await api("/discord/webhook", { method: "POST", body: JSON.stringify({ channel: key, url: "" }) });
       toast("Webhook cleared", "ok");
       await refresh();
+    } else if (act === "preview") {
+      await openPreview(key);
     } else if (act === "test") {
       const out = await api("/discord/test", { method: "POST", body: JSON.stringify({ channel: key }) });
       if (out.ok) { toast("Sent to " + key, "ok"); }
@@ -357,6 +412,69 @@ async function onChannelAction(ev) {
   } finally {
     btn.disabled = false;
   }
+}
+
+let activePreviewKey = null;
+
+async function openPreview(key) {
+  activePreviewKey = key;
+  const ch = state && state.channels.find((c) => c.key === key);
+  $("previewTitle").textContent = "Preview · " + (ch ? ch.emoji + " " + ch.label : key);
+  $("previewMeta").textContent = ch
+    ? (ch.oneShot ? "manual / one-shot" : "auto " + ch.minMinutes + "–" + ch.maxMinutes + "m")
+    : "";
+  $("previewBody").innerHTML = '<div class="msg-content">Generating sample…</div>';
+  $("previewModal").classList.add("show");
+  await loadPreview(key);
+}
+
+async function loadPreview(key) {
+  try {
+    const out = await api("/discord/preview", { method: "POST", body: JSON.stringify({ channel: key }) });
+    if (!out.ok) throw new Error(out.error || "preview failed");
+    $("previewBody").innerHTML = renderPayload(out.payload);
+  } catch (err) {
+    $("previewBody").innerHTML = '<div class="msg-content" style="color:#fca5a5">Error: ' + escapeHtml(err.message) + '</div>';
+  }
+}
+
+function renderPayload(p) {
+  if (!p || typeof p !== "object") return '<div class="msg-content">(empty)</div>';
+  let html = "";
+  if (p.username) {
+    html += '<div class="msg-content" style="color:var(--muted)">as <b style="color:#fff">' + escapeHtml(p.username) + '</b></div>';
+  }
+  if (p.content) {
+    html += '<div class="msg-content" style="margin-top:6px">' + escapeHtml(p.content) + '</div>';
+  }
+  const embeds = Array.isArray(p.embeds) ? p.embeds : [];
+  for (const e of embeds) {
+    html += '<div class="embed">';
+    if (e.title) html += '<div class="embed-title">' + escapeHtml(e.title) + '</div>';
+    if (e.description) html += '<div class="embed-desc">' + escapeHtml(e.description) + '</div>';
+    if (Array.isArray(e.fields) && e.fields.length) {
+      html += '<div class="embed-fields">';
+      for (const f of e.fields) {
+        html += '<div class="embed-field"><b>' + escapeHtml(f.name || "") + '</b><span>' + escapeHtml(f.value || "") + '</span></div>';
+      }
+      html += '</div>';
+    }
+    if (e.image && e.image.url) {
+      html += '<img class="embed-img" src="' + escapeAttr(e.image.url) + '" alt="" onerror="this.style.display=\\'none\\'" />';
+    }
+    if (e.footer && e.footer.text) {
+      html += '<div class="embed-footer">' + escapeHtml(e.footer.text) + '</div>';
+    }
+    html += '</div>';
+  }
+  if (!p.content && embeds.length === 0) {
+    html += '<div class="msg-content" style="color:var(--muted)">(no content / embeds)</div>';
+  }
+  return html;
+}
+
+function escapeAttr(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
 
 $("saveSettings").addEventListener("click", async () => {
@@ -400,6 +518,28 @@ $("postAll").addEventListener("click", async () => {
     toast("Posted " + ok + "/" + out.results.length + " channels", ok ? "ok" : "bad");
     await refresh();
   } catch (err) { toast("Bulk send failed: " + err.message, "bad"); }
+});
+
+$("previewClose").addEventListener("click", () => {
+  $("previewModal").classList.remove("show");
+  activePreviewKey = null;
+});
+$("previewModal").addEventListener("click", (ev) => {
+  if (ev.target === $("previewModal")) {
+    $("previewModal").classList.remove("show");
+    activePreviewKey = null;
+  }
+});
+$("previewRegen").addEventListener("click", async () => {
+  if (!activePreviewKey) return;
+  $("previewBody").innerHTML = '<div class="msg-content">Generating sample…</div>';
+  await loadPreview(activePreviewKey);
+});
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Escape") {
+    $("previewModal").classList.remove("show");
+    activePreviewKey = null;
+  }
 });
 
 refresh();
