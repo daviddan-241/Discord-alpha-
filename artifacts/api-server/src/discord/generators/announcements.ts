@@ -1,6 +1,6 @@
 import type { WebhookPayload } from "../poster";
-import { imageUrl } from "../poster";
-import { COLORS, DM_PROOF_IMAGES, PROOF_IMAGES, pick, pickN, randInt, randFloat } from "../data";
+import { renderUrl } from "../poster";
+import { COLORS, pick, pickN, randInt, randFloat } from "../data";
 import { loadConfig } from "../config";
 
 export async function announcementPost(): Promise<WebhookPayload> {
@@ -8,6 +8,7 @@ export async function announcementPost(): Promise<WebhookPayload> {
   const variants = [
     {
       title: "📢 VIP slots reopened — limited",
+      tag: "VIP SLOTS",
       body:
         `We just opened **${randInt(5, 14)} new VIP seats**.\n\n` +
         `Closing again once filled. We keep VIP small on purpose so signals don't move the chart against us.\n\n` +
@@ -15,6 +16,7 @@ export async function announcementPost(): Promise<WebhookPayload> {
     },
     {
       title: "📢 Last week recap",
+      tag: "WEEKLY RECAP",
       body:
         `**Top public W's:**\n` +
         `• $${pick(["MOON", "GIGA", "PEPE2", "FROG", "TURBO"])} — ${randFloat(8, 60, 1)}x\n` +
@@ -25,6 +27,7 @@ export async function announcementPost(): Promise<WebhookPayload> {
     },
     {
       title: "📢 New caller onboarded",
+      tag: "TEAM UPDATE",
       body:
         `Just added a sniper to the VIP team — solana micro-cap specialist. Hit-rate above ${randInt(62, 78)}% over the last ${randInt(60, 140)} calls.\n\n` +
         `VIP gets every entry he posts. Public sees blurred previews in 💎 vip-snipes.\n\n` +
@@ -32,6 +35,7 @@ export async function announcementPost(): Promise<WebhookPayload> {
     },
     {
       title: "📢 Server is locked down",
+      tag: "ANNOUNCEMENT",
       body:
         `We trimmed inactive members today. Back under capacity.\n\n` +
         `If you got nuked but still want in — re-verify in ✅ get-verified and you'll be back.\n\n` +
@@ -39,6 +43,11 @@ export async function announcementPost(): Promise<WebhookPayload> {
     },
   ];
   const v = pick(variants);
+  const img = await renderUrl("announce", {
+    title: v.title.replace(/^📢 /, ""),
+    body: v.body.split("\n")[0] ?? "",
+    server: cfg.serverName,
+  });
   return {
     username: `${cfg.serverName} Announcements`,
     embeds: [
@@ -46,6 +55,7 @@ export async function announcementPost(): Promise<WebhookPayload> {
         color: COLORS.vipPurple,
         title: v.title,
         description: v.body,
+        image: { url: img },
         footer: { text: `${cfg.serverName} • Official` },
         timestamp: new Date().toISOString(),
       },
@@ -55,9 +65,12 @@ export async function announcementPost(): Promise<WebhookPayload> {
 
 export async function joinVipPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
-  const proof1 = await imageUrl(pick(PROOF_IMAGES));
-  const proof2 = await imageUrl(pick(DM_PROOF_IMAGES));
   const xWins = pickN(["196x", "120x", "111x", "109x", "67x", "48x", "47x", "42x"] as const, 3);
+  const img = await renderUrl("vip", {
+    handle: cfg.ownerHandle,
+    server: cfg.serverName,
+    wins: xWins.join(","),
+  });
 
   const variants = [
     {
@@ -75,7 +88,6 @@ export async function joinVipPost(): Promise<WebhookPayload> {
         `1. DM ${cfg.ownerHandle}\n` +
         `2. Say "VIP from Apex"\n` +
         `3. You'll be in within minutes.`,
-      img: proof1,
     },
     {
       title: "💎 Stop fading the calls. Get the early entry.",
@@ -84,7 +96,6 @@ export async function joinVipPost(): Promise<WebhookPayload> {
         `VIP signals drop **before** the public chart wakes up.\n\n` +
         `Real members. Real fills. Real receipts.\n\n` +
         `> DM ${cfg.ownerHandle} now. We don't keep slots open long.`,
-      img: proof2,
     },
     {
       title: "💎 VIP — read this if you actually want to print",
@@ -96,7 +107,6 @@ export async function joinVipPost(): Promise<WebhookPayload> {
         `• Top hit: ${pick(xWins)}\n\n` +
         `One week of VIP usually pays itself back on a single call.\n\n` +
         `Ready? DM ${cfg.ownerHandle}.`,
-      img: proof1,
     },
   ];
 
@@ -108,7 +118,7 @@ export async function joinVipPost(): Promise<WebhookPayload> {
         color: COLORS.vipPurple,
         title: v.title,
         description: v.desc,
-        image: { url: v.img },
+        image: { url: img },
         footer: { text: `${cfg.serverName} • Join VIP — DM ${cfg.ownerHandle}` },
         timestamp: new Date().toISOString(),
       },

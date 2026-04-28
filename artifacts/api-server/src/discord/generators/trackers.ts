@@ -1,4 +1,5 @@
 import type { WebhookPayload } from "../poster";
+import { renderUrl } from "../poster";
 import {
   CHAINS,
   COLORS,
@@ -35,6 +36,15 @@ export async function whaleTrackerPost(): Promise<WebhookPayload> {
   const sol = randFloat(15, 800, 2);
   const usd = Math.round(sol * randInt(140, 220));
   const tag = pick(WHALE_TAGS);
+  const img = await renderUrl("whale", {
+    action: action === "fully exited" ? "EXITED" : action === "took profit on" ? "TRIMMED" : "BOUGHT",
+    ticker,
+    wallet: shortAddr(wallet),
+    size: `${sol} ${chain === "Solana" ? "SOL" : "ETH"}`,
+    usd: `$${usd.toLocaleString()}`,
+    tag,
+    server: cfg.serverName,
+  });
   return {
     username: `${cfg.serverName} Whales`,
     embeds: [
@@ -47,6 +57,7 @@ export async function whaleTrackerPost(): Promise<WebhookPayload> {
           { name: "Token Mcap", value: fmtMoney(randInt(50, 4000) * 1000), inline: true },
           { name: "Holding", value: `${randInt(1, 96)}h`, inline: true },
         ],
+        image: { url: img },
         footer: { text: "tracking 1,200+ wallets" },
         timestamp: new Date().toISOString(),
       },
@@ -59,7 +70,19 @@ export async function priceBotPost(): Promise<WebhookPayload> {
   const btc = randFloat(58000, 95000, 0);
   const eth = randFloat(2400, 4400, 0);
   const sol = randFloat(120, 260, 1);
+  const bnb = randFloat(450, 720, 0);
+  const doge = randFloat(0.08, 0.34, 4);
+  const wif = randFloat(0.6, 4.2, 3);
   const change = (n = 8) => `${randFloat(-n, n, 2) >= 0 ? "🟢 +" : "🔴 "}${randFloat(-n, n, 2)}%`;
+  const items = [
+    `BTC:${btc}:${randFloat(-4, 4, 2)}`,
+    `ETH:${eth}:${randFloat(-6, 6, 2)}`,
+    `SOL:${sol}:${randFloat(-9, 9, 2)}`,
+    `BNB:${bnb}:${randFloat(-5, 5, 2)}`,
+    `DOGE:${doge}:${randFloat(-12, 12, 2)}`,
+    `WIF:${wif}:${randFloat(-18, 18, 2)}`,
+  ].join(",");
+  const img = await renderUrl("price", { items, server: cfg.serverName });
   return {
     username: `${cfg.serverName} Price Bot`,
     embeds: [
@@ -70,10 +93,11 @@ export async function priceBotPost(): Promise<WebhookPayload> {
           { name: "BTC", value: `$${btc.toLocaleString()}\n${change(4)} 24h`, inline: true },
           { name: "ETH", value: `$${eth.toLocaleString()}\n${change(6)} 24h`, inline: true },
           { name: "SOL", value: `$${sol}\n${change(9)} 24h`, inline: true },
-          { name: "BNB", value: `$${randFloat(450, 720, 0)}\n${change(5)} 24h`, inline: true },
-          { name: "DOGE", value: `$${randFloat(0.08, 0.34, 4)}\n${change(12)} 24h`, inline: true },
-          { name: "WIF", value: `$${randFloat(0.6, 4.2, 3)}\n${change(18)} 24h`, inline: true },
+          { name: "BNB", value: `$${bnb}\n${change(5)} 24h`, inline: true },
+          { name: "DOGE", value: `$${doge}\n${change(12)} 24h`, inline: true },
+          { name: "WIF", value: `$${wif}\n${change(18)} 24h`, inline: true },
         ],
+        image: { url: img },
         footer: { text: "updated every ~15m" },
         timestamp: new Date().toISOString(),
       },
@@ -88,6 +112,12 @@ export async function gasTrackerPost(): Promise<WebhookPayload> {
   const baseGwei = randFloat(0.01, 1.2, 3);
   const tag =
     ethGwei < 12 ? "🟢 dirt cheap" : ethGwei < 35 ? "🟡 normal" : "🔴 expensive";
+  const img = await renderUrl("gas", {
+    eth: `${ethGwei} gwei`,
+    base: `${baseGwei} gwei`,
+    sol: `${solFee.toFixed(6)} SOL`,
+    server: cfg.serverName,
+  });
   return {
     username: `${cfg.serverName} Gas`,
     embeds: [
@@ -99,6 +129,7 @@ export async function gasTrackerPost(): Promise<WebhookPayload> {
           { name: "Base", value: `${baseGwei} gwei\n🟢 cheap`, inline: true },
           { name: "Solana", value: `${solFee.toFixed(6)} SOL avg\n🟢 spammable`, inline: true },
         ],
+        image: { url: img },
         footer: { text: "good moment to ape" },
         timestamp: new Date().toISOString(),
       },
@@ -142,6 +173,11 @@ export async function alertsPost(): Promise<WebhookPayload> {
     },
   ];
   const v = pick(variants);
+  const img = await renderUrl("alert", {
+    title: v.title.replace(/^📡 ALERT — /, ""),
+    body: v.desc.split("\n")[0] ?? "Something is moving.",
+    server: cfg.serverName,
+  });
   return {
     username: `${cfg.serverName} Alerts`,
     embeds: [
@@ -149,6 +185,7 @@ export async function alertsPost(): Promise<WebhookPayload> {
         color: v.color,
         title: v.title,
         description: v.desc,
+        image: { url: img },
         footer: { text: `${cfg.serverName} • Alerts` },
         timestamp: new Date().toISOString(),
       },

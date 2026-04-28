@@ -1,11 +1,9 @@
 import type { WebhookPayload } from "../poster";
-import { imageUrl } from "../poster";
+import { renderUrl } from "../poster";
 import {
-  CALL_IMAGES,
   CHAINS,
   COLORS,
   DEXES,
-  PROOF_IMAGES,
   TOKEN_TICKERS,
   fmtMoney,
   pick,
@@ -17,7 +15,6 @@ import {
   HYPE_LINES,
   VIP_TEASES,
   TOKEN_NAMES,
-  fmtNumber,
 } from "../data";
 import { loadConfig } from "../config";
 
@@ -43,7 +40,9 @@ export async function freeCallPost(): Promise<WebhookPayload> {
   const liq = randInt(8, 60) * 1000;
   const ageMin = randInt(2, 25);
   const addr = ca(chain);
-  const img = await imageUrl(pick(CALL_IMAGES));
+  const img = await renderUrl("call", {
+    ticker, mc, liq, chain, dex, server: cfg.serverName,
+  });
   const fields = [
     { name: "💎 Mcap", value: fmtMoney(mc), inline: true },
     { name: "💧 Liquidity", value: fmtMoney(liq), inline: true },
@@ -80,7 +79,9 @@ export async function proofResultsPost(): Promise<WebhookPayload> {
   const ath = Math.round(entry * x);
   const pnlInvested = randInt(500, 4000);
   const pnlOut = Math.round(pnlInvested * x);
-  const img = await imageUrl(pick(PROOF_IMAGES));
+  const img = await renderUrl("proof", {
+    ticker, x, entry, server: cfg.serverName, handle: cfg.ownerHandle,
+  });
   return {
     username: `${cfg.serverName} Proof`,
     embeds: [
@@ -106,6 +107,9 @@ export async function vipSnipePost(): Promise<WebhookPayload> {
   const mc = randInt(4, 18) * 1000;
   const fillSol = randFloat(2, 18, 2);
   const masked = "0x••••••••••••••••••••••••pump";
+  const img = await renderUrl("snipe", {
+    ticker, mc, server: cfg.serverName, handle: cfg.ownerHandle,
+  });
   return {
     username: `${cfg.serverName} VIP Snipes`,
     embeds: [
@@ -120,6 +124,7 @@ export async function vipSnipePost(): Promise<WebhookPayload> {
           `> **Ticker:** $${ticker.slice(0, 2)}•••\n\n` +
           `_Receipt drops in 🏆 proof-results once we trim._\n\n` +
           `Tired of seeing the blur? DM ${cfg.ownerHandle}.`,
+        image: { url: img },
         footer: { text: "VIP only • Public preview" },
         timestamp: new Date().toISOString(),
       },
@@ -131,6 +136,9 @@ export async function earlyAccessPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const { ticker, chain } = callPair();
   const lead = randInt(8, 45);
+  const img = await renderUrl("early", {
+    ticker, lead, server: cfg.serverName, handle: cfg.ownerHandle,
+  });
   return {
     username: `${cfg.serverName} Early`,
     embeds: [
@@ -145,6 +153,7 @@ export async function earlyAccessPost(): Promise<WebhookPayload> {
           `• Volume building under stealth\n\n` +
           `${pick(VIP_TEASES)}\n` +
           `DM ${cfg.ownerHandle} to unlock the CA.`,
+        image: { url: img },
         footer: { text: `${cfg.serverName} • Early Access` },
         timestamp: new Date().toISOString(),
       },
@@ -161,6 +170,13 @@ export async function liveTradePost(): Promise<WebhookPayload> {
   const wallet = chain === "Solana" ? randomSolAddr() : randomEthAddr();
   const color = direction === "BUY" ? COLORS.green : direction === "TRIM" ? COLORS.gold : COLORS.red;
   const emoji = direction === "BUY" ? "🟢" : direction === "TRIM" ? "🟡" : "🔴";
+  const img = await renderUrl("trade", {
+    direction, ticker,
+    size: `${sol} ${chain === "Solana" ? "SOL" : "ETH"}`,
+    usd: `$${usd.toLocaleString()}`,
+    wallet: shortAddr(wallet),
+    server: cfg.serverName,
+  });
   return {
     username: `${cfg.serverName} Trades`,
     embeds: [
@@ -175,6 +191,7 @@ export async function liveTradePost(): Promise<WebhookPayload> {
           { name: "Caller", value: cfg.ownerHandle, inline: true },
           { name: "Tag", value: direction === "BUY" ? "fresh entry" : "manage risk", inline: true },
         ],
+        image: { url: img },
         footer: { text: `${cfg.serverName} • Live Trades` },
         timestamp: new Date().toISOString(),
       },

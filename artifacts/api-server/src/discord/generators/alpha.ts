@@ -1,4 +1,5 @@
 import type { WebhookPayload } from "../poster";
+import { renderUrl } from "../poster";
 import { COLORS, pick, randInt } from "../data";
 import { loadConfig } from "../config";
 
@@ -37,6 +38,7 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
     `• Risk: low. Catalysts: ${randInt(2, 5)} confirmed in the next 14 days`,
   ];
   const picks = bullets.sort(() => Math.random() - 0.5).slice(0, 3);
+  const img = await renderUrl("alpha", { narrative: n, server: cfg.serverName });
 
   return {
     username: `${cfg.serverName} Alpha`,
@@ -50,6 +52,7 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
           `**Why now:**\n${picks.join("\n")}\n\n` +
           `Specific tickers + entries posted in **VIP**.\n` +
           `DM ${cfg.ownerHandle} to upgrade.`,
+        image: { url: img },
         footer: { text: `${cfg.serverName} • Alpha Lounge` },
         timestamp: new Date().toISOString(),
       },

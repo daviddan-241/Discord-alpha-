@@ -99,7 +99,7 @@ const DEFAULT_CONFIG: DiscordConfig = {
   webhooks: {},
   ownerHandle: "@apex_owner",
   serverName: "Apex Alpha",
-  autoPost: false,
+  autoPost: true,
   publicBaseUrl: "",
 };
 

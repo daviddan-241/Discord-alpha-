@@ -22,16 +22,27 @@ export type WebhookPayload = {
   allowed_mentions?: { parse: string[] };
 };
 
-export async function imageUrl(filename: string): Promise<string> {
+/**
+ * Build a URL pointing at our dynamic image renderer
+ * (e.g. `${base}/api/render/proof.png?ticker=...&x=...`).
+ *
+ * Discord caches embed images by URL forever, so include a `seed` query
+ * param when you want every post to render a fresh, unique image.
+ */
+export async function renderUrl(
+  template: string,
+  params: Record<string, string | number | undefined> = {},
+): Promise<string> {
   const cfg = await loadConfig();
   const base = cfg.publicBaseUrl || publicBaseUrlFromEnv();
-  return `${base}/api/static/images/${filename}`;
-}
-
-export async function imageUrls(filenames: string[]): Promise<string[]> {
-  const cfg = await loadConfig();
-  const base = cfg.publicBaseUrl || publicBaseUrlFromEnv();
-  return filenames.map((f) => `${base}/api/static/images/${f}`);
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null) sp.set(k, String(v));
+  }
+  if (!sp.has("seed")) {
+    sp.set("seed", `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`);
+  }
+  return `${base}/api/render/${template}.png?${sp.toString()}`;
 }
 
 export async function sendToChannel(

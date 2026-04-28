@@ -1,9 +1,16 @@
 import type { WebhookPayload } from "../poster";
+import { renderUrl } from "../poster";
 import { COLORS } from "../data";
 import { loadConfig } from "../config";
 
 export async function welcomePost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const img = await renderUrl("info", {
+    tag: "WELCOME",
+    title: `WELCOME TO ${cfg.serverName.toUpperCase()}`,
+    subtitle: "where the calls happen first",
+    server: cfg.serverName,
+  });
   return {
     username: `${cfg.serverName} Bot`,
     embeds: [
@@ -20,6 +27,7 @@ export async function welcomePost(): Promise<WebhookPayload> {
           `Step 2 — react in **✅ get-verified**\n` +
           `Step 3 — DM ${cfg.ownerHandle} when you're ready for VIP.\n\n` +
           `If you're here to print, you're in the right place.`,
+        image: { url: img },
         footer: { text: `${cfg.serverName} • Welcome` },
       },
     ],
@@ -28,6 +36,12 @@ export async function welcomePost(): Promise<WebhookPayload> {
 
 export async function rulesPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const img = await renderUrl("info", {
+    tag: "RULES",
+    title: "HOUSE RULES",
+    subtitle: "read these once. enforced always.",
+    server: cfg.serverName,
+  });
   return {
     username: `${cfg.serverName} Bot`,
     embeds: [
@@ -44,6 +58,7 @@ export async function rulesPost(): Promise<WebhookPayload> {
           "**7.** Keep chat in chat. Use ⛽ gas-tracker for gas, 📊 price-bot for prices.\n" +
           "**8.** Ask once. Mods will answer when free.\n\n" +
           `Need help? DM ${cfg.ownerHandle} — never anyone else claiming to be staff.`,
+        image: { url: img },
         footer: { text: `${cfg.serverName} • Rules` },
       },
     ],
@@ -52,6 +67,12 @@ export async function rulesPost(): Promise<WebhookPayload> {
 
 export async function getVerifiedPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const img = await renderUrl("info", {
+    tag: "VERIFY",
+    title: "GET VERIFIED",
+    subtitle: "react below to unlock the server",
+    server: cfg.serverName,
+  });
   return {
     username: `${cfg.serverName} Bot`,
     embeds: [
@@ -66,6 +87,7 @@ export async function getVerifiedPost(): Promise<WebhookPayload> {
           "• You understand crypto trading carries risk\n\n" +
           "Verified members get access to **📊 free-calls**, **📈 live-trades**, **🐋 whale-tracker**, and the rest of the public rooms.\n\n" +
           `Want VIP? After you verify, DM ${cfg.ownerHandle} directly.`,
+        image: { url: img },
         footer: { text: "React ✅ to continue" },
       },
     ],
@@ -74,6 +96,12 @@ export async function getVerifiedPost(): Promise<WebhookPayload> {
 
 export async function botCommandsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const img = await renderUrl("info", {
+    tag: "COMMANDS",
+    title: "BOT COMMANDS",
+    subtitle: "use these in #bot-commands only",
+    server: cfg.serverName,
+  });
   return {
     username: `${cfg.serverName} Bot`,
     embeds: [
@@ -93,6 +121,7 @@ export async function botCommandsPost(): Promise<WebhookPayload> {
           { name: "`!proof`", value: "Random recent W from the pile.", inline: true },
           { name: "`!rules`", value: "Show server rules.", inline: true },
         ],
+        image: { url: img },
         footer: { text: "Spam = mute. Use the right room." },
       },
     ],

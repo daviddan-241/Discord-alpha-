@@ -1,4 +1,5 @@
 import type { WebhookPayload } from "../poster";
+import { renderUrl } from "../poster";
 import { COLORS, pick, randFloat, randInt } from "../data";
 import { loadConfig } from "../config";
 
@@ -53,12 +54,6 @@ const MARKET_LINES = [
   () => `careful with low-liq longs over the weekend. mm games incoming.`,
 ];
 
-const TRENDING_LINES = [
-  () => `🔥 trending right now — ${pick(["$DEGEN", "$WIF2", "$BONK2", "$CHILL", "$PNUT", "$MOODENG2", "$GIGA", "$PEPE2"])} +${randFloat(20, 380, 1)}% in 24h`,
-  () => `🔥 ${pick(["AI agents", "cat coins", "frog season", "dog coins", "doge L1s"])} sector pumping — top mover ${pick(["+45%", "+89%", "+121%", "+212%"])}`,
-  () => `🔥 volume spike on ${pick(["Solana", "Base", "Ethereum"])} — top 3 trending: $${pick(["LFG", "MOON", "GIGA"])}, $${pick(["DEGEN", "PEPE", "WIF"])}, $${pick(["BONK", "TURBO", "CHAD"])}`,
-];
-
 export async function generalChatPost(): Promise<WebhookPayload> {
   const p = pick(PERSONAS);
   return {
@@ -71,13 +66,17 @@ export async function generalChatPost(): Promise<WebhookPayload> {
 export async function marketChatPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const p = pick(PERSONAS);
+  const take = pick(MARKET_LINES)();
+  const trend = take.includes("bleeding") || take.includes("negative") || take.includes("careful") ? "down" : "up";
+  const img = await renderUrl("market", { take, trend, server: cfg.serverName });
   return {
     username: p.name,
     avatar_url: p.avatar,
     embeds: [
       {
         color: COLORS.dark,
-        description: pick(MARKET_LINES)(),
+        description: take,
+        image: { url: img },
         footer: { text: `${cfg.serverName} • market take` },
       },
     ],
@@ -86,18 +85,24 @@ export async function marketChatPost(): Promise<WebhookPayload> {
 
 export async function trendingCoinsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
+  const top = [
+    `${pick(["DEGEN", "PEPE2", "WIF2", "MOODENG2"])}:+${randFloat(40, 320, 1)}`,
+    `${pick(["BONK2", "CHILL", "GIGA", "TURBO"])}:+${randFloat(25, 220, 1)}`,
+    `${pick(["PNUT", "MEW2", "POPCAT", "FROG"])}:+${randFloat(15, 180, 1)}`,
+  ];
+  const img = await renderUrl("trending", { items: top.join(","), server: cfg.serverName });
   return {
     username: `${cfg.serverName} Trending`,
     embeds: [
       {
         color: COLORS.orange,
         title: "🔥 Trending right now",
-        description: pick(TRENDING_LINES)(),
-        fields: [
-          { name: "1.", value: `$${pick(["DEGEN", "PEPE2", "WIF2", "MOODENG2"])} • +${randFloat(40, 320, 1)}%`, inline: true },
-          { name: "2.", value: `$${pick(["BONK2", "CHILL", "GIGA", "TURBO"])} • +${randFloat(25, 220, 1)}%`, inline: true },
-          { name: "3.", value: `$${pick(["PNUT", "MEW2", "POPCAT", "FROG"])} • +${randFloat(15, 180, 1)}%`, inline: true },
-        ],
+        description: "Top movers in the last 24h.",
+        fields: top.map((t, i) => {
+          const [sym, ch] = t.split(":");
+          return { name: `${i + 1}.`, value: `$${sym} • ${ch}%`, inline: true };
+        }),
+        image: { url: img },
         footer: { text: "data refreshed every 5m" },
         timestamp: new Date().toISOString(),
       },

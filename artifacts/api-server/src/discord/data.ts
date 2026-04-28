@@ -105,34 +105,6 @@ export function timeAgo(): string {
   return `${randInt(1, 5)}d ago`;
 }
 
-export const PROOF_IMAGES = [
-  "proof_astropepe_109x.jpeg",
-  "proof_asteroid_47x.png",
-  "proof_chsn_196x.png",
-  "proof_chsn_card.png",
-  "proof_unc_222k.png",
-  "proof_solana_42x.png",
-  "proof_crashout_48x.png",
-  "proof_stardi_111x.png",
-  "proof_one_120x.png",
-  "proof_unc_axiom.jpeg",
-];
-
-export const CALL_IMAGES = [
-  "call_unc_play.png",
-  "call_chibiland.png",
-  "call_one_669pct.png",
-  "call_unceroid.png",
-];
-
-export const DM_PROOF_IMAGES = [
-  "dm_pitch_1.png",
-  "dm_pitch_2.png",
-  "dm_pitch_3.png",
-  "dm_pitch_4.png",
-  "dm_pitch_5.png",
-];
-
 export const COLORS = {
   green: 0x2ecc71,
   emerald: 0x10b981,

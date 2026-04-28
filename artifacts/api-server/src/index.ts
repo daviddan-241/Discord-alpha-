@@ -26,12 +26,11 @@ app.listen(port, async (err) => {
   logger.info({ port }, "Server listening");
 
   try {
-    const cfg = await loadConfig();
-    if (cfg.autoPost) {
-      startScheduler();
-    } else {
-      logger.info("auto-post is OFF — toggle it on in the dashboard at /");
-    }
+    await loadConfig();
+    // Always start the scheduler — every tick re-checks autoPost & webhook
+    // presence, so once the user pastes a webhook in the dashboard the next
+    // scheduled tick will pick it up automatically.
+    startScheduler();
   } catch (e) {
     logger.error({ err: e }, "failed to bootstrap discord scheduler");
   }

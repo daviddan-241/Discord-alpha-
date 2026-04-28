@@ -8,4 +8,9 @@ router.get("/healthz", (_req, res) => {
   res.json(data);
 });
 
+// UptimeRobot keepalive — cheap text response so the bot never sleeps on Render free.
+router.get("/ping", (_req, res) => {
+  res.type("text/plain").send("pong");
+});
+
 export default router;
