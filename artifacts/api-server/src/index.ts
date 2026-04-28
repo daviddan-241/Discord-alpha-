@@ -2,6 +2,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { loadConfig } from "./discord/config";
 import { startScheduler } from "./discord/scheduler";
+import { startVerifyBot } from "./discord/verify-bot";
 
 const rawPort = process.env["PORT"];
 
@@ -31,6 +32,10 @@ app.listen(port, async (err) => {
     // presence, so once the user pastes a webhook in the dashboard the next
     // scheduled tick will pick it up automatically.
     startScheduler();
+    // Verification bot only connects if DISCORD_BOT_TOKEN + related env
+    // vars are set. Without them it logs a "disabled" line and stays out
+    // of the way — webhook posting still works.
+    startVerifyBot();
   } catch (e) {
     logger.error({ err: e }, "failed to bootstrap discord scheduler");
   }

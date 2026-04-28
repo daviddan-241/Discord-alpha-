@@ -243,7 +243,23 @@ export const DASHBOARD_HTML = `<!doctype html>
   </section>
 
   <section class="card" style="margin-bottom: 20px;">
-    <h2>3 · Channels</h2>
+    <h2>3 · Verification (auto-grant @Verified role)</h2>
+    <div class="help" id="verifyBotStatus">…</div>
+    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="primary" id="dropVerify">🛡️ Drop verification message + seed ✅</button>
+    </div>
+    <div class="help" style="margin-top:10px;">
+      <b>Setup once</b> in Replit Secrets (Tools → Secrets):<br>
+      • <code>DISCORD_BOT_TOKEN</code> — from <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">discord.com/developers/applications</a> → New Application → Bot → Reset Token<br>
+      • <code>DISCORD_GUILD_ID</code> — right-click your server icon → Copy Server ID<br>
+      • <code>DISCORD_VERIFIED_ROLE_ID</code> — Server Settings → Roles → ⋯ → Copy Role ID<br>
+      • <code>DISCORD_VERIFY_CHANNEL_ID</code> — right-click <b>#get-verified</b> → Copy Channel ID<br>
+      Then invite the bot with the <b>Manage Roles</b> permission and put the @Verified role <b>below</b> the bot's role in the role list.
+    </div>
+  </section>
+
+  <section class="card" style="margin-bottom: 20px;">
+    <h2>4 · Channels</h2>
     <div class="footer-bar">
       <button class="primary" id="initInfo">Send welcome / rules / get-verified / bot-commands now</button>
       <button id="postAll">Force one post in every channel</button>
@@ -255,7 +271,7 @@ export const DASHBOARD_HTML = `<!doctype html>
   </section>
 
   <section class="card">
-    <h2>4 · Activity log</h2>
+    <h2>5 · Activity log</h2>
     <div class="activity" id="activity"></div>
   </section>
 
@@ -362,6 +378,31 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 }
 
+function renderVerifyBot() {
+  const vb = state.verifyBot || {};
+  const root = $("verifyBotStatus");
+  if (!vb.enabled) {
+    root.innerHTML =
+      '<span style="color:#fca5a5">⚠️ Bot disabled.</span> ' +
+      escapeHtml(vb.reason || "configure env vars below to enable role auto-assignment.") +
+      ' Webhook posts still work — you just have to assign roles by hand.';
+    $("dropVerify").disabled = false;
+    $("dropVerify").title = "Will send the verify message via webhook. Reaction won't be auto-seeded until the bot is online.";
+    return;
+  }
+  if (!vb.connected) {
+    root.innerHTML = '<span style="color:#fcd34d">🟡 Bot configured but not connected yet…</span>' +
+      (vb.lastError ? '<br><span style="color:#fca5a5">' + escapeHtml(vb.lastError) + '</span>' : '');
+    $("dropVerify").disabled = false;
+    return;
+  }
+  root.innerHTML =
+    '<span style="color:#86efac">🟢 Bot online as <b>' + escapeHtml(vb.username || "bot") + '</b></span>' +
+    ' · grants so far: <b>' + (vb.grants || 0) + '</b>' +
+    '<br>Listening for ✅ in channel <code>' + escapeHtml(vb.verifyChannelId || "") + '</code>, granting role <code>' + escapeHtml(vb.verifiedRoleId || "") + '</code>.';
+  $("dropVerify").disabled = false;
+}
+
 function renderTopBar() {
   $("autoState").textContent = "Auto: " + (state.autoPost ? "ON" : "OFF");
   $("autoState").style.color = state.autoPost ? "#86efac" : "#fca5a5";
@@ -384,6 +425,7 @@ async function refresh() {
   try {
     state = await api("/discord/state");
     renderTopBar();
+    renderVerifyBot();
     renderChannels();
     renderActivity();
   } catch (err) {
@@ -526,6 +568,26 @@ $("initInfo").addEventListener("click", async () => {
   }
   toast("Sent welcome / rules / get-verified / bot-commands", "ok");
   await refresh();
+});
+
+$("dropVerify").addEventListener("click", async () => {
+  const btn = $("dropVerify");
+  btn.disabled = true;
+  try {
+    const out = await api("/discord/drop-verify", { method: "POST" });
+    if (!out.ok) {
+      toast("Drop failed: " + (out.error || "?"), "bad");
+    } else if (out.reactedTo) {
+      toast("Verify message sent + ✅ seeded — bot will grant role on react", "ok");
+    } else {
+      toast("Verify message sent. Add ✅ manually (bot offline / not configured)", "ok");
+    }
+    await refresh();
+  } catch (err) {
+    toast("Error: " + err.message, "bad");
+  } finally {
+    btn.disabled = false;
+  }
 });
 
 $("postAll").addEventListener("click", async () => {

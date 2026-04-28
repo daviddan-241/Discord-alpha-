@@ -12,6 +12,7 @@ import {
 import { GENERATORS } from "../discord/generators";
 import { sendToChannel } from "../discord/poster";
 import { isStarted, startScheduler, stopScheduler } from "../discord/scheduler";
+import { getVerifyBotStatus } from "../discord/verify-bot";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -48,6 +49,7 @@ router.get("/discord/state", async (_req, res) => {
     serverName: cfg.serverName,
     publicBaseUrl: cfg.publicBaseUrl || publicBaseUrlFromEnv(),
     detectedPublicBaseUrl: publicBaseUrlFromEnv(),
+    verifyBot: getVerifyBotStatus(),
     history: history.slice(0, 60),
   });
 });
@@ -120,6 +122,29 @@ router.post("/discord/test", async (req, res) => {
     res.json(out);
   } catch (err) {
     logger.error({ err, ch }, "test send failed");
+    res.status(500).json({ ok: false, error: (err as Error).message });
+  }
+});
+
+router.post("/discord/drop-verify", async (_req, res) => {
+  try {
+    const { getVerifyBotStatus, seedVerifyReaction } = await import("../discord/verify-bot");
+    const payload = await GENERATORS["get_verified"]();
+    const sent = await sendToChannel("get_verified", payload);
+    if (!sent.ok) {
+      res.json({ ok: false, error: sent.error || "send failed", botStatus: getVerifyBotStatus() });
+      return;
+    }
+    // Give Discord a beat to land the embed before we react to it
+    await new Promise((r) => setTimeout(r, 1500));
+    const reactedTo = await seedVerifyReaction();
+    res.json({
+      ok: true,
+      sent: true,
+      reactedTo,
+      botStatus: getVerifyBotStatus(),
+    });
+  } catch (err) {
     res.status(500).json({ ok: false, error: (err as Error).message });
   }
 });
