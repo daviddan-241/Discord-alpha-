@@ -1,0 +1,26 @@
+[
+  {
+    "ts": 1777371722661,
+    "channel": "general_chat",
+    "ok": false,
+    "message": "no webhook configured"
+  },
+  {
+    "ts": 1777371722621,
+    "channel": "alpha_lounge",
+    "ok": false,
+    "message": "no webhook configured"
+  },
+  {
+    "ts": 1777371722579,
+    "channel": "join_vip",
+    "ok": false,
+    "message": "no webhook configured"
+  },
+  {
+    "ts": 1777371722540,
+    "channel": "free_calls",
+    "ok": false,
+    "message": "no webhook configured"
+  }
+]
