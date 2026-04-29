@@ -1,5 +1,263 @@
 [
   {
+    "ts": 1777452791666,
+    "channel": "report_scams",
+    "ok": true,
+    "message": "🚨 Report Scams & Impersonators"
+  },
+  {
+    "ts": 1777452791451,
+    "channel": "feedback",
+    "ok": true,
+    "message": "💡 Feedback"
+  },
+  {
+    "ts": 1777452791297,
+    "channel": "open_ticket",
+    "ok": true,
+    "message": "🎟️ Open A Ticket"
+  },
+  {
+    "ts": 1777452791126,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — Liquidity unlock incoming"
+  },
+  {
+    "ts": 1777452791048,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1777452790974,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1777452790781,
+    "channel": "bot_commands",
+    "ok": true,
+    "message": "🤖 Bot Commands"
+  },
+  {
+    "ts": 1777452790708,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — BSC degen plays"
+  },
+  {
+    "ts": 1777452790543,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🔴 EXIT — $EWON"
+  },
+  {
+    "ts": 1777452790453,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale fully exited $LMAO!"
+  },
+  {
+    "ts": 1777452790313,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Access — $MDGA watchlist"
+  },
+  {
+    "ts": 1777452790221,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — Filled @ $111.4K"
+  },
+  {
+    "ts": 1777452790137,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777452790060,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "still mad i faded the chsn call"
+  },
+  {
+    "ts": 1777452789982,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 $BARNEY hit 9.7x"
+  },
+  {
+    "ts": 1777452789848,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "👀 Watching — $BARNEY"
+  },
+  {
+    "ts": 1777452789598,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 Why people keep upgrading to VIP"
+  },
+  {
+    "ts": 1777452789445,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 VIP slots reopened — limited"
+  },
+  {
+    "ts": 1777452789371,
+    "channel": "how_to_join_vip",
+    "ok": true,
+    "message": "📊 How To Join VIP"
+  },
+  {
+    "ts": 1777452789273,
+    "channel": "get_verified",
+    "ok": true,
+    "message": "✅ Get Verified — required to enter"
+  },
+  {
+    "ts": 1777452789180,
+    "channel": "rules",
+    "ok": true,
+    "message": "📜 House Rules"
+  },
+  {
+    "ts": 1777452789091,
+    "channel": "welcome",
+    "ok": true,
+    "message": "👋 Welcome to Baldwin Calls"
+  },
+  {
+    "ts": 1777452761082,
+    "channel": "report_scams",
+    "ok": true,
+    "message": "🚨 Report Scams & Impersonators"
+  },
+  {
+    "ts": 1777452760926,
+    "channel": "feedback",
+    "ok": true,
+    "message": "💡 Feedback"
+  },
+  {
+    "ts": 1777452760683,
+    "channel": "open_ticket",
+    "ok": true,
+    "message": "🎟️ Open A Ticket"
+  },
+  {
+    "ts": 1777452760603,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — Movers heating up (1h)"
+  },
+  {
+    "ts": 1777452759982,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1777452759734,
+    "channel": "bot_commands",
+    "ok": true,
+    "message": "🤖 Bot Commands"
+  },
+  {
+    "ts": 1777452759644,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — AI x crypto convergence"
+  },
+  {
+    "ts": 1777452759560,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟢 BUY — $BULL"
+  },
+  {
+    "ts": 1777452759464,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale fully exited $LMAO!"
+  },
+  {
+    "ts": 1777452759375,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Access — $BARNEY watchlist"
+  },
+  {
+    "ts": 1777452759290,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — Filled @ $5.40M"
+  },
+  {
+    "ts": 1777452759198,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777452759075,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "stop asking for refunds you didnt buy anything"
+  },
+  {
+    "ts": 1777452758963,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 $EVA hit 22.3x"
+  },
+  {
+    "ts": 1777452758827,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "👀 Watching — $EVA"
+  },
+  {
+    "ts": 1777452758755,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 Stop fading the calls. Get the early entry."
+  },
+  {
+    "ts": 1777452758663,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 New caller onboarded"
+  },
+  {
+    "ts": 1777452758548,
+    "channel": "how_to_join_vip",
+    "ok": true,
+    "message": "📊 How To Join VIP"
+  },
+  {
+    "ts": 1777452758482,
+    "channel": "get_verified",
+    "ok": true,
+    "message": "✅ Get Verified — required to enter"
+  },
+  {
+    "ts": 1777452758384,
+    "channel": "rules",
+    "ok": true,
+    "message": "📜 House Rules"
+  },
+  {
+    "ts": 1777452758304,
+    "channel": "welcome",
+    "ok": true,
+    "message": "👋 Welcome to Baldwin Calls"
+  },
+  {
     "ts": 1777451998718,
     "channel": "report_scams",
     "ok": true,

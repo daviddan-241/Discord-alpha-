@@ -1,18 +1,19 @@
 import type { WebhookPayload } from "../poster";
 import { renderUrl } from "../poster";
-import {
-  CHAINS,
-  COLORS,
-  TOKEN_TICKERS,
-  fmtMoney,
-  pick,
-  randFloat,
-  randInt,
-  randomEthAddr,
-  randomSolAddr,
-  shortAddr,
-} from "../data";
+import { COLORS, pick, randFloat, randInt } from "../data";
 import { loadConfig, dmTarget } from "../config";
+import {
+  pickTrending,
+  topByGain1h,
+  topByGain24h,
+  fetchMajorPrices,
+  fetchGas,
+  baseGasGwei,
+  solanaAvgFee,
+  fmtUsd,
+  shortAddr,
+  explorerUrl,
+} from "../marketdata";
 
 const WHALE_TAGS = [
   "Smart Money #1",
@@ -26,21 +27,40 @@ const WHALE_TAGS = [
   "Top Trader of the day",
 ];
 
+function randomWallet(chain: string): string {
+  const isSol = chain === "Solana";
+  const chars = isSol
+    ? "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789"
+    : "0123456789abcdef";
+  const len = isSol ? 44 : 40;
+  let out = isSol ? "" : "0x";
+  for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
+
 export async function whaleTrackerPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
-  const chain = pick(CHAINS);
-  const wallet = chain === "Solana" ? randomSolAddr() : randomEthAddr();
-  const ticker = pick(TOKEN_TICKERS);
-  const action = pick(["bought", "added", "rotated into", "took profit on", "fully exited"] as const);
+  const t = await pickTrending({ minLiqUsd: 10_000 });
+  const wallet = randomWallet(t.chain);
+  const action = pick([
+    "bought",
+    "added",
+    "rotated into",
+    "took profit on",
+    "fully exited",
+  ] as const);
   const isExit = action === "fully exited" || action === "took profit on";
-  const sol = randFloat(15, 800, 2);
-  const usd = Math.round(sol * randInt(140, 220));
+  const sizeUnit = t.chain === "Solana" ? "SOL" : "ETH";
+  const size = sizeUnit === "SOL" ? randFloat(15, 800, 2) : randFloat(0.5, 40, 2);
+  const usd = sizeUnit === "SOL"
+    ? Math.round(size * randInt(140, 220))
+    : Math.round(size * randInt(2400, 4400));
   const tag = pick(WHALE_TAGS);
   const img = await renderUrl("whale", {
     action: action === "fully exited" ? "EXITED" : action === "took profit on" ? "TRIMMED" : "BOUGHT",
-    ticker,
+    ticker: t.symbol,
     wallet: shortAddr(wallet),
-    size: `${sol} ${chain === "Solana" ? "SOL" : "ETH"}`,
+    size: `${size} ${sizeUnit}`,
     usd: `$${usd.toLocaleString()}`,
     tag,
     server: cfg.serverName,
@@ -50,13 +70,17 @@ export async function whaleTrackerPost(): Promise<WebhookPayload> {
     embeds: [
       {
         color: isExit ? COLORS.red : COLORS.green,
-        title: `🐋 Whale ${action} $${ticker}`,
-        description: `**${tag}** \`${shortAddr(wallet)}\` ${action} on ${chain}.`,
+        title: `🐋 Whale ${action} $${t.symbol}`,
+        url: t.url,
+        description: `**${tag}** \`${shortAddr(wallet)}\` ${action} on ${t.chain}.`,
         fields: [
-          { name: "Size", value: `${sol} ${chain === "Solana" ? "SOL" : "ETH"}  (~$${usd.toLocaleString()})`, inline: true },
-          { name: "Token Mcap", value: fmtMoney(randInt(50, 4000) * 1000), inline: true },
-          { name: "Holding", value: `${randInt(1, 96)}h`, inline: true },
+          { name: "Size", value: `${size} ${sizeUnit}  (~$${usd.toLocaleString()})`, inline: true },
+          { name: "Token Mcap", value: fmtUsd(t.marketCap), inline: true },
+          { name: "Token Liq", value: fmtUsd(t.liquidityUsd), inline: true },
+          { name: "📜 CA", value: "```" + t.address + "```", inline: false },
+          { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
         ],
+        thumbnail: t.imageUrl ? { url: t.imageUrl } : undefined,
         image: { url: img },
         footer: { text: "tracking 1,200+ wallets" },
         timestamp: new Date().toISOString(),
@@ -67,38 +91,51 @@ export async function whaleTrackerPost(): Promise<WebhookPayload> {
 
 export async function priceBotPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
-  const btc = randFloat(58000, 95000, 0);
-  const eth = randFloat(2400, 4400, 0);
-  const sol = randFloat(120, 260, 1);
-  const bnb = randFloat(450, 720, 0);
-  const doge = randFloat(0.08, 0.34, 4);
-  const wif = randFloat(0.6, 4.2, 3);
-  const change = (n = 8) => `${randFloat(-n, n, 2) >= 0 ? "🟢 +" : "🔴 "}${randFloat(-n, n, 2)}%`;
+  const prices = await fetchMajorPrices();
+
+  const get = (sym: string) => prices[sym];
+  const btc = get("BTC");
+  const eth = get("ETH");
+  const sol = get("SOL");
+  const bnb = get("BNB");
+  const doge = get("DOGE");
+  const xrp = get("XRP");
+
   const items = [
-    `BTC:${btc}:${randFloat(-4, 4, 2)}`,
-    `ETH:${eth}:${randFloat(-6, 6, 2)}`,
-    `SOL:${sol}:${randFloat(-9, 9, 2)}`,
-    `BNB:${bnb}:${randFloat(-5, 5, 2)}`,
-    `DOGE:${doge}:${randFloat(-12, 12, 2)}`,
-    `WIF:${wif}:${randFloat(-18, 18, 2)}`,
-  ].join(",");
+    btc && `BTC:${btc.usd.toFixed(0)}:${btc.change24h.toFixed(2)}`,
+    eth && `ETH:${eth.usd.toFixed(0)}:${eth.change24h.toFixed(2)}`,
+    sol && `SOL:${sol.usd.toFixed(2)}:${sol.change24h.toFixed(2)}`,
+    bnb && `BNB:${bnb.usd.toFixed(0)}:${bnb.change24h.toFixed(2)}`,
+    doge && `DOGE:${doge.usd.toFixed(4)}:${doge.change24h.toFixed(2)}`,
+    xrp && `XRP:${xrp.usd.toFixed(3)}:${xrp.change24h.toFixed(2)}`,
+  ]
+    .filter(Boolean)
+    .join(",");
   const img = await renderUrl("price", { items, server: cfg.serverName });
+
+  const fmtField = (p: { usd: number; change24h: number } | undefined, decimals: number) => {
+    if (!p) return "—";
+    const arrow = p.change24h >= 0 ? "🟢 +" : "🔴 ";
+    return `$${p.usd.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}\n${arrow}${p.change24h.toFixed(2)}% 24h`;
+  };
+
   return {
     username: `${cfg.serverName} Price Bot`,
     embeds: [
       {
         color: COLORS.blue,
         title: "📊 Live prices",
+        description: "Spot prices from CoinGecko — refreshed every minute.",
         fields: [
-          { name: "BTC", value: `$${btc.toLocaleString()}\n${change(4)} 24h`, inline: true },
-          { name: "ETH", value: `$${eth.toLocaleString()}\n${change(6)} 24h`, inline: true },
-          { name: "SOL", value: `$${sol}\n${change(9)} 24h`, inline: true },
-          { name: "BNB", value: `$${bnb}\n${change(5)} 24h`, inline: true },
-          { name: "DOGE", value: `$${doge}\n${change(12)} 24h`, inline: true },
-          { name: "WIF", value: `$${wif}\n${change(18)} 24h`, inline: true },
+          { name: "BTC", value: fmtField(btc, 0), inline: true },
+          { name: "ETH", value: fmtField(eth, 0), inline: true },
+          { name: "SOL", value: fmtField(sol, 2), inline: true },
+          { name: "BNB", value: fmtField(bnb, 0), inline: true },
+          { name: "DOGE", value: fmtField(doge, 4), inline: true },
+          { name: "XRP", value: fmtField(xrp, 3), inline: true },
         ],
         image: { url: img },
-        footer: { text: "updated every ~15m" },
+        footer: { text: "live data • CoinGecko" },
         timestamp: new Date().toISOString(),
       },
     ],
@@ -107,9 +144,11 @@ export async function priceBotPost(): Promise<WebhookPayload> {
 
 export async function gasTrackerPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
-  const ethGwei = randFloat(4, 90, 1);
-  const solFee = randFloat(0.000005, 0.0008, 6);
-  const baseGwei = randFloat(0.01, 1.2, 3);
+  const ethGas = await fetchGas();
+  const baseGwei = await baseGasGwei();
+  const solFee = solanaAvgFee();
+  const ethGwei = ethGas.standard;
+
   const tag =
     ethGwei < 12 ? "🟢 dirt cheap" : ethGwei < 35 ? "🟡 normal" : "🔴 expensive";
   const img = await renderUrl("gas", {
@@ -124,13 +163,18 @@ export async function gasTrackerPost(): Promise<WebhookPayload> {
       {
         color: ethGwei < 12 ? COLORS.green : ethGwei < 35 ? COLORS.gold : COLORS.red,
         title: "⛽ Gas tracker",
+        description: "Live ETH gas + Base + Solana fees.",
         fields: [
-          { name: "Ethereum", value: `${ethGwei} gwei\n${tag}`, inline: true },
+          {
+            name: "Ethereum",
+            value: `Slow: ${ethGas.slow} gwei\nStd: ${ethGas.standard} gwei\nFast: ${ethGas.fast} gwei\n${tag}`,
+            inline: true,
+          },
           { name: "Base", value: `${baseGwei} gwei\n🟢 cheap`, inline: true },
           { name: "Solana", value: `${solFee.toFixed(6)} SOL avg\n🟢 spammable`, inline: true },
         ],
         image: { url: img },
-        footer: { text: "good moment to ape" },
+        footer: { text: "ethgas.watch • live" },
         timestamp: new Date().toISOString(),
       },
     ],
@@ -140,40 +184,56 @@ export async function gasTrackerPost(): Promise<WebhookPayload> {
 export async function alertsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const variants = [
-    {
-      title: "📡 ALERT — Whale cluster forming",
-      desc:
-        `Multiple top wallets just rotated into the same low-cap on ${pick(CHAINS)}.\n` +
-        `Pattern matches ${randInt(2, 6)} previous winners.\n\n` +
-        `Public chart will catch up in ~${randInt(15, 90)} minutes. VIP got the CA already.\n\n` +
-        `Want it now? DM ${dm}.`,
-      color: COLORS.pink,
+
+  const variants: Array<() => Promise<{ title: string; desc: string; color: number }>> = [
+    async () => {
+      const movers = await topByGain1h(3, { minLiqUsd: 15_000 });
+      const top = movers[0];
+      const lines = movers
+        .map((m, i) => `**${i + 1}.** $${m.symbol} on ${m.chain} — ${signed(m.priceChange1h)}% (1h) • ${fmtUsd(m.marketCap)} mcap`)
+        .join("\n");
+      return {
+        title: "📡 ALERT — Movers heating up (1h)",
+        desc:
+          `${lines || "Scanner just refreshed. Loading…"}\n\n` +
+          (top ? `Public chart will catch up in ~${randInt(15, 90)} minutes.\n[Chart](${top.url})\n\n` : "") +
+          `Want the entry before everyone else? DM ${dm}.`,
+        color: COLORS.pink,
+      };
     },
-    {
-      title: "📡 ALERT — Liquidity unlock incoming",
-      desc:
-        `Token we've been watching unlocks ~$${randInt(40, 800)}K of liquidity in <1h.\n` +
-        `Either rocket or rug — VIP is positioned either way.`,
-      color: COLORS.orange,
+    async () => {
+      const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 3_000_000 });
+      return {
+        title: "📡 ALERT — Liquidity unlock incoming",
+        desc:
+          `**$${t.symbol}** on ${t.chain} — sitting at ${fmtUsd(t.liquidityUsd)} liq, ${fmtUsd(t.marketCap)} mcap.\n\n` +
+          `Either rocket or rug — VIP is positioned either way.\n\n` +
+          `[Chart](${t.url})`,
+        color: COLORS.orange,
+      };
     },
-    {
+    async () => ({
       title: "📡 ALERT — Stop bleeding",
       desc:
         `If you're sitting in red bags, post in 💬 general-chat. Mods will look at the chart.\n` +
         `Don't average down on dying coins. Rotate to the live calls.`,
       color: COLORS.red,
-    },
-    {
-      title: "📡 ALERT — VIP just got fed",
-      desc:
-        `New VIP-only call just dropped. Public preview in 💎 vip-snipes.\n` +
-        `${randInt(8, 22)} VIP members already filled.\n\n` +
-        `DM ${dm} to be on the next one in time.`,
-      color: COLORS.vipPurple,
+    }),
+    async () => {
+      const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 6_000_000 });
+      return {
+        title: "📡 ALERT — VIP just got fed",
+        desc:
+          `New VIP-only call just dropped. Public preview in 💎 vip-snipes.\n` +
+          `**Hint:** ${t.chain} • ${fmtUsd(t.marketCap)} mcap entry.\n` +
+          `${randInt(8, 22)} VIP members already filled.\n\n` +
+          `DM ${dm} to be on the next one in time.`,
+        color: COLORS.vipPurple,
+      };
     },
   ];
-  const v = pick(variants);
+
+  const v = await pick(variants)();
   const img = await renderUrl("alert", {
     title: v.title.replace(/^📡 ALERT — /, ""),
     body: v.desc.split("\n")[0] ?? "Something is moving.",
@@ -193,3 +253,11 @@ export async function alertsPost(): Promise<WebhookPayload> {
     ],
   };
 }
+
+function signed(n: number): string {
+  if (!Number.isFinite(n)) return "—";
+  return `${n >= 0 ? "+" : ""}${n.toFixed(2)}`;
+}
+
+// Re-export for backward compat in case anything imports topByGain24h here
+export { topByGain24h };

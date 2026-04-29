@@ -2,9 +2,11 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Currently hosts the **Apex Auto-Poster** —
-a Discord webhook auto-posting bot for the Apex Alpha server (crypto-call style),
-served by the API server artifact at `/api/`.
+pnpm workspace monorepo using TypeScript. Currently hosts the **Baldwin Calls Auto-Poster** —
+a Discord webhook auto-posting bot for the Baldwin Calls server (crypto-call style),
+served by the API server artifact at `/api/`. All call/snipe/trade/whale/proof/trending
+posts use **real on-chain token data** (real CAs, real prices, real mcap/liquidity)
+pulled live from DexScreener + CoinGecko + a public Ethereum RPC.
 
 ## What's built
 
@@ -17,22 +19,39 @@ served by the API server artifact at `/api/`.
   - Serves static proof images from `artifacts/api-server/public/images/`
     at `/api/static/images/...` (copied into `dist/public/` at build time).
 
-### Channels (19 total)
-One-shot info channels (manual): `welcome`, `rules`, `get_verified`, `bot_commands`.
+### Channels (23 total)
+One-shot info channels (manual): `welcome`, `rules`, `get_verified`, `bot_commands`,
+`how_to_join_vip`, `open_ticket`, `feedback`, `report_scams`.
 Recurring auto-post channels: `announcements`, `join_vip`, `free_calls`,
 `proof_results`, `market_chat`, `general_chat`, `trending_coins`, `vip_snipes`,
 `early_access`, `whale_tracker`, `live_trades`, `alpha_lounge`, `price_bot`,
-`gas_tracker`, `alerts`. Each has its own generator under
-`src/discord/generators/` producing unique randomized content (token tickers,
-mcaps, multipliers, wallet addrs, persona usernames, hype lines).
+`gas_tracker`, `alerts`.
+
+### Real market data
+`src/discord/marketdata.ts` is the single source for live data:
+- **DexScreener** (`token-boosts/top/v1` + `tokens/v1/{chain}/{addr}`) — trending
+  tokens with real CAs, chains, mcap, FDV, liquidity, 24h volume, 1h/24h price
+  change, pair age, DexScreener chart URL, and token icon. Cached 3 min.
+- **CoinGecko `simple/price`** — BTC/ETH/SOL/BNB/DOGE/XRP spot prices and 24h
+  change. Cached 1 min.
+- **Public Ethereum RPC** (publicnode → drpc → 1rpc fallback) — live `eth_gasPrice`
+  for the gas tracker. Cached 1 min.
+
+All generators in `src/discord/generators/` (`calls`, `trackers`, `chat`, `alpha`)
+import from `marketdata.ts` so embeds carry real CAs, real DexScreener chart links,
+real explorer links, and the token's own icon as the embed thumbnail.
 
 ### Key files
 - `src/discord/config.ts` — channel registry, config + history persistence.
+- `src/discord/marketdata.ts` — live token / price / gas data with caching.
 - `src/discord/poster.ts` — webhook send + image URL helper.
 - `src/discord/scheduler.ts` — per-channel jittered timers.
 - `src/discord/generators/` — one file per channel family
   (`info`, `calls`, `announcements`, `chat`, `trackers`, `alpha`).
-- `src/discord/data.ts` — token/persona/image pools + format helpers.
+- `src/discord/data.ts` — color palette, hype/teaser pools, format helpers.
+- `src/discord/verify-bot.ts` — react-to-verify bot (gives @Verified role on ✅
+  reaction). Needs `DISCORD_BOT_TOKEN` (set), plus `DISCORD_GUILD_ID`,
+  `DISCORD_VERIFIED_ROLE_ID`, `DISCORD_VERIFY_CHANNEL_ID` to fully connect.
 - `src/admin/dashboard.ts` — full admin UI as a string.
 - `src/routes/discord.ts`, `src/routes/admin.ts` — REST endpoints + dashboard route.
 

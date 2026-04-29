@@ -2,20 +2,15 @@ import type { WebhookPayload } from "../poster";
 import { renderUrl } from "../poster";
 import { COLORS, pick, randInt } from "../data";
 import { loadConfig, dmTarget } from "../config";
+import { topByGain24h, topByVolume, fmtUsd } from "../marketdata";
 
-const NARRATIVES = [
-  "AI agents",
-  "Solana memecoin season 2",
-  "Base micro-caps",
-  "DePIN rotation",
-  "BTC L2s",
-  "RWA tokenization",
-  "Gaming + token launches",
-  "Stablecoin yield wars",
-  "Restaking unlocks",
-  "Rune season",
-  "TON mini-apps",
-  "AI x crypto convergence",
+const NARRATIVE_BUCKETS: Array<{ name: string; chains: string[] }> = [
+  { name: "Solana memecoin season", chains: ["Solana"] },
+  { name: "Base micro-caps", chains: ["Base"] },
+  { name: "ETH alt rotation", chains: ["Ethereum"] },
+  { name: "BSC degen plays", chains: ["BSC"] },
+  { name: "AI x crypto convergence", chains: ["Solana", "Ethereum", "Base"] },
+  { name: "L1 rotation", chains: ["Ethereum", "Solana", "Base", "BSC", "Arbitrum"] },
 ];
 
 const THESIS_OPENERS = [
@@ -29,8 +24,23 @@ const THESIS_OPENERS = [
 export async function alphaLoungePost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const n = pick(NARRATIVES);
+  const bucket = pick(NARRATIVE_BUCKETS);
   const opener = pick(THESIS_OPENERS);
+
+  // Pull a few real coins matching the narrative chain set.
+  const allMovers = await topByGain24h(15);
+  const matching = allMovers.filter((t) => bucket.chains.includes(t.chain));
+  const pool = matching.length >= 2 ? matching : await topByVolume(8);
+
+  const examples = pool.slice(0, 3);
+
+  const exampleLines = examples
+    .map(
+      (t) =>
+        `• **$${t.symbol}** on ${t.chain} — ${fmtUsd(t.marketCap)} mcap, ${signed(t.priceChange24h)}% 24h ([chart](${t.url}))`,
+    )
+    .join("\n");
+
   const bullets = [
     `• Top wallets accumulating quietly across ${randInt(3, 9)} tickers in this sector`,
     `• Liquidity on the leaders is up ${randInt(20, 180)}% week-over-week`,
@@ -39,19 +49,20 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
     `• Risk: low. Catalysts: ${randInt(2, 5)} confirmed in the next 14 days`,
   ];
   const picks = bullets.sort(() => Math.random() - 0.5).slice(0, 3);
-  const img = await renderUrl("alpha", { narrative: n, server: cfg.serverName });
+  const img = await renderUrl("alpha", { narrative: bucket.name, server: cfg.serverName });
 
   return {
     username: `${cfg.serverName} Alpha`,
     embeds: [
       {
         color: COLORS.purple,
-        title: `🧠 Alpha Lounge — ${n}`,
+        title: `🧠 Alpha Lounge — ${bucket.name}`,
         description:
           `${opener}\n\n` +
-          `**Narrative:** ${n}\n` +
+          `**Narrative:** ${bucket.name}\n` +
           `**Why now:**\n${picks.join("\n")}\n\n` +
-          `Specific tickers + entries posted in **VIP**.\n` +
+          `**On our radar right now:**\n${exampleLines || "_(scanner refreshing — check back in a few minutes)_"}\n\n` +
+          `Specific entries + sizing posted in **VIP**.\n` +
           `DM ${dm} to upgrade.`,
         image: { url: img },
         footer: { text: `${cfg.serverName} • Alpha Lounge` },
@@ -59,4 +70,9 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
       },
     ],
   };
+}
+
+function signed(n: number): string {
+  if (!Number.isFinite(n)) return "—";
+  return `${n >= 0 ? "+" : ""}${n.toFixed(2)}`;
 }

@@ -2,6 +2,7 @@ import type { WebhookPayload } from "../poster";
 import { renderUrl } from "../poster";
 import { COLORS, pick, randFloat, randInt } from "../data";
 import { loadConfig } from "../config";
+import { fetchMajorPrices, topByGain24h, topByVolume, fmtUsd } from "../marketdata";
 
 const PERSONAS = [
   { name: "ZaneSnipes", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=zane" },
@@ -10,11 +11,11 @@ const PERSONAS = [
   { name: "0xSerum", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=serum" },
   { name: "DegenLatte", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=latte" },
   { name: "frenchaped", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=french" },
-  { name: "tinybag",   avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=tiny" },
-  { name: "rugproof",  avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=rug" },
+  { name: "tinybag", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=tiny" },
+  { name: "rugproof", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=rug" },
   { name: "sleeplessG", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=sleep" },
   { name: "ChainsawSol", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=chain" },
-  { name: "octogem",  avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=octo" },
+  { name: "octogem", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=octo" },
   { name: "dailyalpha", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=daily" },
 ];
 
@@ -41,19 +42,6 @@ const GENERAL_LINES = [
   "alpha rooms popping rn",
 ];
 
-const MARKET_LINES = [
-  () => `BTC sitting at ~$${randInt(58, 92)}k, range bound. waiting on a reclaim of $${randInt(60, 95)}k for confirmation.`,
-  () => `SOL printing again, +${randFloat(2, 12, 1)}% on the day. sol micro-caps about to wake up.`,
-  () => `eth/sol ratio still bleeding. degens know where the money is going.`,
-  () => `funding flipped negative on majors. squeeze incoming if we hold.`,
-  () => `total market cap +${randFloat(0.5, 6, 1)}% — alts leading. classic risk-on day.`,
-  () => `dxy rolling over. risk assets like that.`,
-  () => `volatility crushed. expect a big move within 24-48h.`,
-  () => `liquidations cleared the leverage. healthier setup now.`,
-  () => `narrative of the day: ${pick(["AI agents", "memecoins", "DePIN", "L1 rotation", "RWA", "gaming", "rune season"])}.`,
-  () => `careful with low-liq longs over the weekend. mm games incoming.`,
-];
-
 export async function generalChatPost(): Promise<WebhookPayload> {
   const p = pick(PERSONAS);
   return {
@@ -63,11 +51,66 @@ export async function generalChatPost(): Promise<WebhookPayload> {
   };
 }
 
+/**
+ * Real market commentary — pulls live BTC/ETH/SOL from CoinGecko and the top
+ * mover from DexScreener, then wraps it in a casual "trader take".
+ */
 export async function marketChatPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const p = pick(PERSONAS);
-  const take = pick(MARKET_LINES)();
-  const trend = take.includes("bleeding") || take.includes("negative") || take.includes("careful") ? "down" : "up";
+
+  let take = "";
+  let trend: "up" | "down" = "up";
+
+  try {
+    const prices = await fetchMajorPrices();
+    const btc = prices["BTC"];
+    const eth = prices["ETH"];
+    const sol = prices["SOL"];
+    let movers: Awaited<ReturnType<typeof topByGain24h>> = [];
+    try { movers = await topByGain24h(1, { minLiqUsd: 25_000 }); } catch { /* ok */ }
+    const lead = movers[0];
+
+    const candidates: Array<{ trend: "up" | "down"; line: string }> = [];
+    if (btc) {
+      candidates.push({
+        trend: btc.change24h >= 0 ? "up" : "down",
+        line: `BTC at $${btc.usd.toLocaleString(undefined, { maximumFractionDigits: 0 })} (${signed(btc.change24h)}% 24h). ${btc.change24h >= 1 ? "Bid is back, alts about to wake up." : btc.change24h <= -1 ? "Watch your leverage — chop continues." : "Range bound, waiting on a reclaim."}`,
+      });
+    }
+    if (eth && sol) {
+      const ethSol = eth.usd / sol.usd;
+      candidates.push({
+        trend: sol.change24h >= eth.change24h ? "up" : "down",
+        line: `eth/sol ratio at ${ethSol.toFixed(1)} — SOL ${signed(sol.change24h)}% vs ETH ${signed(eth.change24h)}% on the day. degens know where the money is going.`,
+      });
+    }
+    if (sol) {
+      candidates.push({
+        trend: sol.change24h >= 0 ? "up" : "down",
+        line: `SOL ${sol.change24h >= 0 ? "printing" : "bleeding"} — ${signed(sol.change24h)}% on the day, sitting at $${sol.usd.toFixed(2)}. sol micro-caps about to ${sol.change24h >= 0 ? "wake up" : "follow"}.`,
+      });
+    }
+    if (lead) {
+      candidates.push({
+        trend: "up",
+        line: `top mover on the radar: $${lead.symbol} on ${lead.chain}, +${lead.priceChange24h.toFixed(0)}% in 24h, sitting at ${fmtUsd(lead.marketCap)} mcap. liq ${fmtUsd(lead.liquidityUsd)}.`,
+      });
+    }
+    if (candidates.length > 0) {
+      const c = pick(candidates);
+      take = c.line;
+      trend = c.trend;
+    }
+  } catch {
+    // fall through to fallback
+  }
+
+  if (!take) {
+    take = `volatility crushed across majors. expect a big move within 24-48h. narrative of the day: ${pick(["AI agents", "memecoins", "DePIN", "L1 rotation", "RWA", "gaming"])}.`;
+    trend = "up";
+  }
+
   const img = await renderUrl("market", { take, trend, server: cfg.serverName });
   return {
     username: p.name,
@@ -85,27 +128,51 @@ export async function marketChatPost(): Promise<WebhookPayload> {
 
 export async function trendingCoinsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
-  const top = [
-    `${pick(["DEGEN", "PEPE2", "WIF2", "MOODENG2"])}:+${randFloat(40, 320, 1)}`,
-    `${pick(["BONK2", "CHILL", "GIGA", "TURBO"])}:+${randFloat(25, 220, 1)}`,
-    `${pick(["PNUT", "MEW2", "POPCAT", "FROG"])}:+${randFloat(15, 180, 1)}`,
-  ];
-  const img = await renderUrl("trending", { items: top.join(","), server: cfg.serverName });
+  // Real top movers — split between volume leaders and 24h gainers.
+  const byVol = await topByVolume(3, { minLiqUsd: 15_000 });
+  const byGain = await topByGain24h(3, { minLiqUsd: 15_000 });
+  const seen = new Set<string>();
+  const merged: typeof byVol = [];
+  for (const t of [...byGain, ...byVol]) {
+    if (seen.has(t.address)) continue;
+    seen.add(t.address);
+    merged.push(t);
+    if (merged.length === 3) break;
+  }
+  const top = merged.length ? merged : byVol;
+
+  const items = top
+    .map((t) => `${t.symbol}:${(t.priceChange24h ?? 0).toFixed(1)}`)
+    .join(",");
+  const img = await renderUrl("trending", { items, server: cfg.serverName });
+
   return {
     username: `${cfg.serverName} Trending`,
     embeds: [
       {
         color: COLORS.orange,
         title: "🔥 Trending right now",
-        description: "Top movers in the last 24h.",
-        fields: top.map((t, i) => {
-          const [sym, ch] = t.split(":");
-          return { name: `${i + 1}.`, value: `$${sym} • ${ch}%`, inline: true };
-        }),
+        description: "Top movers in the last 24h across DexScreener.",
+        fields: top.flatMap((t, i) => [
+          {
+            name: `${i + 1}. $${t.symbol}`,
+            value: `${signed(t.priceChange24h)}% 24h • ${fmtUsd(t.marketCap)} mcap • ${t.chain}\n[Chart](${t.url})`,
+            inline: false,
+          },
+        ]),
         image: { url: img },
-        footer: { text: "data refreshed every 5m" },
+        footer: { text: "data refreshed every 3m • DexScreener" },
         timestamp: new Date().toISOString(),
       },
     ],
   };
 }
+
+function signed(n: number): string {
+  if (!Number.isFinite(n)) return "—";
+  return `${n >= 0 ? "+" : ""}${n.toFixed(2)}`;
+}
+
+// Suppress unused warnings — kept for potential future variants.
+void randInt;
+void randFloat;
