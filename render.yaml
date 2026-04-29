@@ -13,10 +13,43 @@ services:
     startCommand: node --enable-source-maps ./dist/index.mjs
     healthCheckPath: /api/ping
     autoDeploy: true
+
+    # ── Persistent disk ──────────────────────────────────────────────────────
+    # Keeps your webhook config + post history across deploys & restarts.
+    # Requires Render paid plan (Starter $7/mo+). Remove this block on free
+    # tier — config will reset on every redeploy (you'd need to re-paste
+    # webhooks after each deploy).
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/artifacts/api-server/data
+      sizeGB: 1
+
     envVars:
+      # ── Runtime ─────────────────────────────────────────────────────────────
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
+
+      # ── Required: set this AFTER your first deploy ───────────────────────────
+      # Copy your Render URL (e.g. https://discord-alpha-bot.onrender.com)
+      # and paste it here — Discord uses it to fetch your card images.
       - key: PUBLIC_BASE_URL
+        sync: false
+
+      # ── Telegram (optional) ──────────────────────────────────────────────────
+      # Bot token from @BotFather.  Leave blank to disable Telegram mirroring.
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+
+      # ── Discord verify-bot (optional) ────────────────────────────────────────
+      # All four must be set to enable the ✅ reaction → role auto-grant bot.
+      # Without these the webhook poster still works fine.
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_GUILD_ID
+        sync: false
+      - key: DISCORD_VERIFIED_ROLE_ID
+        sync: false
+      - key: DISCORD_VERIFY_CHANNEL_ID
         sync: false
