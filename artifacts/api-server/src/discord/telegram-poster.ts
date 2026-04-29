@@ -91,16 +91,14 @@ function rewriteMentions(text: string, tgHandle: string): string {
 }
 
 /**
- * Strip all hyperlinks from text — removes Markdown-style [text](url)
- * and bare https:// / http:// URLs so Telegram posts stay clean with
- * no clickable chart / explorer links.
+ * Convert Markdown-style [label](url) into Telegram HTML <a href="url">label</a>.
+ * Bare URLs are left untouched so Telegram auto-linkifies them.
  */
-function stripLinks(text: string): string {
-  return text
-    .replace(/\[([^\]]*)\]\([^)]+\)/g, "$1")
-    .replace(/https?:\/\/\S+/g, "")
-    .replace(/ {2,}/g, " ")
-    .trim();
+function renderLinks(text: string): string {
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, label: string, url: string) => {
+    const safeUrl = url.replace(/"/g, "%22");
+    return `<a href="${safeUrl}">${esc(label)}</a>`;
+  });
 }
 
 /**
@@ -118,47 +116,94 @@ function extractCodeBlock(val: string): string | null {
 }
 
 /**
- * Convert description text that may contain inline backtick blocks (like `address`)
- * to Telegram HTML where those become <code>address</code>.
+ * Escape free text for Telegram HTML (preserving any backtick code spans
+ * by converting them to <code>) and render markdown links as <a> tags.
  */
-function convertInlineCode(text: string, tgHandle: string): string {
-  const cleaned = stripLinks(rewriteMentions(text, tgHandle));
-  // Replace inline `code` spans with <code>…</code>
-  return cleaned.replace(/`([^`]+)`/g, (_m, inner: string) => `<code>${esc(inner.trim())}</code>`);
-}
+function richEscape(text: string, tgHandle: string): string {
+  const withMentions = rewriteMentions(text, tgHandle);
 
-/** Convert one Discord-style embed to a clean Telegram HTML block (no links). */
-function embedToHtml(e: Embed, tgHandle: string): string {
-  const parts: string[] = [];
-  if (e.author?.name) parts.push(`<i>${esc(e.author.name)}</i>`);
-  if (e.title) {
-    parts.push(`<b>${esc(stripLinks(rewriteMentions(e.title, tgHandle)))}</b>`);
+  // Tokenize so we can escape free text while preserving code spans + links.
+  const tokens: { kind: "text" | "code" | "link"; v1: string; v2?: string }[] = [];
+  let i = 0;
+  const re = /`([^`]+)`|\[([^\]]+)\]\(([^)]+)\)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(withMentions)) !== null) {
+    if (m.index > i) tokens.push({ kind: "text", v1: withMentions.slice(i, m.index) });
+    if (m[1] !== undefined) tokens.push({ kind: "code", v1: m[1] });
+    else if (m[2] !== undefined && m[3] !== undefined) tokens.push({ kind: "link", v1: m[2], v2: m[3] });
+    i = m.index + m[0].length;
   }
-  if (e.description) {
-    parts.push(convertInlineCode(e.description, tgHandle));
-  }
-  if (e.fields?.length) {
-    for (const f of e.fields) {
-      const raw = rewriteMentions(f.value, tgHandle).trim();
-      // Check if the entire field value is a code block (e.g. a CA address)
-      const codeAddr = extractCodeBlock(raw);
-      if (codeAddr) {
-        parts.push(`\n<b>${esc(f.name)}</b>\n<code>${esc(codeAddr)}</code>`);
-        continue;
+  if (i < withMentions.length) tokens.push({ kind: "text", v1: withMentions.slice(i) });
+
+  return tokens
+    .map((t) => {
+      if (t.kind === "code") return `<code>${esc(t.v1.trim())}</code>`;
+      if (t.kind === "link") {
+        const url = (t.v2 ?? "").replace(/"/g, "%22");
+        return `<a href="${url}">${esc(t.v1)}</a>`;
       }
-      // Otherwise strip links and escape normally
-      const val = stripLinks(raw).trim();
-      if (!val) continue;
-      parts.push(`\n<b>${esc(f.name)}</b>\n${esc(val)}`);
-    }
-  }
-  if (e.footer?.text) parts.push(`\n<i>${esc(e.footer.text)}</i>`);
-  return parts.join("\n");
+      // strip Discord markdown bold/italic markers so they don't show as raw asterisks
+      const cleaned = t.v1.replace(/\*\*/g, "").replace(/__/g, "");
+      return esc(cleaned);
+    })
+    .join("");
 }
 
 /**
- * Convert a Discord WebhookPayload into plain Telegram HTML text.
- * Never includes photos or clickable URLs — clean text-only output.
+ * Compact one Discord-style embed into a SHORT Telegram HTML block.
+ * - Title (bold)
+ * - First 1–2 sentences of description (max ~280 chars)
+ * - CA (if present, as <code>)
+ * - Chart link (first link found in fields, as <a>)
+ * - DM CTA on its own line
+ */
+function embedToHtml(e: Embed, tgHandle: string): string {
+  const parts: string[] = [];
+
+  if (e.title) {
+    parts.push(`<b>${richEscape(e.title, tgHandle)}</b>`);
+  }
+
+  if (e.description) {
+    // Take first two non-empty paragraphs, capped to ~280 chars
+    const paras = e.description.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+    let summary = paras.slice(0, 2).join("\n\n");
+    if (summary.length > 280) summary = summary.slice(0, 277) + "…";
+    parts.push(richEscape(summary, tgHandle));
+  }
+
+  // Pull useful field bits: CA + chart link + key stats (price/mcap/24h)
+  let ca: string | null = null;
+  let chartLine: string | null = null;
+  const stats: string[] = [];
+  for (const f of e.fields ?? []) {
+    const raw = rewriteMentions(f.value, tgHandle).trim();
+    const code = extractCodeBlock(raw);
+    if (code && !ca) {
+      ca = code;
+      continue;
+    }
+    if (/chart/i.test(f.name) && !chartLine) {
+      chartLine = richEscape(raw, tgHandle);
+      continue;
+    }
+    if (/(mcap|market|24h|liq|price|change|chain)/i.test(f.name) && stats.length < 3) {
+      const val = richEscape(raw, tgHandle).replace(/\s+/g, " ").trim();
+      if (val) stats.push(`${esc(f.name)}: ${val}`);
+    }
+  }
+
+  if (stats.length) parts.push(stats.join(" • "));
+  if (ca) parts.push(`CA: <code>${esc(ca)}</code>`);
+  if (chartLine) parts.push(chartLine);
+
+  return parts.filter(Boolean).join("\n");
+}
+
+/**
+ * Convert a Discord WebhookPayload into a SHORT Telegram HTML message.
+ * Telegram captions are capped at 1024 chars (vs 4096 for text), so we
+ * keep the output compact and let the image carry the visual punch.
  */
 function payloadToTelegram(
   payload: WebhookPayload,
@@ -166,17 +211,15 @@ function payloadToTelegram(
 ): { text: string } {
   const blocks: string[] = [];
 
-  if (payload.username) {
-    blocks.push(`<b>${esc(payload.username)}</b>`);
-  }
   if (payload.content) {
-    blocks.push(esc(stripLinks(rewriteMentions(payload.content, tgHandle))));
+    blocks.push(richEscape(payload.content, tgHandle));
   }
   for (const e of payload.embeds ?? []) {
     blocks.push(embedToHtml(e, tgHandle));
   }
   let text = blocks.filter(Boolean).join("\n\n").trim();
-  if (text.length > 4096) text = text.slice(0, 4093) + "…";
+  // Hard ceiling matching Telegram caption limit (sendPhoto = 1024)
+  if (text.length > 1024) text = text.slice(0, 1021) + "…";
   if (!text) text = "(no content)";
   return { text };
 }
@@ -249,7 +292,7 @@ export async function sendToTelegram(
       chat_id: chatId,
       text,
       parse_mode: "HTML",
-      disable_web_page_preview: true,
+      disable_web_page_preview: false,
     };
     const res = await fetch(`${base}/sendMessage`, {
       method: "POST",

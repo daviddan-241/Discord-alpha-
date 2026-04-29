@@ -242,6 +242,8 @@ export async function appendHistory(entry: HistoryEntry): Promise<void> {
 }
 
 export function publicBaseUrlFromEnv(): string {
+  const render = process.env["RENDER_EXTERNAL_URL"];
+  if (render) return render.replace(/\/$/, "");
   const dev = process.env["REPLIT_DEV_DOMAIN"];
   if (dev) return `https://${dev}`;
   const domains = process.env["REPLIT_DOMAINS"];
