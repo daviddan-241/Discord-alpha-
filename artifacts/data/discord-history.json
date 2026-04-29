@@ -1,5 +1,137 @@
 [
   {
+    "ts": 1777451998718,
+    "channel": "report_scams",
+    "ok": true,
+    "message": "🚨 Report Scams & Impersonators"
+  },
+  {
+    "ts": 1777451998608,
+    "channel": "feedback",
+    "ok": true,
+    "message": "💡 Feedback"
+  },
+  {
+    "ts": 1777451998507,
+    "channel": "open_ticket",
+    "ok": true,
+    "message": "🎟️ Open A Ticket"
+  },
+  {
+    "ts": 1777451998409,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — VIP just got fed"
+  },
+  {
+    "ts": 1777451998313,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1777451998207,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1777451998031,
+    "channel": "bot_commands",
+    "ok": true,
+    "message": "🤖 Bot Commands"
+  },
+  {
+    "ts": 1777451997945,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — AI agents"
+  },
+  {
+    "ts": 1777451997803,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟢 BUY — $ASTROPEPE"
+  },
+  {
+    "ts": 1777451997667,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale rotated into $BETAFISH"
+  },
+  {
+    "ts": 1777451997535,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Access — $CHILLGUY watchlist"
+  },
+  {
+    "ts": 1777451997458,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — Filled @ $11.0K"
+  },
+  {
+    "ts": 1777451997325,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777451997213,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "vip ppl be eating different"
+  },
+  {
+    "ts": 1777451997124,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 $TURBOCAT hit 78.9x"
+  },
+  {
+    "ts": 1777451996939,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "🔒 VIP-ONLY CALL — $MO•••••"
+  },
+  {
+    "ts": 1777451996748,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 VIP — read this if you actually want to print"
+  },
+  {
+    "ts": 1777451996658,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 VIP slots reopened — limited"
+  },
+  {
+    "ts": 1777451996569,
+    "channel": "how_to_join_vip",
+    "ok": true,
+    "message": "📊 How To Join VIP"
+  },
+  {
+    "ts": 1777451996442,
+    "channel": "get_verified",
+    "ok": true,
+    "message": "✅ Get Verified — required to enter"
+  },
+  {
+    "ts": 1777451996306,
+    "channel": "rules",
+    "ok": true,
+    "message": "📜 House Rules"
+  },
+  {
+    "ts": 1777451996218,
+    "channel": "welcome",
+    "ok": true,
+    "message": "👋 Welcome to Baldwin Calls"
+  },
+  {
     "ts": 1777450189497,
     "channel": "join_vip",
     "ok": false,
