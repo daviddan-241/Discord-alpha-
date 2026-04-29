@@ -8,6 +8,32 @@ type Timer = ReturnType<typeof setTimeout>;
 const timers: Partial<Record<ChannelKey, Timer>> = {};
 let started = false;
 
+/**
+ * Fire every recurring channel once right now, staggered by 3 s each so
+ * Discord / Telegram don't rate-limit us. Runs silently — skips channels with
+ * no webhook configured.
+ */
+export async function startupBurst(): Promise<void> {
+  const recurringChannels = CHANNEL_KEYS.filter((ch) => !CHANNEL_META[ch].oneShot);
+  logger.info({ count: recurringChannels.length }, "scheduler: startup burst — firing all channels");
+  for (let i = 0; i < recurringChannels.length; i++) {
+    const ch = recurringChannels[i]!;
+    // Stagger each by 3 s to avoid hitting rate limits
+    setTimeout(async () => {
+      try {
+        const cfg = await loadConfig();
+        if (!cfg.autoPost) return;
+        if (!cfg.webhooks[ch]) return;
+        const payload = await GENERATORS[ch]();
+        await sendToChannel(ch, payload);
+        logger.info({ channel: ch }, `startup burst: posted ${CHANNEL_META[ch].label}`);
+      } catch (err) {
+        logger.error({ err, channel: ch }, "startup burst: post failed (non-fatal)");
+      }
+    }, i * 3_000);
+  }
+}
+
 function jitter(min: number, max: number): number {
   return (Math.random() * (max - min) + min) * 60_000;
 }

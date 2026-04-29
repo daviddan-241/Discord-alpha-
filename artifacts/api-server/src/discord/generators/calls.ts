@@ -19,11 +19,11 @@ import {
   type RealToken,
 } from "../marketdata";
 
-const CALL_NAMES   = ["AlphaBot", "SignalBot", "CallsBot", "DropBot", "HunterBot", "ScanBot"];
-const PROOF_NAMES  = ["ReceiptBot", "ProofBot", "WinBot", "GainBot", "ResultBot", "PrintBot"];
-const SNIPE_NAMES  = ["SniperBot", "VaultKey", "EliteSnipe", "VIPAlert", "LockBot"];
-const EARLY_NAMES  = ["RadarBot", "InsiderBot", "EarlyAlert", "FirstIn", "OnRadar"];
-const TRADE_NAMES  = ["TradeBot", "LiveEntry", "TxAlert", "FillBot", "EntryBot"];
+const CALL_NAMES   = ["Tyler 📊", "Alex Calls", "Kyle", "Marcus Drop", "Jake Signal", "Dre 🎯"];
+const PROOF_NAMES  = ["Liam 🏆", "Noah Prints", "Ethan", "Oliver Wins", "Mason Receipt", "Kai 💰"];
+const SNIPE_NAMES  = ["VIP Tyler", "Elite Kyle", "Inner Circle", "Apex Jake", "Private Marcus"];
+const EARLY_NAMES  = ["Jake Early", "Insider Liam", "Pre-Launch", "First In Marcus", "Radar Dre"];
+const TRADE_NAMES  = ["Tyler Live", "Alex Fill", "Kyle Entry", "Jake TX", "Marcus Trade"];
 
 export async function freeCallPost(): Promise<WebhookPayload> {
   const roll = Math.random();

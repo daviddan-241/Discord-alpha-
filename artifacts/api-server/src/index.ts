@@ -1,8 +1,9 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { loadConfig } from "./discord/config";
-import { startScheduler } from "./discord/scheduler";
+import { startScheduler, startupBurst } from "./discord/scheduler";
 import { startVerifyBot } from "./discord/verify-bot";
+import { startKeepalive } from "./discord/keepalive";
 
 const rawPort = process.env["PORT"];
 
@@ -28,10 +29,20 @@ app.listen(port, async (err) => {
 
   try {
     await loadConfig();
+
     // Always start the scheduler — every tick re-checks autoPost & webhook
     // presence, so once the user pastes a webhook in the dashboard the next
     // scheduled tick will pick it up automatically.
     startScheduler();
+
+    // Fire every configured channel once immediately (3 s stagger per channel)
+    // so posts start flowing the moment the server is up — no waiting for the
+    // first timer to expire.
+    void startupBurst();
+
+    // Self-pinger: hits /api/ping every 14 min so Render free tier never sleeps.
+    startKeepalive();
+
     // Verification bot only connects if DISCORD_BOT_TOKEN + related env
     // vars are set. Without them it logs a "disabled" line and stays out
     // of the way — webhook posting still works.

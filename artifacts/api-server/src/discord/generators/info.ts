@@ -4,9 +4,9 @@ import { maybeAnimatedRenderUrl } from "../poster";
 import { COLORS } from "../data";
 import { loadConfig, dmTarget } from "../config";
 
-const INFO_NAMES   = ["ServerBot", "InfoBot", "ModBot", "ApexInfo", "SetupBot"];
-const VERIFY_NAMES = ["GateBot", "VerifyBot", "AccessBot", "EntryBot", "WelcomeBot"];
-const SUPPORT_NAMES = ["SupportBot", "HelpBot", "TicketBot", "StaffBot", "AdminBot"];
+const INFO_NAMES    = ["Server Info", "Guide", "Setup", "Welcome Desk", "Info"];
+const VERIFY_NAMES  = ["Gate ✅", "Verify", "Access Control", "Entry", "Welcome Gate"];
+const SUPPORT_NAMES = ["Support 🎟️", "Help Desk", "Ticket System", "Staff", "Admin Support"];
 
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]!; }
 

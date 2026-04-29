@@ -16,11 +16,11 @@ import {
   explorerUrl,
 } from "../marketdata";
 
-const WHALE_NAMES   = ["WhaleBot", "OnChainBot", "WalletAlert", "DeepScan", "TrackBot"];
-const PRICE_NAMES   = ["PriceOracle", "SpotBot", "MarketBot", "PriceTrack", "LivePrices"];
-const GAS_NAMES     = ["GasOracle", "FeeBot", "GasTrack", "NetBot", "ChainFees"];
-const ALERT_NAMES   = ["AlertBot", "BreakingBot", "SignalAlert", "ScanAlert", "RadarAlert"];
-const TRENDING_NAMES = ["TrendBot", "HotList", "DexScan", "MoverBot", "TopGains"];
+const WHALE_NAMES    = ["Whale Watch 🐋", "OnChain Alex", "Wallet Scout", "Deep Scan", "Track Marcus"];
+const PRICE_NAMES    = ["Live Prices 📊", "Spot Check", "Market Watch", "Dex Prices", "Price Oracle"];
+const GAS_NAMES      = ["Gas Oracle ⛽", "Fee Watch", "Chain Fees", "Net Status", "Gas Check"];
+const ALERT_NAMES    = ["Alert 🚨", "Breaking Now", "Signal Alert", "Radar Scan", "Live Alert"];
+const TRENDING_NAMES = ["Trending 🔥", "Hot Coins", "Dex Movers", "Top Gains", "Chart Scan"];
 
 const WHALE_TAGS = [
   "Smart Money #1",

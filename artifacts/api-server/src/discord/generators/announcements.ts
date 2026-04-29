@@ -3,8 +3,8 @@ import { maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, pickN, randInt, randFloat } from "../data";
 import { loadConfig, dmTarget } from "../config";
 
-const ANNOUNCE_NAMES = ["OfficialBot", "ServerBot", "AdminAlert", "ApexBot", "ModBot"];
-const VIP_NAMES      = ["VaultBot", "VIPAccess", "EliteBot", "KeyBot", "GateBot"];
+const ANNOUNCE_NAMES = ["Official 📢", "Server News", "Admin", "Apex Official", "Mod Team"];
+const VIP_NAMES      = ["VIP Access 💎", "Elite Portal", "Apex VIP", "Inner Circle", "Premium Access"];
 
 export async function announcementPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
