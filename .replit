@@ -29,7 +29,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=5000 pnpm --filter @workspace/api-server build && PORT=5000 pnpm --filter @workspace/api-server start"
+args = "cd artifacts/api-server && pnpm run dev"
 waitForPort = 5000
 
 [agent]
@@ -42,11 +42,7 @@ timeoutMs = 20000
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
-
-[[ports]]
-localPort = 8080
-externalPort = 8080
+externalPort = 80
 
 [[ports]]
 localPort = 8081
@@ -59,3 +55,4 @@ channel = "stable-25_05"
 
 [userenv.shared]
 TELEGRAM_BOT_TOKEN = "7507047699:AAEiGoEhwncdbO4lBwqdYYnAVyNSHtgjcdg"
+PORT = "5000"
