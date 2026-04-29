@@ -15,7 +15,6 @@ import {
   fmtUsd,
   maskAddr,
   shortAddr,
-  explorerUrl,
   type RealToken,
 } from "../marketdata";
 
@@ -47,7 +46,6 @@ export async function freeCallLinkedTeaserFor(
     embeds: [{
       color: COLORS.gold,
       title: `👀 VIP just filled — $${t.symbol} (${vipLeadMin}m head start)`,
-      url: t.url,
       description:
         `Posting this for free chat **${vipLeadMin} minutes after VIP got the full CA.**\n\n` +
         `**VIP entry:** ${fmtUsd(vipMc)} mcap • **${vipLeadMin}m ago**\n` +
@@ -61,7 +59,6 @@ export async function freeCallLinkedTeaserFor(
         { name: "📊 24h Change", value: fmtChangeLine(t.priceChange24h), inline: true },
         { name: "💧 Liquidity", value: fmtUsd(t.liquidityUsd), inline: true },
         { name: "🚪 Want the full CA next time?", value: `DM ${dm}`, inline: true },
-        { name: "🔗 Chart", value: `[DexScreener](${t.url})`, inline: false },
       ],
       image: { url: img },
       footer: { text: `${cfg.serverName} • VIP got this ${vipLeadMin} min before this post` },
@@ -98,14 +95,12 @@ async function freeCallFull(): Promise<WebhookPayload> {
     { name: "⏱ Pair Age", value: t.ageMin > 0 ? humanAge(t.ageMin) : "—", inline: true },
     { name: "🎯 Entry", value: "Market now / scale on any dip", inline: true },
     { name: "📜 CA", value: "```" + t.address + "```", inline: false },
-    { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
   ];
   return {
     username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.emerald,
       title: `🚨 CALL — $${t.symbol}`,
-      url: t.url,
       description:
         `${callerNote}\n\n` +
         `${pick(VIP_TEASES)}\n\n` +
@@ -133,7 +128,6 @@ async function freeCallDripTeaser(): Promise<WebhookPayload> {
     embeds: [{
       color: COLORS.gold,
       title: `👀 Already running — $${t.symbol} (you missed the entry)`,
-      url: t.url,
       description:
         `Posting this for free chat so you can see exactly what you walked past.\n\n` +
         `**VIP entry:** ${fmtUsd(vipMc)} mcap • sent **${minsAgo} minutes ago**\n` +
@@ -148,7 +142,6 @@ async function freeCallDripTeaser(): Promise<WebhookPayload> {
         { name: "📊 24h Change", value: fmtChangeLine(t.priceChange24h), inline: true },
         { name: "💧 Liquidity", value: fmtUsd(t.liquidityUsd), inline: true },
         { name: "🚪 Want the full CA next time?", value: `DM ${dm}`, inline: true },
-        { name: "🔗 Chart", value: `[DexScreener](${t.url})`, inline: false },
       ],
       image: { url: img },
       footer: { text: `${cfg.serverName} • Called by ${dm} — this is what VIP gets every day` },
@@ -211,7 +204,6 @@ export async function proofResultsPost(): Promise<WebhookPayload> {
     embeds: [{
       color: COLORS.gold,
       title: `🏆 RECEIPT — $${t.symbol} ${x}x ✅`,
-      url: t.url,
       description:
         `**Called at ${fmtUsd(entryMc)} mcap. Sitting at ${fmtUsd(t.marketCap)} right now.**\n\n` +
         `My position: **$${pnlInvested.toLocaleString()} in → $${pnlOut.toLocaleString()} out** (+$${pnlProfit.toLocaleString()} profit)\n\n` +
@@ -223,7 +215,6 @@ export async function proofResultsPost(): Promise<WebhookPayload> {
         { name: "📊 24h Performance", value: fmtChangeLine(t.priceChange24h), inline: true },
         { name: "💧 Liquidity", value: fmtUsd(t.liquidityUsd), inline: true },
         { name: "📜 CA", value: "```" + t.address + "```", inline: false },
-        { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
       ],
       image: { url: img },
       footer: { text: `${cfg.serverName} • Receipts posted by ${dm} every time` },
@@ -255,7 +246,6 @@ export async function vipSnipePostFor(t: RealToken): Promise<WebhookPayload> {
     embeds: [{
       color: COLORS.vipPurple,
       title: `💎 VIP SNIPE — $${t.symbol} filled @ ${fmtUsd(t.marketCap)} mcap`,
-      url: t.url,
       description:
         `**VIP ONLY — full CA below. Sent to members first. Free chat will see a teaser later.**\n\n` +
         `> **Ticker:** $${t.symbol}\n` +
@@ -265,8 +255,7 @@ export async function vipSnipePostFor(t: RealToken): Promise<WebhookPayload> {
         `> **Liquidity:** ${fmtUsd(t.liquidityUsd)}\n` +
         `> **My fill:** ${fillSize} ${fillSizeUnit}\n\n` +
         `**Full CA (VIP only — do NOT share):**\n` +
-        `\`\`\`${t.address}\`\`\`\n` +
-        `[Open chart](${t.url}) • [Explorer](${explorerUrl(t)})\n\n` +
+        `\`\`\`${t.address}\`\`\`\n\n` +
         `Same setup, every cycle: VIP fills first → I post in free chat ~10–25 min later with the masked CA → receipt drops when I trim. Zero exceptions.`,
       image: { url: img },
       footer: { text: `${cfg.serverName} • VIP first • Sniped by ${dm}` },
@@ -294,7 +283,6 @@ export async function earlyAccessPost(): Promise<WebhookPayload> {
     embeds: [{
       color: COLORS.cyan,
       title: `🚀 Early Radar — $${t.symbol} — ${lead}min head start`,
-      url: t.url,
       description:
         `**This just hit my scanner ${lead} minutes before the public chart wakes up.**\n\n` +
         `Why this is on my radar:\n` +
@@ -361,7 +349,6 @@ export async function liveTradePost(): Promise<WebhookPayload> {
     embeds: [{
       color,
       title: `${emoji} ${direction} — $${t.symbol}`,
-      url: t.url,
       description:
         `${actionLine}\n\n` +
         `Wallet \`${wallet}\` just moved on ${t.chain}.\n` +
@@ -372,7 +359,6 @@ export async function liveTradePost(): Promise<WebhookPayload> {
         { name: "💧 Liq", value: fmtUsd(t.liquidityUsd), inline: true },
         { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
         { name: "📜 CA", value: "```" + t.address + "```", inline: false },
-        { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
         { name: "🎯 Caller", value: dm, inline: true },
         { name: "📍 Move type", value: direction === "BUY" ? "fresh entry" : direction === "TRIM" ? "risk management" : "full exit", inline: true },
       ],

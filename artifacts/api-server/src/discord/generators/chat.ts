@@ -153,7 +153,7 @@ export async function trendingCoinsPost(): Promise<WebhookPayload> {
       fields: top.flatMap((t, i) => [
         {
           name: `${i + 1}. $${t.symbol}`,
-          value: `${signed(t.priceChange24h)}% 24h • ${fmtUsd(t.marketCap)} mcap • ${t.chain}\n[Chart](${t.url})`,
+          value: `${signed(t.priceChange24h)}% 24h • ${fmtUsd(t.marketCap)} mcap • ${t.chain}`,
           inline: false,
         },
       ]),

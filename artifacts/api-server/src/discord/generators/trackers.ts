@@ -13,7 +13,6 @@ import {
   solanaAvgFee,
   fmtUsd,
   shortAddr,
-  explorerUrl,
 } from "../marketdata";
 
 const WHALE_NAMES    = ["Whale Watch 🐋", "OnChain Alex", "Wallet Scout", "Deep Scan", "Track Marcus"];
@@ -73,14 +72,12 @@ export async function whaleTrackerPost(): Promise<WebhookPayload> {
     embeds: [{
       color: isExit ? COLORS.red : COLORS.green,
       title: `🐋 Whale ${action} $${t.symbol}`,
-      url: t.url,
       description: `**${tag}** \`${shortAddr(wallet)}\` ${action} on ${t.chain}.`,
       fields: [
         { name: "Size", value: `${size} ${sizeUnit}  (~$${usd.toLocaleString()})`, inline: true },
         { name: "Token Mcap", value: fmtUsd(t.marketCap), inline: true },
         { name: "Token Liq", value: fmtUsd(t.liquidityUsd), inline: true },
         { name: "📜 CA", value: "```" + t.address + "```", inline: false },
-        { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
       ],
       image: { url: img },
       footer: { text: "tracking 1,200+ wallets" },

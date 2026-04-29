@@ -1,5 +1,227 @@
 [
   {
+    "ts": 1777463262698,
+    "channel": "alerts",
+    "ok": true,
+    "message": "→ telegram: alerts (msg 327)"
+  },
+  {
+    "ts": 1777463261763,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — VIP just got fed"
+  },
+  {
+    "ts": 1777463259652,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "→ telegram: gas-tracker (msg 326)"
+  },
+  {
+    "ts": 1777463258826,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1777463256784,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "→ telegram: price-bot (msg 325)"
+  },
+  {
+    "ts": 1777463255791,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1777463253740,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "→ telegram: alpha-lounge (msg 25)"
+  },
+  {
+    "ts": 1777463252716,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — GameFi revival"
+  },
+  {
+    "ts": 1777463251061,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "→ telegram: live-trades (msg 324)"
+  },
+  {
+    "ts": 1777463249717,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🔴 EXIT — $EWON"
+  },
+  {
+    "ts": 1777463247612,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "→ telegram: whale-tracker (msg 323)"
+  },
+  {
+    "ts": 1777463246726,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale took profit on $MDGA"
+  },
+  {
+    "ts": 1777463244672,
+    "channel": "early_access",
+    "ok": true,
+    "message": "→ telegram: early-access (msg 24)"
+  },
+  {
+    "ts": 1777463243674,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $LEGIT — 26min head start"
+  },
+  {
+    "ts": 1777463242388,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "→ telegram: trending-coins (msg 322)"
+  },
+  {
+    "ts": 1777463240752,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777463238136,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "→ telegram: general-chat (msg 321)"
+  },
+  {
+    "ts": 1777463237692,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "fomo'd into a green candle. pain."
+  },
+  {
+    "ts": 1777463233128,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "→ telegram: proof-results (msg 23)"
+  },
+  {
+    "ts": 1777463231894,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $EVA 24.4x ✅"
+  },
+  {
+    "ts": 1777463229821,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "→ telegram: join-apex-vip (msg 22)"
+  },
+  {
+    "ts": 1777463228694,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 You've seen the calls hit. You were watching instead of in them."
+  },
+  {
+    "ts": 1777463227332,
+    "channel": "announcements",
+    "ok": true,
+    "message": "→ telegram: apex-announcements (msg 21)"
+  },
+  {
+    "ts": 1777463225767,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 I said I'd be straight with you — so here it is"
+  },
+  {
+    "ts": 1777463116274,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "→ telegram: vip-snipes (msg 20)"
+  },
+  {
+    "ts": 1777463114773,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — $LUNCHMONEY filled @ $503.4K mcap"
+  },
+  {
+    "ts": 1777463108169,
+    "channel": "alerts",
+    "ok": true,
+    "message": "→ telegram: alerts (msg 320)"
+  },
+  {
+    "ts": 1777463106754,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — Stop bleeding"
+  },
+  {
+    "ts": 1777463105083,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "→ telegram: gas-tracker (msg 319)"
+  },
+  {
+    "ts": 1777463103895,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1777463101664,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "→ telegram: price-bot (msg 318)"
+  },
+  {
+    "ts": 1777463100835,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1777463098838,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "→ telegram: alpha-lounge (msg 19)"
+  },
+  {
+    "ts": 1777463097757,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — Base micro-caps"
+  },
+  {
+    "ts": 1777463095725,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "→ telegram: live-trades (msg 317)"
+  },
+  {
+    "ts": 1777463094750,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟢 BUY — $MDGA"
+  },
+  {
+    "ts": 1777463093128,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "→ telegram: whale-tracker (msg 316)"
+  },
+  {
     "ts": 1777463091781,
     "channel": "whale_tracker",
     "ok": true,
@@ -976,89 +1198,5 @@
     "channel": "join_vip",
     "ok": true,
     "message": "💎 VIP — read this if you actually want to print"
-  },
-  {
-    "ts": 1777451996658,
-    "channel": "announcements",
-    "ok": true,
-    "message": "📢 VIP slots reopened — limited"
-  },
-  {
-    "ts": 1777451996569,
-    "channel": "how_to_join_vip",
-    "ok": true,
-    "message": "📊 How To Join VIP"
-  },
-  {
-    "ts": 1777451996442,
-    "channel": "get_verified",
-    "ok": true,
-    "message": "✅ Get Verified — required to enter"
-  },
-  {
-    "ts": 1777451996306,
-    "channel": "rules",
-    "ok": true,
-    "message": "📜 House Rules"
-  },
-  {
-    "ts": 1777451996218,
-    "channel": "welcome",
-    "ok": true,
-    "message": "👋 Welcome to Baldwin Calls"
-  },
-  {
-    "ts": 1777450189497,
-    "channel": "join_vip",
-    "ok": false,
-    "message": "no webhook configured"
-  },
-  {
-    "ts": 1777450128227,
-    "channel": "welcome",
-    "ok": false,
-    "message": "no webhook configured"
-  },
-  {
-    "ts": 1777450099936,
-    "channel": "welcome",
-    "ok": false,
-    "message": "no webhook configured"
-  },
-  {
-    "ts": 1777450097002,
-    "channel": "welcome",
-    "ok": false,
-    "message": "no webhook configured"
-  },
-  {
-    "ts": 1777450031770,
-    "channel": "welcome",
-    "ok": false,
-    "message": "no webhook configured"
-  },
-  {
-    "ts": 1777371722661,
-    "channel": "general_chat",
-    "ok": false,
-    "message": "no webhook configured"
-  },
-  {
-    "ts": 1777371722621,
-    "channel": "alpha_lounge",
-    "ok": false,
-    "message": "no webhook configured"
-  },
-  {
-    "ts": 1777371722579,
-    "channel": "join_vip",
-    "ok": false,
-    "message": "no webhook configured"
-  },
-  {
-    "ts": 1777371722540,
-    "channel": "free_calls",
-    "ok": false,
-    "message": "no webhook configured"
   }
 ]
