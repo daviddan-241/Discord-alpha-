@@ -1,12 +1,22 @@
 import { logger } from "../lib/logger";
 import { CHANNEL_KEYS, CHANNEL_META, type ChannelKey, loadConfig } from "./config";
 import { GENERATORS } from "./generators";
+import { freeCallLinkedTeaserFor, vipSnipePostFor } from "./generators/calls";
+import { pickTrending } from "./marketdata";
 import { sendToChannel } from "./poster";
 
 type Timer = ReturnType<typeof setTimeout>;
 
 const timers: Partial<Record<ChannelKey, Timer>> = {};
+let linkedTimer: Timer | undefined;
 let started = false;
+
+/**
+ * Channels that are NEVER scheduled independently — they fire as part of the
+ * coupled "VIP-first" call cycle so VIP always gets the same token before free
+ * chat sees the teaser.
+ */
+const LINKED_CHANNELS = new Set<ChannelKey>(["vip_snipes", "free_calls"]);
 
 /**
  * Fire every recurring channel once right now, staggered by 3 s each so
@@ -14,7 +24,9 @@ let started = false;
  * no webhook configured.
  */
 export async function startupBurst(): Promise<void> {
-  const recurringChannels = CHANNEL_KEYS.filter((ch) => !CHANNEL_META[ch].oneShot);
+  const recurringChannels = CHANNEL_KEYS
+    .filter((ch) => !CHANNEL_META[ch].oneShot)
+    .filter((ch) => !LINKED_CHANNELS.has(ch)); // linked cycle handles vip_snipes + free_calls
   logger.info({ count: recurringChannels.length }, "scheduler: startup burst — firing all channels");
   for (let i = 0; i < recurringChannels.length; i++) {
     const ch = recurringChannels[i]!;
@@ -32,6 +44,85 @@ export async function startupBurst(): Promise<void> {
       }
     }, i * 3_000);
   }
+  // Fire one linked VIP→free cycle on startup as well (small offset so it
+  // doesn't pile on the burst).
+  setTimeout(() => {
+    void runLinkedCallCycle().catch((err) =>
+      logger.error({ err }, "startup linked call cycle failed"),
+    );
+  }, recurringChannels.length * 3_000 + 5_000);
+}
+
+/**
+ * The single source of truth for "calls" — VIP gets the full CA first, then
+ * the SAME token is teased in free chat after a short delay. Both Discord and
+ * Telegram see this ordering (Telegram routing for vip_snipes goes to the VIP
+ * group, free_calls goes to the broadcast group — see telegramChatFor()).
+ */
+async function runLinkedCallCycle(): Promise<void> {
+  const cfg = await loadConfig();
+  if (!cfg.autoPost) {
+    logger.info("linked-cycle: autoPost off, skipping");
+    return;
+  }
+  let token;
+  try {
+    token = await pickTrending({ minLiqUsd: 10_000, maxMcUsd: 8_000_000 });
+  } catch (err) {
+    logger.error({ err }, "linked-cycle: pickTrending failed");
+    return;
+  }
+  // 1) VIP first — full CA goes to vip_snipes (and Telegram VIP chat).
+  if (cfg.webhooks["vip_snipes"]) {
+    try {
+      const vipPayload = await vipSnipePostFor(token);
+      await sendToChannel("vip_snipes", vipPayload);
+      logger.info({ channel: "vip_snipes", token: token.symbol }, "linked-cycle: VIP posted FIRST");
+    } catch (err) {
+      logger.error({ err }, "linked-cycle: VIP post failed");
+    }
+  } else {
+    logger.warn("linked-cycle: vip_snipes has no webhook — skipping VIP leg");
+  }
+  // 2) Free chat after a short, randomised lead — masked CA + "VIP got this N min ago".
+  const leadMin = randInt(8, 22);
+  logger.info({ leadMin, token: token.symbol }, "linked-cycle: scheduling free-chat teaser");
+  setTimeout(async () => {
+    try {
+      const freshCfg = await loadConfig();
+      if (!freshCfg.autoPost) return;
+      if (!freshCfg.webhooks["free_calls"]) {
+        logger.warn("linked-cycle: free_calls has no webhook — skipping free leg");
+        return;
+      }
+      const freePayload = await freeCallLinkedTeaserFor(token, leadMin);
+      await sendToChannel("free_calls", freePayload);
+      logger.info({ channel: "free_calls", token: token.symbol, leadMin }, "linked-cycle: free chat posted AFTER VIP");
+    } catch (err) {
+      logger.error({ err }, "linked-cycle: free post failed");
+    }
+  }, leadMin * 60_000);
+}
+
+function randInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function scheduleNextLinkedCycle(): void {
+  // Recurring cadence between cycles (independent of the per-cycle lead).
+  // Bias toward 25–55 min so VIP / free pairs never starve and never spam.
+  const delayMs = (Math.random() * (55 - 25) + 25) * 60_000;
+  const next = Math.round(delayMs / 60_000);
+  logger.info({ nextInMin: next }, `discord-scheduler: next linked-call-cycle in ~${next}m`);
+  linkedTimer = setTimeout(async () => {
+    try {
+      await runLinkedCallCycle();
+    } catch (err) {
+      logger.error({ err }, "linked-cycle tick failed");
+    } finally {
+      scheduleNextLinkedCycle();
+    }
+  }, delayMs);
 }
 
 function jitter(min: number, max: number): number {
@@ -69,11 +160,12 @@ export function startScheduler(): void {
   if (started) return;
   started = true;
   for (const ch of CHANNEL_KEYS) {
-    if (!CHANNEL_META[ch].oneShot) {
-      scheduleNext(ch);
-    }
+    if (CHANNEL_META[ch].oneShot) continue;
+    if (LINKED_CHANNELS.has(ch)) continue; // handled by linked cycle
+    scheduleNext(ch);
   }
-  logger.info("discord-scheduler: started");
+  scheduleNextLinkedCycle();
+  logger.info("discord-scheduler: started (with VIP-first linked call cycle)");
 }
 
 export function stopScheduler(): void {
@@ -81,6 +173,10 @@ export function stopScheduler(): void {
     const t = timers[k];
     if (t) clearTimeout(t);
     delete timers[k];
+  }
+  if (linkedTimer) {
+    clearTimeout(linkedTimer);
+    linkedTimer = undefined;
   }
   started = false;
   logger.info("discord-scheduler: stopped");

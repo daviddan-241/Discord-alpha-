@@ -14,15 +14,17 @@ services:
     healthCheckPath: /api/ping
     autoDeploy: true
 
-    # ── Persistent disk ──────────────────────────────────────────────────────
-    # Keeps your webhook config + post history across deploys & restarts.
-    # Requires Render paid plan (Starter $7/mo+). Remove this block on free
-    # tier — config will reset on every redeploy (you'd need to re-paste
-    # webhooks after each deploy).
-    disk:
-      name: data
-      mountPath: /opt/render/project/src/artifacts/api-server/data
-      sizeGB: 1
+    # ── Persistent disk (DISABLED — free tier doesn't support disks) ─────────
+    # Render's free web-service plan does NOT allow persistent disks. On free
+    # tier your webhook config + post history will reset on every redeploy
+    # (you'll need to re-paste webhook URLs in the dashboard after each deploy,
+    # or commit them in code). To enable persistence, upgrade to Starter ($7/mo)
+    # and re-enable the block below.
+    #
+    # disk:
+    #   name: data
+    #   mountPath: /opt/render/project/src/artifacts/api-server/data
+    #   sizeGB: 1
 
     envVars:
       # ── Runtime ─────────────────────────────────────────────────────────────

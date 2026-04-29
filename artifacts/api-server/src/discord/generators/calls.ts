@@ -26,6 +26,50 @@ export async function freeCallPost(): Promise<WebhookPayload> {
   return freeCallVipLocked();
 }
 
+/**
+ * Free-chat post that re-uses a token VIP already received.
+ * Always renders the "VIP got this N min ago" drip-teaser variant so the
+ * timing/teaser line lines up with the linked VIP snipe that just fired.
+ */
+export async function freeCallLinkedTeaserFor(
+  t: RealToken,
+  vipLeadMin: number,
+): Promise<WebhookPayload> {
+  const cfg = await loadConfig();
+  const dm = dmTarget(cfg);
+  const entryMult = randFloat(1.4, 2.6, 1);
+  const vipMc = Math.max(1000, Math.round(t.marketCap / entryMult));
+  const img = await maybeAnimatedRenderUrl("proof", {
+    ticker: t.symbol, x: entryMult, entry: vipMc, server: cfg.serverName, handle: dm,
+  });
+  return {
+    username: cfg.ownerHandle,
+    embeds: [{
+      color: COLORS.gold,
+      title: `👀 VIP just filled — $${t.symbol} (${vipLeadMin}m head start)`,
+      url: t.url,
+      description:
+        `Posting this for free chat **${vipLeadMin} minutes after VIP got the full CA.**\n\n` +
+        `**VIP entry:** ${fmtUsd(vipMc)} mcap • **${vipLeadMin}m ago**\n` +
+        `**Right now:** ${fmtUsd(t.marketCap)} mcap (already +${entryMult.toFixed(1)}x for members)\n\n` +
+        `**Chain:** ${t.chain}  •  **DEX:** ${t.dexId}\n\n` +
+        `I'm showing you half the CA so you can verify this is real on-chain. Full address + my exact entry price + size — VIP got it first. That's the entire point.\n\n` +
+        `This happens **every single call.** VIP first. Free chat sees the receipt.\n\n` +
+        `Stop watching from the outside. DM ${dm} right now.`,
+      fields: [
+        { name: "📜 CA (partial)", value: "```" + maskAddr(t.address) + "```", inline: false },
+        { name: "📊 24h Change", value: fmtChangeLine(t.priceChange24h), inline: true },
+        { name: "💧 Liquidity", value: fmtUsd(t.liquidityUsd), inline: true },
+        { name: "🚪 Want the full CA next time?", value: `DM ${dm}`, inline: true },
+        { name: "🔗 Chart", value: `[DexScreener](${t.url})`, inline: false },
+      ],
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • VIP got this ${vipLeadMin} min before this post` },
+      timestamp: new Date().toISOString(),
+    }],
+  };
+}
+
 async function freeCallFull(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
@@ -189,9 +233,18 @@ export async function proofResultsPost(): Promise<WebhookPayload> {
 }
 
 export async function vipSnipePost(): Promise<WebhookPayload> {
+  const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 8_000_000 });
+  return vipSnipePostFor(t);
+}
+
+/**
+ * VIP snipe post for a specific token — used by the linked call cycle so the
+ * SAME token fires to VIP first, then to free chat after a delay.
+ * VIP gets the FULL CA (not masked) — that is the whole VIP value prop.
+ */
+export async function vipSnipePostFor(t: RealToken): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 8_000_000 });
   const fillSizeUnit = t.chain === "Solana" ? "SOL" : t.chain === "Ethereum" ? "ETH" : "tokens";
   const fillSize = t.chain === "Solana" ? randFloat(2, 18, 2) : randFloat(0.2, 4, 2);
   const img = await maybeAnimatedRenderUrl("snipe", {
@@ -201,19 +254,22 @@ export async function vipSnipePost(): Promise<WebhookPayload> {
     username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.vipPurple,
-      title: `💎 VIP SNIPE — Filled @ ${fmtUsd(t.marketCap)} mcap`,
+      title: `💎 VIP SNIPE — $${t.symbol} filled @ ${fmtUsd(t.marketCap)} mcap`,
+      url: t.url,
       description:
-        `**Just filled. VIP has the full CA. I'm in.**\n\n` +
-        `> **CA:** \`${maskAddr(t.address)}\` *(full CA inside VIP — only members got this)*\n` +
+        `**VIP ONLY — full CA below. Sent to members first. Free chat will see a teaser later.**\n\n` +
+        `> **Ticker:** $${t.symbol}\n` +
         `> **Chain:** ${t.chain}\n` +
         `> **DEX:** ${t.dexId}\n` +
-        `> **My fill:** ${fillSize} ${fillSizeUnit}\n` +
-        `> **Ticker:** $${t.symbol.slice(0, 2)}•••\n\n` +
-        `The receipt drops in 🏆 proof-results the second I trim. I've done this every single time — zero exceptions.\n\n` +
-        `You're reading this from the outside right now. You don't have to be.\n\n` +
-        `**DM ${dm}. One message. That's all it takes.**`,
+        `> **Entry mcap:** ${fmtUsd(t.marketCap)}\n` +
+        `> **Liquidity:** ${fmtUsd(t.liquidityUsd)}\n` +
+        `> **My fill:** ${fillSize} ${fillSizeUnit}\n\n` +
+        `**Full CA (VIP only — do NOT share):**\n` +
+        `\`\`\`${t.address}\`\`\`\n` +
+        `[Open chart](${t.url}) • [Explorer](${explorerUrl(t)})\n\n` +
+        `Same setup, every cycle: VIP fills first → I post in free chat ~10–25 min later with the masked CA → receipt drops when I trim. Zero exceptions.`,
       image: { url: img },
-      footer: { text: `${cfg.serverName} • VIP snipes by ${dm} — join before the next one` },
+      footer: { text: `${cfg.serverName} • VIP first • Sniped by ${dm}` },
       timestamp: new Date().toISOString(),
     }],
   };

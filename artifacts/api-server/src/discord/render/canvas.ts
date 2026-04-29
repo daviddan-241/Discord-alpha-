@@ -108,6 +108,16 @@ export function paintBackground(
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, W, H);
 
+  // Subtle holographic shimmer band — soft prismatic sweep across the card.
+  const sweepStart = rng() * 0.3;
+  const sweep = ctx.createLinearGradient(W * sweepStart, 0, W * (sweepStart + 0.55), H);
+  sweep.addColorStop(0, "rgba(255,255,255,0)");
+  sweep.addColorStop(0.45, hexAlpha("#ffffff", 0.06));
+  sweep.addColorStop(0.55, hexAlpha(accent, 0.05));
+  sweep.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = sweep;
+  ctx.fillRect(0, 0, W, H);
+
   const grain = ctx.createImageData(W, H);
   const data = grain.data;
   for (let i = 0; i < data.length; i += 4) {
@@ -115,6 +125,27 @@ export function paintBackground(
     data[i] = v; data[i + 1] = v; data[i + 2] = v; data[i + 3] = 18;
   }
   ctx.putImageData(grain, 0, 0);
+
+  // Premium chromatic edge ring — thin neon border that frames the whole card
+  // and gives every embed a consistent "holographic metal" finish.
+  const inset = 10;
+  const edgeGrad = ctx.createLinearGradient(0, 0, W, H);
+  edgeGrad.addColorStop(0, hexAlpha(accent, 0.85));
+  edgeGrad.addColorStop(0.5, hexAlpha("#ffffff", 0.35));
+  edgeGrad.addColorStop(1, hexAlpha(accent, 0.85));
+  ctx.save();
+  ctx.shadowColor = accent;
+  ctx.shadowBlur = 18;
+  roundedRect(ctx, inset, inset, W - inset * 2, H - inset * 2, 18);
+  ctx.strokeStyle = edgeGrad;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+  // Inner darker hairline so the rim has depth instead of looking pasted on.
+  roundedRect(ctx, inset + 2, inset + 2, W - (inset + 2) * 2, H - (inset + 2) * 2, 16);
+  ctx.strokeStyle = hexAlpha("#000000", 0.5);
+  ctx.lineWidth = 1;
+  ctx.stroke();
 
   return p;
 }
