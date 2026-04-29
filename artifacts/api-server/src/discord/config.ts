@@ -141,7 +141,7 @@ export type DiscordConfig = {
 
 const DEFAULT_CONFIG: DiscordConfig = {
   webhooks: {},
-  ownerHandle: "@baldwin_owner",
+  ownerHandle: "linux_kernel01",
   ownerMention: "",
   serverName: "Baldwin Calls",
   autoPost: true,
