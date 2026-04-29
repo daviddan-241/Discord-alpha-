@@ -1,5 +1,35 @@
 [
   {
+    "ts": 1777450189497,
+    "channel": "join_vip",
+    "ok": false,
+    "message": "no webhook configured"
+  },
+  {
+    "ts": 1777450128227,
+    "channel": "welcome",
+    "ok": false,
+    "message": "no webhook configured"
+  },
+  {
+    "ts": 1777450099936,
+    "channel": "welcome",
+    "ok": false,
+    "message": "no webhook configured"
+  },
+  {
+    "ts": 1777450097002,
+    "channel": "welcome",
+    "ok": false,
+    "message": "no webhook configured"
+  },
+  {
+    "ts": 1777450031770,
+    "channel": "welcome",
+    "ok": false,
+    "message": "no webhook configured"
+  },
+  {
     "ts": 1777371722661,
     "channel": "general_chat",
     "ok": false,

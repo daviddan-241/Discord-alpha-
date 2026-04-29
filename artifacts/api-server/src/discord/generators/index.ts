@@ -1,6 +1,15 @@
 import type { ChannelKey } from "../config";
 import type { WebhookPayload } from "../poster";
-import { welcomePost, rulesPost, getVerifiedPost, botCommandsPost } from "./info";
+import {
+  welcomePost,
+  rulesPost,
+  getVerifiedPost,
+  botCommandsPost,
+  howToJoinVipPost,
+  openTicketPost,
+  feedbackPost,
+  reportScamsPost,
+} from "./info";
 import { freeCallPost, proofResultsPost, vipSnipePost, earlyAccessPost, liveTradePost } from "./calls";
 import { announcementPost, joinVipPost } from "./announcements";
 import { generalChatPost, marketChatPost, trendingCoinsPost } from "./chat";
@@ -13,7 +22,11 @@ export const GENERATORS: Record<ChannelKey, Generator> = {
   welcome: welcomePost,
   rules: rulesPost,
   get_verified: getVerifiedPost,
+  how_to_join_vip: howToJoinVipPost,
   bot_commands: botCommandsPost,
+  open_ticket: openTicketPost,
+  feedback: feedbackPost,
+  report_scams: reportScamsPost,
   announcements: announcementPost,
   join_vip: joinVipPost,
   free_calls: freeCallPost,

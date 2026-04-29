@@ -3,7 +3,7 @@ export const DASHBOARD_HTML = `<!doctype html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Apex Auto-Poster — Control Panel</title>
+<title>Baldwin Calls Auto-Poster — Control Panel</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
 <style>
   :root {
@@ -183,10 +183,10 @@ export const DASHBOARD_HTML = `<!doctype html>
 </head>
 <body>
 <header>
-  <div class="brand">⚡ Apex Auto-Poster</div>
+  <div class="brand">⚡ Baldwin Calls Auto-Poster</div>
   <span class="pill" id="autoState">loading…</span>
   <span class="pill" id="schedulerState">scheduler: ?</span>
-  <span class="pill" id="hookCount">0/19 webhooks</span>
+  <span class="pill" id="hookCount">0/23 webhooks</span>
 </header>
 
 <main>

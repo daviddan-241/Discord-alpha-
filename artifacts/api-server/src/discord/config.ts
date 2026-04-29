@@ -13,6 +13,7 @@ export type ChannelKey =
   | "welcome"
   | "rules"
   | "get_verified"
+  | "how_to_join_vip"
   | "announcements"
   | "join_vip"
   | "free_calls"
@@ -28,12 +29,16 @@ export type ChannelKey =
   | "bot_commands"
   | "price_bot"
   | "gas_tracker"
-  | "alerts";
+  | "alerts"
+  | "open_ticket"
+  | "feedback"
+  | "report_scams";
 
 export const CHANNEL_KEYS: ChannelKey[] = [
   "welcome",
   "rules",
   "get_verified",
+  "how_to_join_vip",
   "announcements",
   "join_vip",
   "free_calls",
@@ -50,6 +55,9 @@ export const CHANNEL_KEYS: ChannelKey[] = [
   "price_bot",
   "gas_tracker",
   "alerts",
+  "open_ticket",
+  "feedback",
+  "report_scams",
 ];
 
 export type ChannelMeta = {
@@ -66,10 +74,14 @@ export type ChannelMeta = {
 };
 
 export const CHANNEL_META: Record<ChannelKey, ChannelMeta> = {
-  welcome: { key: "welcome", label: "welcome-to-apex", emoji: "👋", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "Server welcome message." },
+  welcome: { key: "welcome", label: "welcome-to-baldwin-calls", emoji: "👋", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "Server welcome message." },
   rules: { key: "rules", label: "rules", emoji: "📜", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "Server rules." },
   get_verified: { key: "get_verified", label: "get-verified", emoji: "✅", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "Verification instructions." },
-  bot_commands: { key: "bot_commands", label: "bot-commands", emoji: "🤖", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "List of bot commands." },
+  how_to_join_vip: { key: "how_to_join_vip", label: "how-to-join-vip", emoji: "📊", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "Step-by-step VIP onboarding instructions." },
+  bot_commands: { key: "bot_commands", label: "bot-terminal", emoji: "🤖", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "List of bot commands." },
+  open_ticket: { key: "open_ticket", label: "open-ticket", emoji: "🎟️", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "How to open a support ticket." },
+  feedback: { key: "feedback", label: "feedback", emoji: "💡", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "How to leave feedback." },
+  report_scams: { key: "report_scams", label: "report-scams", emoji: "🚨", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "How to report scams / impersonators." },
   announcements: { key: "announcements", label: "apex-announcements", emoji: "📢", oneShot: false, minMinutes: 240, maxMinutes: 600, description: "Big server / VIP announcements." },
   join_vip: { key: "join_vip", label: "join-apex-vip", emoji: "💎", oneShot: false, minMinutes: 180, maxMinutes: 420, description: "VIP sales pitch with proof." },
   free_calls: { key: "free_calls", label: "free-calls", emoji: "📊", oneShot: false, minMinutes: 30, maxMinutes: 90, description: "Free trade calls." },
@@ -102,9 +114,9 @@ export type DiscordConfig = {
 
 const DEFAULT_CONFIG: DiscordConfig = {
   webhooks: {},
-  ownerHandle: "@apex_owner",
-  ownerMention: "<@1035212407213133856>",
-  serverName: "Apex Alpha",
+  ownerHandle: "@baldwin_owner",
+  ownerMention: "",
+  serverName: "Baldwin Calls",
   autoPost: true,
   publicBaseUrl: "",
 };
