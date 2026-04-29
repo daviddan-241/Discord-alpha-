@@ -1,7 +1,10 @@
 import type { WebhookPayload } from "../poster";
-import { renderUrl, maybeAnimatedRenderUrl } from "../poster";
+import { maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, pickN, randInt, randFloat } from "../data";
 import { loadConfig, dmTarget } from "../config";
+
+const ANNOUNCE_NAMES = ["OfficialBot", "ServerBot", "AdminAlert", "ApexBot", "ModBot"];
+const VIP_NAMES      = ["VaultBot", "VIPAccess", "EliteBot", "KeyBot", "GateBot"];
 
 export async function announcementPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
@@ -45,22 +48,18 @@ export async function announcementPost(): Promise<WebhookPayload> {
   ];
   const v = pick(variants);
   const img = await maybeAnimatedRenderUrl("announce", {
-    title: v.title.replace(/^📢 /, ""),
-    body: v.body.split("\n")[0] ?? "",
-    server: cfg.serverName,
+    title: v.tag, body: v.body.slice(0, 100), server: cfg.serverName,
   });
   return {
-    username: `${cfg.serverName} Announcements`,
-    embeds: [
-      {
-        color: COLORS.vipPurple,
-        title: v.title,
-        description: v.body,
-        image: { url: img },
-        footer: { text: `${cfg.serverName} • Official` },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(ANNOUNCE_NAMES),
+    embeds: [{
+      color: COLORS.vipPurple,
+      title: v.title,
+      description: v.body,
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Official` },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
@@ -68,11 +67,6 @@ export async function joinVipPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   const xWins = pickN(["196x", "120x", "111x", "109x", "67x", "48x", "47x", "42x"] as const, 3);
-  const img = await maybeAnimatedRenderUrl("vip", {
-    handle: cfg.ownerHandle,
-    server: cfg.serverName,
-    wins: xWins.join(","),
-  });
 
   const variants = [
     {
@@ -113,17 +107,20 @@ export async function joinVipPost(): Promise<WebhookPayload> {
   ];
 
   const v = pick(variants);
+  const img = await maybeAnimatedRenderUrl("vip", {
+    handle: dm, server: cfg.serverName,
+    wins: xWins.join(","),
+  });
   return {
-    username: `${cfg.serverName} VIP`,
-    embeds: [
-      {
-        color: COLORS.vipPurple,
-        title: v.title,
-        description: v.desc,
-        image: { url: img },
-        footer: { text: `${cfg.serverName} • Join VIP — DM ${dm}` },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(VIP_NAMES),
+    embeds: [{
+      color: COLORS.vipPurple,
+      title: v.title,
+      description: v.desc,
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Join VIP — DM ${dm}` },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
+

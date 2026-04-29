@@ -1,5 +1,6 @@
 import type { WebhookPayload } from "../poster";
-import { renderUrl, maybeAnimatedRenderUrl } from "../poster";
+import { maybeAnimatedRenderUrl } from "../poster";
+
 import { COLORS, pick, randFloat, randInt } from "../data";
 import { loadConfig } from "../config";
 import { fetchMajorPrices, topByGain24h, topByVolume, fmtUsd } from "../marketdata";
@@ -111,7 +112,6 @@ export async function marketChatPost(): Promise<WebhookPayload> {
     trend = "up";
   }
 
-  const img = await maybeAnimatedRenderUrl("market", { take, trend, server: cfg.serverName });
   return {
     username: p.name,
     avatar_url: p.avatar,
@@ -119,7 +119,6 @@ export async function marketChatPost(): Promise<WebhookPayload> {
       {
         color: COLORS.dark,
         description: take,
-        image: { url: img },
         footer: { text: `${cfg.serverName} • market take` },
       },
     ],
@@ -142,29 +141,26 @@ export async function trendingCoinsPost(): Promise<WebhookPayload> {
   const top = merged.length ? merged : byVol;
 
   const items = top
-    .map((t) => `${t.symbol}:${(t.priceChange24h ?? 0).toFixed(1)}`)
+    .map((t) => `${t.symbol}:+${Math.abs(t.priceChange24h ?? 0).toFixed(1)}`)
     .join(",");
-  const img = await maybeAnimatedRenderUrl("trending", { items, server: cfg.serverName });
 
   return {
-    username: `${cfg.serverName} Trending`,
-    embeds: [
-      {
-        color: COLORS.orange,
-        title: "🔥 Trending right now",
-        description: "Top movers in the last 24h across DexScreener.",
-        fields: top.flatMap((t, i) => [
-          {
-            name: `${i + 1}. $${t.symbol}`,
-            value: `${signed(t.priceChange24h)}% 24h • ${fmtUsd(t.marketCap)} mcap • ${t.chain}\n[Chart](${t.url})`,
-            inline: false,
-          },
-        ]),
-        image: { url: img },
-        footer: { text: "data refreshed every 3m • DexScreener" },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(["TrendBot", "HotList", "DexScan", "MoverBot", "TopGains"]),
+    embeds: [{
+      color: COLORS.orange,
+      title: "🔥 Trending right now",
+      description: "Top movers in the last 24h across DexScreener.",
+      fields: top.flatMap((t, i) => [
+        {
+          name: `${i + 1}. $${t.symbol}`,
+          value: `${signed(t.priceChange24h)}% 24h • ${fmtUsd(t.marketCap)} mcap • ${t.chain}\n[Chart](${t.url})`,
+          inline: false,
+        },
+      ]),
+      image: { url: await maybeAnimatedRenderUrl("trending", { items, server: cfg.serverName }) },
+      footer: { text: "data refreshed every 3m • DexScreener" },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 

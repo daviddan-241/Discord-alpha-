@@ -1,19 +1,20 @@
 import type { WebhookPayload } from "../poster";
-import { renderUrl } from "../poster";
+import { maybeAnimatedRenderUrl } from "../poster";
+
 import { COLORS } from "../data";
 import { loadConfig, dmTarget } from "../config";
+
+const INFO_NAMES   = ["ServerBot", "InfoBot", "ModBot", "ApexInfo", "SetupBot"];
+const VERIFY_NAMES = ["GateBot", "VerifyBot", "AccessBot", "EntryBot", "WelcomeBot"];
+const SUPPORT_NAMES = ["SupportBot", "HelpBot", "TicketBot", "StaffBot", "AdminBot"];
+
+function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]!; }
 
 export async function welcomePost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const img = await renderUrl("info", {
-    tag: "WELCOME",
-    title: `WELCOME TO ${cfg.serverName.toUpperCase()}`,
-    subtitle: "where the calls happen first",
-    server: cfg.serverName,
-  });
   return {
-    username: `${cfg.serverName} Bot`,
+    username: pick(INFO_NAMES),
     embeds: [
       {
         color: COLORS.vipPurple,
@@ -28,7 +29,6 @@ export async function welcomePost(): Promise<WebhookPayload> {
           `Step 2 — react in **✅ get-verified**\n` +
           `Step 3 — DM ${dm} when you're ready for VIP.\n\n` +
           `If you're here to print, you're in the right place.`,
-        image: { url: img },
         footer: { text: `${cfg.serverName} • Welcome` },
       },
     ],
@@ -38,14 +38,8 @@ export async function welcomePost(): Promise<WebhookPayload> {
 export async function rulesPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const img = await renderUrl("info", {
-    tag: "RULES",
-    title: "HOUSE RULES",
-    subtitle: "read these once. enforced always.",
-    server: cfg.serverName,
-  });
   return {
-    username: `${cfg.serverName} Bot`,
+    username: pick(INFO_NAMES),
     embeds: [
       {
         color: COLORS.dark,
@@ -60,7 +54,6 @@ export async function rulesPost(): Promise<WebhookPayload> {
           "**7.** Keep chat in chat. Use ⛽ gas-tracker for gas, 📊 price-bot for prices.\n" +
           "**8.** Ask once. Mods will answer when free.\n\n" +
           `Need help? DM ${dm} — never anyone else claiming to be staff.`,
-        image: { url: img },
         footer: { text: `${cfg.serverName} • Rules` },
       },
     ],
@@ -70,14 +63,8 @@ export async function rulesPost(): Promise<WebhookPayload> {
 export async function getVerifiedPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const img = await renderUrl("info", {
-    tag: "VERIFY",
-    title: "GET VERIFIED",
-    subtitle: "react below to unlock the server",
-    server: cfg.serverName,
-  });
   return {
-    username: `${cfg.serverName} Bot`,
+    username: pick(INFO_NAMES),
     embeds: [
       {
         color: COLORS.green,
@@ -97,7 +84,6 @@ export async function getVerifiedPost(): Promise<WebhookPayload> {
           "**What unlocks after verify**\n" +
           "📊 free-calls · 📈 live-trades · 🐋 whale-tracker · 🏆 proof-results · 📡 alerts · 💬 chat rooms · 🤖 bot-commands\n\n" +
           `**Want the early signal?** After verifying, DM ${dm} for VIP.`,
-        image: { url: img },
         footer: { text: "React ✅ to continue • Without it you stay locked out" },
       },
     ],
@@ -107,14 +93,8 @@ export async function getVerifiedPost(): Promise<WebhookPayload> {
 export async function howToJoinVipPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const img = await renderUrl("info", {
-    tag: "JOIN VIP",
-    title: "HOW TO JOIN VIP",
-    subtitle: "three steps. one DM.",
-    server: cfg.serverName,
-  });
   return {
-    username: `${cfg.serverName} Bot`,
+    username: pick(INFO_NAMES),
     embeds: [
       {
         color: COLORS.vipPurple,
@@ -129,7 +109,6 @@ export async function howToJoinVipPost(): Promise<WebhookPayload> {
           `• 🐋 whale-tracker — the wallets we follow live\n` +
           `• 🧠 alpha-lounge — narratives, plays, deep dives\n\n` +
           `One ping, lifetime access. No subscriptions, no renewals.`,
-        image: { url: img },
         footer: { text: `${cfg.serverName} • DM ${dm} to upgrade` },
       },
     ],
@@ -139,14 +118,8 @@ export async function howToJoinVipPost(): Promise<WebhookPayload> {
 export async function openTicketPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const img = await renderUrl("info", {
-    tag: "SUPPORT",
-    title: "OPEN A TICKET",
-    subtitle: "we reply within a few hours",
-    server: cfg.serverName,
-  });
   return {
-    username: `${cfg.serverName} Bot`,
+    username: pick(INFO_NAMES),
     embeds: [
       {
         color: COLORS.blue,
@@ -162,7 +135,6 @@ export async function openTicketPost(): Promise<WebhookPayload> {
           `• Payment / wallet questions\n` +
           `• Refunds (within policy)\n\n` +
           `**Don't** post payment info or seed phrases in a ticket. We'll never ask.`,
-        image: { url: img },
         footer: { text: `${cfg.serverName} • Support` },
       },
     ],
@@ -172,14 +144,8 @@ export async function openTicketPost(): Promise<WebhookPayload> {
 export async function feedbackPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const img = await renderUrl("info", {
-    tag: "FEEDBACK",
-    title: "DROP YOUR FEEDBACK",
-    subtitle: "we read everything",
-    server: cfg.serverName,
-  });
   return {
-    username: `${cfg.serverName} Bot`,
+    username: pick(INFO_NAMES),
     embeds: [
       {
         color: COLORS.gold,
@@ -195,7 +161,6 @@ export async function feedbackPost(): Promise<WebhookPayload> {
           `Reply right here in this channel — one message per idea is best.\n` +
           `For private feedback, DM ${dm}.\n\n` +
           `Top suggestions get implemented. We name-drop the contributor when we ship.`,
-        image: { url: img },
         footer: { text: `${cfg.serverName} • Feedback` },
       },
     ],
@@ -205,14 +170,8 @@ export async function feedbackPost(): Promise<WebhookPayload> {
 export async function reportScamsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const img = await renderUrl("info", {
-    tag: "SCAM ALERT",
-    title: "REPORT SCAMS",
-    subtitle: "if it feels off, it is",
-    server: cfg.serverName,
-  });
   return {
-    username: `${cfg.serverName} Bot`,
+    username: pick(INFO_NAMES),
     embeds: [
       {
         color: COLORS.red,
@@ -229,7 +188,6 @@ export async function reportScamsPost(): Promise<WebhookPayload> {
           `**2.** Post it in this channel **or** DM ${dm}.\n` +
           `**3.** Block the account in Discord.\n\n` +
           `We ban impersonators server-wide and warn the community. Speed matters — the faster you report, the fewer people get hit.`,
-        image: { url: img },
         footer: { text: `${cfg.serverName} • Stay safe` },
       },
     ],
@@ -239,14 +197,8 @@ export async function reportScamsPost(): Promise<WebhookPayload> {
 export async function botCommandsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const img = await renderUrl("info", {
-    tag: "COMMANDS",
-    title: "BOT COMMANDS",
-    subtitle: "use these in #bot-commands only",
-    server: cfg.serverName,
-  });
   return {
-    username: `${cfg.serverName} Bot`,
+    username: pick(INFO_NAMES),
     embeds: [
       {
         color: COLORS.blue,
@@ -264,7 +216,6 @@ export async function botCommandsPost(): Promise<WebhookPayload> {
           { name: "`!proof`", value: "Random recent W from the pile.", inline: true },
           { name: "`!rules`", value: "Show server rules.", inline: true },
         ],
-        image: { url: img },
         footer: { text: "Spam = mute. Use the right room." },
       },
     ],

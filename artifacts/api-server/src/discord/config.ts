@@ -82,22 +82,32 @@ export const CHANNEL_META: Record<ChannelKey, ChannelMeta> = {
   open_ticket: { key: "open_ticket", label: "open-ticket", emoji: "🎟️", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "How to open a support ticket." },
   feedback: { key: "feedback", label: "feedback", emoji: "💡", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "How to leave feedback." },
   report_scams: { key: "report_scams", label: "report-scams", emoji: "🚨", oneShot: true, minMinutes: 0, maxMinutes: 0, description: "How to report scams / impersonators." },
-  announcements: { key: "announcements", label: "apex-announcements", emoji: "📢", oneShot: false, minMinutes: 240, maxMinutes: 600, description: "Big server / VIP announcements." },
-  join_vip: { key: "join_vip", label: "join-apex-vip", emoji: "💎", oneShot: false, minMinutes: 180, maxMinutes: 420, description: "VIP sales pitch with proof." },
-  free_calls: { key: "free_calls", label: "free-calls", emoji: "📊", oneShot: false, minMinutes: 30, maxMinutes: 90, description: "Free trade calls." },
-  proof_results: { key: "proof_results", label: "proof-results", emoji: "🏆", oneShot: false, minMinutes: 60, maxMinutes: 180, description: "Result screenshots & profits." },
-  market_chat: { key: "market_chat", label: "market-chat", emoji: "📉", oneShot: false, minMinutes: 30, maxMinutes: 75, description: "Market commentary & vibes." },
-  general_chat: { key: "general_chat", label: "general-chat", emoji: "💬", oneShot: false, minMinutes: 25, maxMinutes: 55, description: "Casual conversation." },
-  trending_coins: { key: "trending_coins", label: "trending-coins", emoji: "🔥", oneShot: false, minMinutes: 25, maxMinutes: 60, description: "Trending coin updates." },
-  vip_snipes: { key: "vip_snipes", label: "vip-snipes", emoji: "💎", oneShot: false, minMinutes: 60, maxMinutes: 150, description: "Blurred VIP snipe previews." },
-  early_access: { key: "early_access", label: "early-access", emoji: "🚀", oneShot: false, minMinutes: 90, maxMinutes: 240, description: "Early access teases." },
-  whale_tracker: { key: "whale_tracker", label: "whale-tracker", emoji: "🐋", oneShot: false, minMinutes: 15, maxMinutes: 45, description: "Whale wallet movements." },
-  live_trades: { key: "live_trades", label: "live-trades", emoji: "📈", oneShot: false, minMinutes: 20, maxMinutes: 55, description: "Live trade entries / exits." },
-  alpha_lounge: { key: "alpha_lounge", label: "alpha-lounge", emoji: "🧠", oneShot: false, minMinutes: 60, maxMinutes: 180, description: "Alpha analysis & narratives." },
-  price_bot: { key: "price_bot", label: "price-bot", emoji: "📊", oneShot: false, minMinutes: 12, maxMinutes: 25, description: "Major coin price ticker." },
-  gas_tracker: { key: "gas_tracker", label: "gas-tracker", emoji: "⛽", oneShot: false, minMinutes: 18, maxMinutes: 35, description: "Gas / network fees." },
-  alerts: { key: "alerts", label: "alerts", emoji: "📡", oneShot: false, minMinutes: 60, maxMinutes: 180, description: "Urgent breaking alerts." },
+  announcements: { key: "announcements", label: "apex-announcements", emoji: "📢", oneShot: false, minMinutes: 60, maxMinutes: 120, description: "Big server / VIP announcements." },
+  join_vip: { key: "join_vip", label: "join-apex-vip", emoji: "💎", oneShot: false, minMinutes: 45, maxMinutes: 90, description: "VIP sales pitch with proof." },
+  free_calls: { key: "free_calls", label: "free-calls", emoji: "📊", oneShot: false, minMinutes: 15, maxMinutes: 40, description: "Free trade calls." },
+  proof_results: { key: "proof_results", label: "proof-results", emoji: "🏆", oneShot: false, minMinutes: 25, maxMinutes: 60, description: "Result screenshots & profits." },
+  market_chat: { key: "market_chat", label: "market-chat", emoji: "📉", oneShot: false, minMinutes: 10, maxMinutes: 25, description: "Market commentary & vibes." },
+  general_chat: { key: "general_chat", label: "general-chat", emoji: "💬", oneShot: false, minMinutes: 8, maxMinutes: 18, description: "Casual conversation." },
+  trending_coins: { key: "trending_coins", label: "trending-coins", emoji: "🔥", oneShot: false, minMinutes: 15, maxMinutes: 30, description: "Trending coin updates." },
+  vip_snipes: { key: "vip_snipes", label: "vip-snipes", emoji: "💎", oneShot: false, minMinutes: 20, maxMinutes: 45, description: "Blurred VIP snipe previews." },
+  early_access: { key: "early_access", label: "early-access", emoji: "🚀", oneShot: false, minMinutes: 30, maxMinutes: 60, description: "Early access teases." },
+  whale_tracker: { key: "whale_tracker", label: "whale-tracker", emoji: "🐋", oneShot: false, minMinutes: 8, maxMinutes: 20, description: "Whale wallet movements." },
+  live_trades: { key: "live_trades", label: "live-trades", emoji: "📈", oneShot: false, minMinutes: 8, maxMinutes: 20, description: "Live trade entries / exits." },
+  alpha_lounge: { key: "alpha_lounge", label: "alpha-lounge", emoji: "🧠", oneShot: false, minMinutes: 25, maxMinutes: 55, description: "Alpha analysis & narratives." },
+  price_bot: { key: "price_bot", label: "price-bot", emoji: "📊", oneShot: false, minMinutes: 5, maxMinutes: 12, description: "Major coin price ticker." },
+  gas_tracker: { key: "gas_tracker", label: "gas-tracker", emoji: "⛽", oneShot: false, minMinutes: 8, maxMinutes: 18, description: "Gas / network fees." },
+  alerts: { key: "alerts", label: "alerts", emoji: "📡", oneShot: false, minMinutes: 30, maxMinutes: 60, description: "Urgent breaking alerts." },
 };
+
+/** Channels that go to the VIP Telegram group instead of the broadcast channel. */
+export const VIP_CHANNEL_KEYS: ChannelKey[] = [
+  "vip_snipes",
+  "early_access",
+  "alpha_lounge",
+  "proof_results",
+  "join_vip",
+  "announcements",
+];
 
 export type DiscordConfig = {
   webhooks: Record<string, string>;
@@ -121,6 +131,12 @@ export type DiscordConfig = {
   telegramChats: Record<string, string>;
   /** Telegram username users DM for VIP access (e.g. `@Dave_211`). */
   telegramDmHandle: string;
+  /**
+   * Telegram chat ID for VIP-only posts (vip_snipes, early_access, alpha_lounge,
+   * proof_results, join_vip, announcements). Falls back to telegramBroadcastChatId
+   * if not set.
+   */
+  telegramVipChatId: string;
 };
 
 const DEFAULT_CONFIG: DiscordConfig = {
@@ -134,6 +150,7 @@ const DEFAULT_CONFIG: DiscordConfig = {
   telegramBroadcastChatId: "",
   telegramChats: {},
   telegramDmHandle: "@Dave_211",
+  telegramVipChatId: "",
 };
 
 /**
@@ -149,12 +166,19 @@ export function tgDmTarget(cfg: Pick<DiscordConfig, "telegramDmHandle">): string
   return cfg.telegramDmHandle || "@Dave_211";
 }
 
-/** Pick the right telegram chat id for a channel — per-channel override or broadcast fallback. */
+/** Pick the right telegram chat id for a channel — per-channel override, then VIP group (for VIP channels), then broadcast fallback. */
 export function telegramChatFor(
-  cfg: Pick<DiscordConfig, "telegramChats" | "telegramBroadcastChatId">,
+  cfg: Pick<DiscordConfig, "telegramChats" | "telegramBroadcastChatId" | "telegramVipChatId">,
   channel: string,
 ): string {
-  return (cfg.telegramChats?.[channel] || "").trim() || (cfg.telegramBroadcastChatId || "").trim();
+  const perChannel = (cfg.telegramChats?.[channel] || "").trim();
+  if (perChannel) return perChannel;
+  const isVip = VIP_CHANNEL_KEYS.includes(channel as ChannelKey);
+  if (isVip) {
+    const vipChat = (cfg.telegramVipChatId || "").trim();
+    if (vipChat) return vipChat;
+  }
+  return (cfg.telegramBroadcastChatId || "").trim();
 }
 
 let cached: DiscordConfig | null = null;

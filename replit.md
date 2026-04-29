@@ -8,6 +8,12 @@ served by the API server artifact at `/api/`. All call/snipe/trade/whale/proof/t
 posts use **real on-chain token data** (real CAs, real prices, real mcap/liquidity)
 pulled live from DexScreener + CoinGecko + a public Ethereum RPC.
 
+## Recent changes (April 2026)
+- **Premium card images**: All 16 Discord/Telegram card templates completely redesigned with premium dark atmospheric backgrounds, glowing hero typography, money-stack decorations, glowing orb mascot elements, accent lines, and film grain — inspired by TokenScan-style broadcast graphics.
+- **Per-channel bot names**: Each channel now picks a unique name from its own pool (AlphaBot, SignalBot, ReceiptBot, WhaleBotent, etc.) instead of a single username.
+- **Telegram photo sending**: Re-enabled — bot sends `sendPhoto` with caption when image URL is available, falls back to `sendMessage` if the photo URL fails.
+- **New canvas helpers**: `drawGlowText`, `drawMoneyStacks`, `drawGlowOrb`, `drawPremiumBadge`, `drawAccentLine`, `drawHeaderBar`, improved `paintBackground` with vignette + stronger atmospheric glow.
+
 ## What's built
 
 - **API server** (`artifacts/api-server/`) — Express 5 backend that:

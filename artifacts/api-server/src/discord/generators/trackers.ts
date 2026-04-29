@@ -1,5 +1,6 @@
 import type { WebhookPayload } from "../poster";
 import { renderUrl, maybeAnimatedRenderUrl } from "../poster";
+
 import { COLORS, pick, randFloat, randInt } from "../data";
 import { loadConfig, dmTarget } from "../config";
 import {
@@ -14,6 +15,12 @@ import {
   shortAddr,
   explorerUrl,
 } from "../marketdata";
+
+const WHALE_NAMES   = ["WhaleBot", "OnChainBot", "WalletAlert", "DeepScan", "TrackBot"];
+const PRICE_NAMES   = ["PriceOracle", "SpotBot", "MarketBot", "PriceTrack", "LivePrices"];
+const GAS_NAMES     = ["GasOracle", "FeeBot", "GasTrack", "NetBot", "ChainFees"];
+const ALERT_NAMES   = ["AlertBot", "BreakingBot", "SignalAlert", "ScanAlert", "RadarAlert"];
+const TRENDING_NAMES = ["TrendBot", "HotList", "DexScan", "MoverBot", "TopGains"];
 
 const WHALE_TAGS = [
   "Smart Money #1",
@@ -57,35 +64,28 @@ export async function whaleTrackerPost(): Promise<WebhookPayload> {
     : Math.round(size * randInt(2400, 4400));
   const tag = pick(WHALE_TAGS);
   const img = await maybeAnimatedRenderUrl("whale", {
-    action: action === "fully exited" ? "EXITED" : action === "took profit on" ? "TRIMMED" : "BOUGHT",
-    ticker: t.symbol,
-    wallet: shortAddr(wallet),
-    size: `${size} ${sizeUnit}`,
-    usd: `$${usd.toLocaleString()}`,
-    tag,
-    server: cfg.serverName,
+    action: action.toUpperCase(), ticker: t.symbol,
+    wallet: shortAddr(wallet), size: `${size} ${sizeUnit}`,
+    usd: `$${usd.toLocaleString()}`, tag, server: cfg.serverName,
   });
   return {
-    username: `${cfg.serverName} Whales`,
-    embeds: [
-      {
-        color: isExit ? COLORS.red : COLORS.green,
-        title: `🐋 Whale ${action} $${t.symbol}`,
-        url: t.url,
-        description: `**${tag}** \`${shortAddr(wallet)}\` ${action} on ${t.chain}.`,
-        fields: [
-          { name: "Size", value: `${size} ${sizeUnit}  (~$${usd.toLocaleString()})`, inline: true },
-          { name: "Token Mcap", value: fmtUsd(t.marketCap), inline: true },
-          { name: "Token Liq", value: fmtUsd(t.liquidityUsd), inline: true },
-          { name: "📜 CA", value: "```" + t.address + "```", inline: false },
-          { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
-        ],
-        thumbnail: t.imageUrl ? { url: t.imageUrl } : undefined,
-        image: { url: img },
-        footer: { text: "tracking 1,200+ wallets" },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(WHALE_NAMES),
+    embeds: [{
+      color: isExit ? COLORS.red : COLORS.green,
+      title: `🐋 Whale ${action} $${t.symbol}`,
+      url: t.url,
+      description: `**${tag}** \`${shortAddr(wallet)}\` ${action} on ${t.chain}.`,
+      fields: [
+        { name: "Size", value: `${size} ${sizeUnit}  (~$${usd.toLocaleString()})`, inline: true },
+        { name: "Token Mcap", value: fmtUsd(t.marketCap), inline: true },
+        { name: "Token Liq", value: fmtUsd(t.liquidityUsd), inline: true },
+        { name: "📜 CA", value: "```" + t.address + "```", inline: false },
+        { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
+      ],
+      image: { url: img },
+      footer: { text: "tracking 1,200+ wallets" },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
@@ -102,16 +102,13 @@ export async function priceBotPost(): Promise<WebhookPayload> {
   const xrp = get("XRP");
 
   const items = [
-    btc && `BTC:${btc.usd.toFixed(0)}:${btc.change24h.toFixed(2)}`,
-    eth && `ETH:${eth.usd.toFixed(0)}:${eth.change24h.toFixed(2)}`,
-    sol && `SOL:${sol.usd.toFixed(2)}:${sol.change24h.toFixed(2)}`,
-    bnb && `BNB:${bnb.usd.toFixed(0)}:${bnb.change24h.toFixed(2)}`,
-    doge && `DOGE:${doge.usd.toFixed(4)}:${doge.change24h.toFixed(2)}`,
-    xrp && `XRP:${xrp.usd.toFixed(3)}:${xrp.change24h.toFixed(2)}`,
-  ]
-    .filter(Boolean)
-    .join(",");
-  const img = await renderUrl("price", { items, server: cfg.serverName });
+    btc && `BTC:${btc.usd.toFixed(0)}:${btc.change24h >= 0 ? "+" : ""}${btc.change24h.toFixed(2)}`,
+    eth && `ETH:${eth.usd.toFixed(0)}:${eth.change24h >= 0 ? "+" : ""}${eth.change24h.toFixed(2)}`,
+    sol && `SOL:${sol.usd.toFixed(2)}:${sol.change24h >= 0 ? "+" : ""}${sol.change24h.toFixed(2)}`,
+    bnb && `BNB:${bnb.usd.toFixed(0)}:${bnb.change24h >= 0 ? "+" : ""}${bnb.change24h.toFixed(2)}`,
+    doge && `DOGE:${doge.usd.toFixed(4)}:${doge.change24h >= 0 ? "+" : ""}${doge.change24h.toFixed(2)}`,
+    xrp && `XRP:${xrp.usd.toFixed(3)}:${xrp.change24h >= 0 ? "+" : ""}${xrp.change24h.toFixed(2)}`,
+  ].filter(Boolean).join(",");
 
   const fmtField = (p: { usd: number; change24h: number } | undefined, decimals: number) => {
     if (!p) return "—";
@@ -119,26 +116,25 @@ export async function priceBotPost(): Promise<WebhookPayload> {
     return `$${p.usd.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}\n${arrow}${p.change24h.toFixed(2)}% 24h`;
   };
 
+  const img = await maybeAnimatedRenderUrl("price", { items, server: cfg.serverName });
   return {
-    username: `${cfg.serverName} Price Bot`,
-    embeds: [
-      {
-        color: COLORS.blue,
-        title: "📊 Live prices",
-        description: "Spot prices from CoinGecko — refreshed every minute.",
-        fields: [
-          { name: "BTC", value: fmtField(btc, 0), inline: true },
-          { name: "ETH", value: fmtField(eth, 0), inline: true },
-          { name: "SOL", value: fmtField(sol, 2), inline: true },
-          { name: "BNB", value: fmtField(bnb, 0), inline: true },
-          { name: "DOGE", value: fmtField(doge, 4), inline: true },
-          { name: "XRP", value: fmtField(xrp, 3), inline: true },
-        ],
-        image: { url: img },
-        footer: { text: "live data • CoinGecko" },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(PRICE_NAMES),
+    embeds: [{
+      color: COLORS.blue,
+      title: "📊 Live prices",
+      description: "Spot prices from CoinGecko — refreshed every minute.",
+      fields: [
+        { name: "BTC", value: fmtField(btc, 0), inline: true },
+        { name: "ETH", value: fmtField(eth, 0), inline: true },
+        { name: "SOL", value: fmtField(sol, 2), inline: true },
+        { name: "BNB", value: fmtField(bnb, 0), inline: true },
+        { name: "DOGE", value: fmtField(doge, 4), inline: true },
+        { name: "XRP", value: fmtField(xrp, 3), inline: true },
+      ],
+      image: { url: img },
+      footer: { text: "live data • CoinGecko" },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
@@ -148,36 +144,31 @@ export async function gasTrackerPost(): Promise<WebhookPayload> {
   const baseGwei = await baseGasGwei();
   const solFee = solanaAvgFee();
   const ethGwei = ethGas.standard;
-
   const tag =
     ethGwei < 12 ? "🟢 dirt cheap" : ethGwei < 35 ? "🟡 normal" : "🔴 expensive";
-  const img = await renderUrl("gas", {
-    eth: `${ethGwei} gwei`,
-    base: `${baseGwei} gwei`,
-    sol: `${solFee.toFixed(6)} SOL`,
-    server: cfg.serverName,
+  const img = await maybeAnimatedRenderUrl("gas", {
+    eth: `${ethGwei} gwei`, base: `${baseGwei} gwei`,
+    sol: `${solFee.toFixed(6)} SOL`, server: cfg.serverName,
   });
   return {
-    username: `${cfg.serverName} Gas`,
-    embeds: [
-      {
-        color: ethGwei < 12 ? COLORS.green : ethGwei < 35 ? COLORS.gold : COLORS.red,
-        title: "⛽ Gas tracker",
-        description: "Live ETH gas + Base + Solana fees.",
-        fields: [
-          {
-            name: "Ethereum",
-            value: `Slow: ${ethGas.slow} gwei\nStd: ${ethGas.standard} gwei\nFast: ${ethGas.fast} gwei\n${tag}`,
-            inline: true,
-          },
-          { name: "Base", value: `${baseGwei} gwei\n🟢 cheap`, inline: true },
-          { name: "Solana", value: `${solFee.toFixed(6)} SOL avg\n🟢 spammable`, inline: true },
-        ],
-        image: { url: img },
-        footer: { text: "ethgas.watch • live" },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(GAS_NAMES),
+    embeds: [{
+      color: ethGwei < 12 ? COLORS.green : ethGwei < 35 ? COLORS.gold : COLORS.red,
+      title: "⛽ Gas tracker",
+      description: "Live ETH gas + Base + Solana fees.",
+      fields: [
+        {
+          name: "Ethereum",
+          value: `Slow: ${ethGas.slow} gwei\nStd: ${ethGas.standard} gwei\nFast: ${ethGas.fast} gwei\n${tag}`,
+          inline: true,
+        },
+        { name: "Base", value: `${baseGwei} gwei\n🟢 cheap`, inline: true },
+        { name: "Solana", value: `${solFee.toFixed(6)} SOL avg\n🟢 spammable`, inline: true },
+      ],
+      image: { url: img },
+      footer: { text: "ethgas.watch • live" },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
@@ -196,7 +187,7 @@ export async function alertsPost(): Promise<WebhookPayload> {
         title: "📡 ALERT — Movers heating up (1h)",
         desc:
           `${lines || "Scanner just refreshed. Loading…"}\n\n` +
-          (top ? `Public chart will catch up in ~${randInt(15, 90)} minutes.\n[Chart](${top.url})\n\n` : "") +
+          (top ? `Public chart will catch up in ~${randInt(15, 90)} minutes.\n\n` : "") +
           `Want the entry before everyone else? DM ${dm}.`,
         color: COLORS.pink,
       };
@@ -207,8 +198,7 @@ export async function alertsPost(): Promise<WebhookPayload> {
         title: "📡 ALERT — Liquidity unlock incoming",
         desc:
           `**$${t.symbol}** on ${t.chain} — sitting at ${fmtUsd(t.liquidityUsd)} liq, ${fmtUsd(t.marketCap)} mcap.\n\n` +
-          `Either rocket or rug — VIP is positioned either way.\n\n` +
-          `[Chart](${t.url})`,
+          `Either rocket or rug — VIP is positioned either way.`,
         color: COLORS.orange,
       };
     },
@@ -235,22 +225,42 @@ export async function alertsPost(): Promise<WebhookPayload> {
 
   const v = await pick(variants)();
   const img = await maybeAnimatedRenderUrl("alert", {
-    title: v.title.replace(/^📡 ALERT — /, ""),
-    body: v.desc.split("\n")[0] ?? "Something is moving.",
+    title: v.title.replace(/^📡 ALERT — /, "").slice(0, 40),
+    body: v.desc.slice(0, 120),
     server: cfg.serverName,
   });
   return {
-    username: `${cfg.serverName} Alerts`,
-    embeds: [
-      {
-        color: v.color,
-        title: v.title,
-        description: v.desc,
-        image: { url: img },
-        footer: { text: `${cfg.serverName} • Alerts` },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(ALERT_NAMES),
+    embeds: [{
+      color: v.color,
+      title: v.title,
+      description: v.desc,
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Alerts` },
+      timestamp: new Date().toISOString(),
+    }],
+  };
+}
+
+export async function trendingPost(): Promise<WebhookPayload> {
+  const cfg = await loadConfig();
+  const movers = await topByGain24h(5, { minLiqUsd: 10_000 });
+  const items = movers.slice(0, 3)
+    .map(m => `${m.symbol}:+${m.priceChange24h.toFixed(1)}`)
+    .join(",");
+  const img = await maybeAnimatedRenderUrl("trending", { items, server: cfg.serverName });
+  return {
+    username: pick(TRENDING_NAMES),
+    embeds: [{
+      color: COLORS.orange,
+      title: "🔥 Trending Coins — Top 3 (24h)",
+      description: movers.slice(0, 3)
+        .map((m, i) => `**#${i + 1}** $${m.symbol} on ${m.chain} — +${m.priceChange24h.toFixed(1)}% • ${fmtUsd(m.marketCap)} mcap`)
+        .join("\n"),
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Updated every 5m` },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
@@ -259,5 +269,4 @@ function signed(n: number): string {
   return `${n >= 0 ? "+" : ""}${n.toFixed(2)}`;
 }
 
-// Re-export for backward compat in case anything imports topByGain24h here
 export { topByGain24h };

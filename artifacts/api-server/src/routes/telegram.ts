@@ -23,6 +23,7 @@ router.get("/telegram/state", async (_req, res) => {
     sends: probed.sends,
     lastSendAt: probed.lastSendAt,
     broadcastChatId: cfg.telegramBroadcastChatId,
+    vipChatId: cfg.telegramVipChatId,
     chats: cfg.telegramChats,
     dmHandle: cfg.telegramDmHandle,
   });
@@ -32,12 +33,14 @@ router.post("/telegram/config", async (req, res) => {
   const body = req.body as {
     enabled?: boolean;
     broadcastChatId?: string;
+    vipChatId?: string;
     dmHandle?: string;
     chats?: Record<string, string>;
   };
   const patch: Parameters<typeof updateConfig>[0] = {};
   if (body.enabled !== undefined) patch.telegramEnabled = body.enabled;
   if (body.broadcastChatId !== undefined) patch.telegramBroadcastChatId = body.broadcastChatId.trim();
+  if (body.vipChatId !== undefined) patch.telegramVipChatId = body.vipChatId.trim();
   if (body.dmHandle !== undefined) {
     let h = body.dmHandle.trim();
     if (h && !h.startsWith("@")) h = "@" + h;

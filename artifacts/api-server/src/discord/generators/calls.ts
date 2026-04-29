@@ -19,16 +19,12 @@ import {
   type RealToken,
 } from "../marketdata";
 
-/**
- * The free-calls feed rotates three personalities so it doesn't read
- * identical every time:
- *   - 40%  full public call (CA visible, real chart)
- *   - 30%  drip teaser (CA blurred, "VIP got this earlier")
- *   - 30%  VIP-locked card (everything blurred)
- *
- * Every variant uses a real token pulled from DexScreener — real CA, real
- * chain, real DEX, real mcap / liquidity / volume / 24h move.
- */
+const CALL_NAMES   = ["AlphaBot", "SignalBot", "CallsBot", "DropBot", "HunterBot", "ScanBot"];
+const PROOF_NAMES  = ["ReceiptBot", "ProofBot", "WinBot", "GainBot", "ResultBot", "PrintBot"];
+const SNIPE_NAMES  = ["SniperBot", "VaultKey", "EliteSnipe", "VIPAlert", "LockBot"];
+const EARLY_NAMES  = ["RadarBot", "InsiderBot", "EarlyAlert", "FirstIn", "OnRadar"];
+const TRADE_NAMES  = ["TradeBot", "LiveEntry", "TxAlert", "FillBot", "EntryBot"];
+
 export async function freeCallPost(): Promise<WebhookPayload> {
   const roll = Math.random();
   if (roll < 0.4) return freeCallFull();
@@ -48,13 +44,9 @@ async function freeCallFull(): Promise<WebhookPayload> {
     "Volume building under the radar. Public hasn't found it yet.",
     "Survived the first dump. Re-entry is here.",
   ]);
-  const img = await renderUrl("call", {
-    ticker: t.symbol,
-    mc: t.marketCap,
-    liq: t.liquidityUsd,
-    chain: t.chain,
-    dex: t.dexId,
-    server: cfg.serverName,
+  const img = await maybeAnimatedRenderUrl("call", {
+    ticker: t.symbol, mc: t.marketCap, liq: t.liquidityUsd,
+    chain: t.chain, dex: t.dexId, server: cfg.serverName,
   });
   const fields = [
     { name: "💎 Mcap", value: fmtUsd(t.marketCap), inline: true },
@@ -70,23 +62,20 @@ async function freeCallFull(): Promise<WebhookPayload> {
     { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
   ];
   return {
-    username: `${cfg.serverName} Calls`,
-    embeds: [
-      {
-        color: COLORS.emerald,
-        title: `📊 NEW CALL — $${t.symbol}`,
-        url: t.url,
-        description:
-          `${callerNote}\n\n` +
-          `${pick(VIP_TEASES)}\n\n` +
-          `> _Public call. VIP got this **${randInt(8, 35)} minutes earlier** — DM ${dm} for the upgrade._`,
-        fields,
-        thumbnail: t.imageUrl ? { url: t.imageUrl } : undefined,
-        image: { url: img },
-        footer: { text: `${cfg.serverName} • Free Calls • not financial advice` },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(CALL_NAMES),
+    embeds: [{
+      color: COLORS.emerald,
+      title: `📊 NEW CALL — $${t.symbol}`,
+      url: t.url,
+      description:
+        `${callerNote}\n\n` +
+        `${pick(VIP_TEASES)}\n\n` +
+        `> _Public call. VIP got this **${randInt(8, 35)} minutes earlier** — DM ${dm} for the upgrade._`,
+      fields,
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Free Calls • not financial advice` },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
@@ -95,44 +84,35 @@ async function freeCallDripTeaser(): Promise<WebhookPayload> {
   const dm = dmTarget(cfg);
   const t = await pickTrending({ minLiqUsd: 10_000, maxMcUsd: 30_000_000 });
   const minsAgo = randInt(12, 55);
-  // Estimate "VIP entry mcap" as a fraction of current — enough to look like
-  // the chart already moved up off VIP fills.
   const entryMult = randFloat(2, 6, 1);
   const vipMc = Math.max(1000, Math.round(t.marketCap / entryMult));
-  const img = await renderUrl("call", {
-    ticker: t.symbol,
-    mc: t.marketCap,
-    liq: t.liquidityUsd,
-    chain: t.chain,
-    dex: t.dexId,
-    server: cfg.serverName,
+  const img = await maybeAnimatedRenderUrl("call", {
+    ticker: t.symbol, mc: vipMc, liq: t.liquidityUsd,
+    chain: t.chain, dex: t.dexId, server: cfg.serverName,
   });
   return {
-    username: `${cfg.serverName} Calls`,
-    embeds: [
-      {
-        color: COLORS.gold,
-        title: `👀 Watching — $${t.symbol}`,
-        url: t.url,
-        description:
-          `Dripping this for the free chat. Already running on ${t.chain}.\n\n` +
-          `**VIP entry:** ${fmtUsd(vipMc)} mcap • posted ${minsAgo}m ago\n` +
-          `**Now:** ${fmtUsd(t.marketCap)} mcap (~${entryMult.toFixed(1)}x already)\n` +
-          `**Chain:** ${t.chain} • **DEX:** ${t.dexId}\n\n` +
-          `CA half-shown for free. Full CA + entry timing went out in VIP earlier.`,
-        fields: [
-          { name: "📜 CA (partial)", value: "```" + maskAddr(t.address) + "```", inline: false },
-          { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
-          { name: "💧 Liq", value: fmtUsd(t.liquidityUsd), inline: true },
-          { name: "🚪 Want it earlier?", value: `DM ${dm}`, inline: true },
-          { name: "🔗 Chart", value: `[DexScreener](${t.url})`, inline: false },
-        ],
-        thumbnail: t.imageUrl ? { url: t.imageUrl } : undefined,
-        image: { url: img },
-        footer: { text: `${cfg.serverName} • Drip from VIP` },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(CALL_NAMES),
+    embeds: [{
+      color: COLORS.gold,
+      title: `👀 Watching — $${t.symbol}`,
+      url: t.url,
+      description:
+        `Dripping this for the free chat. Already running on ${t.chain}.\n\n` +
+        `**VIP entry:** ${fmtUsd(vipMc)} mcap • posted ${minsAgo}m ago\n` +
+        `**Now:** ${fmtUsd(t.marketCap)} mcap (~${entryMult.toFixed(1)}x already)\n` +
+        `**Chain:** ${t.chain} • **DEX:** ${t.dexId}\n\n` +
+        `CA half-shown for free. Full CA + entry timing went out in VIP earlier.`,
+      fields: [
+        { name: "📜 CA (partial)", value: "```" + maskAddr(t.address) + "```", inline: false },
+        { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
+        { name: "💧 Liq", value: fmtUsd(t.liquidityUsd), inline: true },
+        { name: "🚪 Want it earlier?", value: `DM ${dm}`, inline: true },
+        { name: "🔗 Chart", value: `[DexScreener](${t.url})`, inline: false },
+      ],
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Drip from VIP` },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
@@ -142,80 +122,67 @@ async function freeCallVipLocked(): Promise<WebhookPayload> {
   const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 5_000_000 });
   const masked = `$${t.symbol.slice(0, 2)}•••••`;
   const img = await maybeAnimatedRenderUrl("snipe", {
-    ticker: t.symbol,
-    mc: t.marketCap,
-    server: cfg.serverName,
-    handle: cfg.ownerHandle,
+    ticker: t.symbol, mc: t.marketCap,
+    handle: dmTarget(cfg), server: cfg.serverName,
   });
   return {
-    username: `${cfg.serverName} Calls`,
-    embeds: [
-      {
-        color: COLORS.vipPurple,
-        title: `🔒 VIP-ONLY CALL — ${masked}`,
-        description:
-          `**This one is locked to VIP.** Free chat sees the wrapper, VIP got the entry.\n\n` +
-          `Why we're not posting it here:\n` +
-          `• Liquidity is thin — public alpha would move the price against members.\n` +
-          `• Caller wants VIP to fill before the chart wakes up.\n\n` +
-          `Receipt will drop in 🏆 **proof-results** once we trim.`,
-        fields: [
-          { name: "🔗 Chain", value: t.chain, inline: true },
-          { name: "💎 Entry MC", value: fmtUsd(t.marketCap), inline: true },
-          { name: "🔓 Unlock", value: `DM ${dm}`, inline: true },
-        ],
-        image: { url: img },
-        footer: { text: "VIP only • Free preview" },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(SNIPE_NAMES),
+    embeds: [{
+      color: COLORS.vipPurple,
+      title: `🔒 VIP-ONLY CALL — ${masked}`,
+      description:
+        `**This one is locked to VIP.** Free chat sees the wrapper, VIP got the entry.\n\n` +
+        `Why we're not posting it here:\n` +
+        `• Liquidity is thin — public alpha would move the price against members.\n` +
+        `• Caller wants VIP to fill before the chart wakes up.\n\n` +
+        `Receipt will drop in 🏆 **proof-results** once we trim.`,
+      fields: [
+        { name: "🔗 Chain", value: t.chain, inline: true },
+        { name: "💎 Entry MC", value: fmtUsd(t.marketCap), inline: true },
+        { name: "🔓 Unlock", value: `DM ${dm}`, inline: true },
+      ],
+      image: { url: img },
+      footer: { text: "VIP only • Free preview" },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
 export async function proofResultsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  // Use a real top gainer from the last 24h as the receipt.
   const winners = await topByGain24h(8, { minLiqUsd: 10_000 });
   const t = winners[Math.floor(Math.random() * Math.min(winners.length, 5))] ?? (await pickTrending());
-  // Convert the real % move into a multiple. A +320% move = 4.2x, etc.
   const pct = Math.max(40, t.priceChange24h);
   const x = Number((1 + pct / 100).toFixed(1));
-  // Synthesize a believable entry mcap (where the call would have been placed).
   const entryMc = Math.max(8_000, Math.round(t.marketCap / x));
   const pnlInvested = randInt(500, 4000);
   const pnlOut = Math.round(pnlInvested * x);
   const img = await maybeAnimatedRenderUrl("proof", {
-    ticker: t.symbol,
-    x,
-    entry: entryMc,
-    server: cfg.serverName,
-    handle: cfg.ownerHandle,
+    ticker: t.symbol, x: x, entry: entryMc, server: cfg.serverName,
+    handle: dmTarget(cfg),
   });
   return {
-    username: `${cfg.serverName} Proof`,
-    embeds: [
-      {
-        color: COLORS.gold,
-        title: `🏆 $${t.symbol} hit ${x}x`,
-        url: t.url,
-        description:
-          `Called at **${fmtUsd(entryMc)}** mcap. Now sitting at **${fmtUsd(t.marketCap)}** on ${t.chain}.\n\n` +
-          `**Position PnL** — $${pnlInvested.toLocaleString()} → $${pnlOut.toLocaleString()}\n\n` +
-          `${pick(HYPE_LINES)}\n\n` +
-          `> Want to be on the next one? DM ${dm}.`,
-        fields: [
-          { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
-          { name: "💧 Liq", value: fmtUsd(t.liquidityUsd), inline: true },
-          { name: "📜 CA", value: "```" + t.address + "```", inline: false },
-          { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
-        ],
-        thumbnail: t.imageUrl ? { url: t.imageUrl } : undefined,
-        image: { url: img },
-        footer: { text: `${cfg.serverName} • Receipts` },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(PROOF_NAMES),
+    embeds: [{
+      color: COLORS.gold,
+      title: `🏆 $${t.symbol} hit ${x}x`,
+      url: t.url,
+      description:
+        `Called at **${fmtUsd(entryMc)}** mcap. Now sitting at **${fmtUsd(t.marketCap)}** on ${t.chain}.\n\n` +
+        `**Position PnL** — $${pnlInvested.toLocaleString()} → $${pnlOut.toLocaleString()}\n\n` +
+        `${pick(HYPE_LINES)}\n\n` +
+        `> Want to be on the next one? DM ${dm}.`,
+      fields: [
+        { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
+        { name: "💧 Liq", value: fmtUsd(t.liquidityUsd), inline: true },
+        { name: "📜 CA", value: "```" + t.address + "```", inline: false },
+        { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
+      ],
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Receipts` },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
@@ -226,38 +193,33 @@ export async function vipSnipePost(): Promise<WebhookPayload> {
   const fillSizeUnit = t.chain === "Solana" ? "SOL" : t.chain === "Ethereum" ? "ETH" : "tokens";
   const fillSize = t.chain === "Solana" ? randFloat(2, 18, 2) : randFloat(0.2, 4, 2);
   const img = await maybeAnimatedRenderUrl("snipe", {
-    ticker: t.symbol,
-    mc: t.marketCap,
-    server: cfg.serverName,
-    handle: cfg.ownerHandle,
+    ticker: t.symbol, mc: t.marketCap,
+    handle: dm, server: cfg.serverName,
   });
   return {
-    username: `${cfg.serverName} VIP Snipes`,
-    embeds: [
-      {
-        color: COLORS.vipPurple,
-        title: `💎 VIP SNIPE — Filled @ ${fmtUsd(t.marketCap)}`,
-        description:
-          `One of our VIP wallets just filled an early bag.\n\n` +
-          `> **CA:** \`${maskAddr(t.address)}\`  *(unlocked in VIP)*\n` +
-          `> **Chain:** ${t.chain}\n` +
-          `> **DEX:** ${t.dexId}\n` +
-          `> **Fill size:** ${fillSize} ${fillSizeUnit} avg\n` +
-          `> **Ticker:** $${t.symbol.slice(0, 2)}•••\n\n` +
-          `_Receipt drops in 🏆 proof-results once we trim._\n\n` +
-          `Tired of seeing the blur? DM ${dm}.`,
-        image: { url: img },
-        footer: { text: "VIP only • Public preview" },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(SNIPE_NAMES),
+    embeds: [{
+      color: COLORS.vipPurple,
+      title: `💎 VIP SNIPE — Filled @ ${fmtUsd(t.marketCap)}`,
+      description:
+        `One of our VIP wallets just filled an early bag.\n\n` +
+        `> **CA:** \`${maskAddr(t.address)}\`  *(unlocked in VIP)*\n` +
+        `> **Chain:** ${t.chain}\n` +
+        `> **DEX:** ${t.dexId}\n` +
+        `> **Fill size:** ${fillSize} ${fillSizeUnit} avg\n` +
+        `> **Ticker:** $${t.symbol.slice(0, 2)}•••\n\n` +
+        `_Receipt drops in 🏆 proof-results once we trim._\n\n` +
+        `Tired of seeing the blur? DM ${dm}.`,
+      image: { url: img },
+      footer: { text: "VIP only • Public preview" },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
 export async function earlyAccessPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  // Prefer young pairs — under 24h. Fall back to any small-cap if none qualify.
   let t: RealToken;
   try {
     t = await pickTrending({ maxAgeMin: 60 * 24, minLiqUsd: 8_000, maxMcUsd: 5_000_000 });
@@ -265,39 +227,33 @@ export async function earlyAccessPost(): Promise<WebhookPayload> {
     t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 8_000_000 });
   }
   const lead = randInt(8, 45);
-  const img = await maybeAnimatedRenderUrl("early", {
-    ticker: t.symbol,
-    lead,
-    server: cfg.serverName,
-    handle: cfg.ownerHandle,
-  });
   const ageStr = t.ageMin > 0 ? humanAge(t.ageMin) : "fresh";
+  const img = await maybeAnimatedRenderUrl("early", {
+    ticker: t.symbol, lead: lead, handle: dm, server: cfg.serverName,
+  });
   return {
-    username: `${cfg.serverName} Early`,
-    embeds: [
-      {
-        color: COLORS.cyan,
-        title: `🚀 Early Access — $${t.symbol} watchlist`,
-        url: t.url,
-        description:
-          `On the VIP radar **${lead} minutes before** the public chart wakes up.\n\n` +
-          `Why we're watching:\n` +
-          `• Smart-money cluster forming on ${t.chain}\n` +
-          `• Pair age: ${ageStr} — caller likes the entry timing\n` +
-          `• Liq: ${fmtUsd(t.liquidityUsd)} • 24h vol: ${fmtUsd(t.volume24h)}\n\n` +
-          `${pick(VIP_TEASES)}\n` +
-          `DM ${dm} to unlock the CA.`,
-        fields: [
-          { name: "💎 Mcap", value: fmtUsd(t.marketCap), inline: true },
-          { name: "📈 1h", value: fmtChangeLine(t.priceChange1h), inline: true },
-          { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
-        ],
-        thumbnail: t.imageUrl ? { url: t.imageUrl } : undefined,
-        image: { url: img },
-        footer: { text: `${cfg.serverName} • Early Access` },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(EARLY_NAMES),
+    embeds: [{
+      color: COLORS.cyan,
+      title: `🚀 Early Access — $${t.symbol} watchlist`,
+      url: t.url,
+      description:
+        `On the VIP radar **${lead} minutes before** the public chart wakes up.\n\n` +
+        `Why we're watching:\n` +
+        `• Smart-money cluster forming on ${t.chain}\n` +
+        `• Pair age: ${ageStr} — caller likes the entry timing\n` +
+        `• Liq: ${fmtUsd(t.liquidityUsd)} • 24h vol: ${fmtUsd(t.volume24h)}\n\n` +
+        `${pick(VIP_TEASES)}\n` +
+        `DM ${dm} to unlock the CA.`,
+      fields: [
+        { name: "💎 Mcap", value: fmtUsd(t.marketCap), inline: true },
+        { name: "📈 1h", value: fmtChangeLine(t.priceChange1h), inline: true },
+        { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
+      ],
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Early Access` },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
@@ -313,44 +269,37 @@ export async function liveTradePost(): Promise<WebhookPayload> {
       : sizeUnit === "ETH"
       ? Math.round(size * randInt(2400, 4400))
       : Math.round(size);
-  // Walletless display — random short addr for anonymity.
   const wallet = randomWalletShort(t.chainId);
   const color =
     direction === "BUY" ? COLORS.green : direction === "TRIM" ? COLORS.gold : COLORS.red;
   const emoji = direction === "BUY" ? "🟢" : direction === "TRIM" ? "🟡" : "🔴";
   const img = await maybeAnimatedRenderUrl("trade", {
-    direction,
-    ticker: t.symbol,
-    size: `${size} ${sizeUnit}`,
-    usd: `$${usd.toLocaleString()}`,
-    wallet,
-    server: cfg.serverName,
+    ticker: t.symbol, direction,
+    size: `${size} ${sizeUnit}`, usd: `$${usd.toLocaleString()}`,
+    wallet, server: cfg.serverName,
   });
   return {
-    username: `${cfg.serverName} Trades`,
-    embeds: [
-      {
-        color,
-        title: `${emoji} ${direction} — $${t.symbol}`,
-        url: t.url,
-        description:
-          `Wallet \`${wallet}\` ${verb(direction)} on ${t.chain}.\n\n` +
-          `**Size:** ${size} ${sizeUnit} (~$${usd.toLocaleString()})`,
-        fields: [
-          { name: "💎 Mcap", value: fmtUsd(t.marketCap), inline: true },
-          { name: "💧 Liq", value: fmtUsd(t.liquidityUsd), inline: true },
-          { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
-          { name: "📜 CA", value: "```" + t.address + "```", inline: false },
-          { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
-          { name: "Caller", value: cfg.ownerHandle, inline: true },
-          { name: "Tag", value: direction === "BUY" ? "fresh entry" : "manage risk", inline: true },
-        ],
-        thumbnail: t.imageUrl ? { url: t.imageUrl } : undefined,
-        image: { url: img },
-        footer: { text: `${cfg.serverName} • Live Trades` },
-        timestamp: new Date().toISOString(),
-      },
-    ],
+    username: pick(TRADE_NAMES),
+    embeds: [{
+      color,
+      title: `${emoji} ${direction} — $${t.symbol}`,
+      url: t.url,
+      description:
+        `Wallet \`${wallet}\` ${verb(direction)} on ${t.chain}.\n\n` +
+        `**Size:** ${size} ${sizeUnit} (~$${usd.toLocaleString()})`,
+      fields: [
+        { name: "💎 Mcap", value: fmtUsd(t.marketCap), inline: true },
+        { name: "💧 Liq", value: fmtUsd(t.liquidityUsd), inline: true },
+        { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
+        { name: "📜 CA", value: "```" + t.address + "```", inline: false },
+        { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
+        { name: "Caller", value: cfg.ownerHandle, inline: true },
+        { name: "Tag", value: direction === "BUY" ? "fresh entry" : "manage risk", inline: true },
+      ],
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Live Trades` },
+      timestamp: new Date().toISOString(),
+    }],
   };
 }
 
