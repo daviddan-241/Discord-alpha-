@@ -4,7 +4,6 @@ import { COLORS, pick, randInt } from "../data";
 import { loadConfig, dmTarget } from "../config";
 import { topByGain24h, topByVolume, fmtUsd } from "../marketdata";
 
-const ALPHA_NAMES    = ["Alpha Desk 🧠", "Thesis", "Narrative Desk", "Deep Alpha", "Intel 🔍"];
 
 const NARRATIVE_BUCKETS: Array<{ name: string; chains: string[] }> = [
   { name: "Solana memecoin season", chains: ["Solana"] },
@@ -57,7 +56,7 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
   });
 
   return {
-    username: pick(ALPHA_NAMES),
+    username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.purple,
       title: `🧠 Alpha Lounge — ${bucket.name}`,

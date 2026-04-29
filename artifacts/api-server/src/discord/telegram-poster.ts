@@ -103,6 +103,30 @@ function stripLinks(text: string): string {
     .trim();
 }
 
+/**
+ * Extract a raw address from a Discord markdown code block like ```address```
+ * or inline `address`. Returns null if not a code block value.
+ */
+function extractCodeBlock(val: string): string | null {
+  // Triple backtick: ```address```
+  const triple = val.match(/^```([^`]+)```$/);
+  if (triple) return triple[1]!.trim();
+  // Single backtick: `address`
+  const single = val.match(/^`([^`]+)`$/);
+  if (single) return single[1]!.trim();
+  return null;
+}
+
+/**
+ * Convert description text that may contain inline backtick blocks (like `address`)
+ * to Telegram HTML where those become <code>address</code>.
+ */
+function convertInlineCode(text: string, tgHandle: string): string {
+  const cleaned = stripLinks(rewriteMentions(text, tgHandle));
+  // Replace inline `code` spans with <code>…</code>
+  return cleaned.replace(/`([^`]+)`/g, (_m, inner: string) => `<code>${esc(inner.trim())}</code>`);
+}
+
 /** Convert one Discord-style embed to a clean Telegram HTML block (no links). */
 function embedToHtml(e: Embed, tgHandle: string): string {
   const parts: string[] = [];
@@ -111,11 +135,19 @@ function embedToHtml(e: Embed, tgHandle: string): string {
     parts.push(`<b>${esc(stripLinks(rewriteMentions(e.title, tgHandle)))}</b>`);
   }
   if (e.description) {
-    parts.push(esc(stripLinks(rewriteMentions(e.description, tgHandle))));
+    parts.push(convertInlineCode(e.description, tgHandle));
   }
   if (e.fields?.length) {
     for (const f of e.fields) {
-      const val = stripLinks(rewriteMentions(f.value, tgHandle)).trim();
+      const raw = rewriteMentions(f.value, tgHandle).trim();
+      // Check if the entire field value is a code block (e.g. a CA address)
+      const codeAddr = extractCodeBlock(raw);
+      if (codeAddr) {
+        parts.push(`\n<b>${esc(f.name)}</b>\n<code>${esc(codeAddr)}</code>`);
+        continue;
+      }
+      // Otherwise strip links and escape normally
+      const val = stripLinks(raw).trim();
       if (!val) continue;
       parts.push(`\n<b>${esc(f.name)}</b>\n${esc(val)}`);
     }

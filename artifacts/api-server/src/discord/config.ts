@@ -142,7 +142,7 @@ export type DiscordConfig = {
 const DEFAULT_CONFIG: DiscordConfig = {
   webhooks: {},
   ownerHandle: "@baldwin_owner",
-  ownerMention: "<@1035212407213133856>",
+  ownerMention: "",
   serverName: "Baldwin Calls",
   autoPost: true,
   publicBaseUrl: "",
@@ -150,15 +150,14 @@ const DEFAULT_CONFIG: DiscordConfig = {
   telegramBroadcastChatId: "",
   telegramChats: {},
   telegramDmHandle: "@Dave_211",
-  telegramVipChatId: "",
+  telegramVipChatId: "-1003761346762",
 };
 
 /**
- * The "DM CTA" string used in posts — prefers the real Discord mention
- * (which actually pings) and falls back to the readable handle.
+ * The "DM CTA" string used in posts — always the readable handle (username only, no numeric ID).
  */
 export function dmTarget(cfg: Pick<DiscordConfig, "ownerMention" | "ownerHandle">): string {
-  return (cfg.ownerMention && cfg.ownerMention.trim()) || cfg.ownerHandle;
+  return cfg.ownerHandle;
 }
 
 /** Telegram DM target for VIP CTAs. */
