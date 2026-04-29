@@ -1,4 +1,5 @@
 import type { WebhookPayload } from "../poster";
+import { maybeAnimatedRenderUrl } from "../poster";
 import {
   COLORS,
   pick,
@@ -29,6 +30,10 @@ async function freeCallFull(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   const t = await pickTrending({ minLiqUsd: 15_000, maxMcUsd: 50_000_000 });
+  const img = await maybeAnimatedRenderUrl("call", {
+    ticker: t.symbol, mc: t.marketCap, liq: t.liquidityUsd,
+    chain: t.chain, dex: t.dexId, server: cfg.serverName,
+  });
   const callerNote = pick([
     `Been watching this for days. Smart money has been silently accumulating — chart is coiling like a spring. This is exactly the setup I look for before a run.`,
     `Dev locked LP. No team wallet. Bundle scan completely clean. Liquidity building quietly. I'm in a full bag right now.`,
@@ -62,6 +67,7 @@ async function freeCallFull(): Promise<WebhookPayload> {
         `${pick(VIP_TEASES)}\n\n` +
         `> 🔒 _VIP received this call **${randInt(12, 45)} minutes before** this post. They're already filled. DM ${dm} if you want to be on the next one from the entry — not after._`,
       fields,
+      image: { url: img },
       footer: { text: `${cfg.serverName} • Called by ${dm} • not financial advice` },
       timestamp: new Date().toISOString(),
     }],
@@ -75,6 +81,9 @@ async function freeCallDripTeaser(): Promise<WebhookPayload> {
   const minsAgo = randInt(20, 65);
   const entryMult = randFloat(2.5, 9, 1);
   const vipMc = Math.max(1000, Math.round(t.marketCap / entryMult));
+  const img = await maybeAnimatedRenderUrl("proof", {
+    ticker: t.symbol, x: entryMult, entry: vipMc, server: cfg.serverName, handle: dm,
+  });
   return {
     username: cfg.ownerHandle,
     embeds: [{
@@ -97,6 +106,7 @@ async function freeCallDripTeaser(): Promise<WebhookPayload> {
         { name: "🚪 Want the full CA next time?", value: `DM ${dm}`, inline: true },
         { name: "🔗 Chart", value: `[DexScreener](${t.url})`, inline: false },
       ],
+      image: { url: img },
       footer: { text: `${cfg.serverName} • Called by ${dm} — this is what VIP gets every day` },
       timestamp: new Date().toISOString(),
     }],
@@ -108,6 +118,9 @@ async function freeCallVipLocked(): Promise<WebhookPayload> {
   const dm = dmTarget(cfg);
   const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 5_000_000 });
   const masked = `$${t.symbol.slice(0, 2)}•••••`;
+  const img = await maybeAnimatedRenderUrl("snipe", {
+    ticker: t.symbol, mc: t.marketCap, handle: dm, server: cfg.serverName,
+  });
   return {
     username: cfg.ownerHandle,
     embeds: [{
@@ -128,6 +141,7 @@ async function freeCallVipLocked(): Promise<WebhookPayload> {
         { name: "💎 Entry MC", value: fmtUsd(t.marketCap), inline: true },
         { name: "🔓 Unlock VIP", value: `DM ${dm}`, inline: true },
       ],
+      image: { url: img },
       footer: { text: `${cfg.serverName} • VIP only • DM ${dm} to change your position` },
       timestamp: new Date().toISOString(),
     }],
@@ -145,6 +159,9 @@ export async function proofResultsPost(): Promise<WebhookPayload> {
   const pnlInvested = randInt(500, 4000);
   const pnlOut = Math.round(pnlInvested * x);
   const pnlProfit = pnlOut - pnlInvested;
+  const img = await maybeAnimatedRenderUrl("proof", {
+    ticker: t.symbol, x, entry: entryMc, server: cfg.serverName, handle: dm,
+  });
   return {
     username: cfg.ownerHandle,
     embeds: [{
@@ -164,6 +181,7 @@ export async function proofResultsPost(): Promise<WebhookPayload> {
         { name: "📜 CA", value: "```" + t.address + "```", inline: false },
         { name: "🔗 Chart", value: `[DexScreener](${t.url}) • [Explorer](${explorerUrl(t)})`, inline: false },
       ],
+      image: { url: img },
       footer: { text: `${cfg.serverName} • Receipts posted by ${dm} every time` },
       timestamp: new Date().toISOString(),
     }],
@@ -176,6 +194,9 @@ export async function vipSnipePost(): Promise<WebhookPayload> {
   const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 8_000_000 });
   const fillSizeUnit = t.chain === "Solana" ? "SOL" : t.chain === "Ethereum" ? "ETH" : "tokens";
   const fillSize = t.chain === "Solana" ? randFloat(2, 18, 2) : randFloat(0.2, 4, 2);
+  const img = await maybeAnimatedRenderUrl("snipe", {
+    ticker: t.symbol, mc: t.marketCap, handle: dm, server: cfg.serverName,
+  });
   return {
     username: cfg.ownerHandle,
     embeds: [{
@@ -191,6 +212,7 @@ export async function vipSnipePost(): Promise<WebhookPayload> {
         `The receipt drops in 🏆 proof-results the second I trim. I've done this every single time — zero exceptions.\n\n` +
         `You're reading this from the outside right now. You don't have to be.\n\n` +
         `**DM ${dm}. One message. That's all it takes.**`,
+      image: { url: img },
       footer: { text: `${cfg.serverName} • VIP snipes by ${dm} — join before the next one` },
       timestamp: new Date().toISOString(),
     }],
@@ -208,6 +230,9 @@ export async function earlyAccessPost(): Promise<WebhookPayload> {
   }
   const lead = randInt(12, 55);
   const ageStr = t.ageMin > 0 ? humanAge(t.ageMin) : "brand new";
+  const img = await maybeAnimatedRenderUrl("early", {
+    ticker: t.symbol, lead, handle: dm, server: cfg.serverName,
+  });
   return {
     username: cfg.ownerHandle,
     embeds: [{
@@ -229,6 +254,7 @@ export async function earlyAccessPost(): Promise<WebhookPayload> {
         { name: "📈 1h", value: fmtChangeLine(t.priceChange1h), inline: true },
         { name: "📊 24h", value: fmtChangeLine(t.priceChange24h), inline: true },
       ],
+      image: { url: img },
       footer: { text: `${cfg.serverName} • Early Access by ${dm} — VIP gets this first` },
       timestamp: new Date().toISOString(),
     }],
@@ -252,6 +278,11 @@ export async function liveTradePost(): Promise<WebhookPayload> {
   const color =
     direction === "BUY" ? COLORS.green : direction === "TRIM" ? COLORS.gold : COLORS.red;
   const emoji = direction === "BUY" ? "🟢" : direction === "TRIM" ? "🟡" : "🔴";
+  const img = await maybeAnimatedRenderUrl("trade", {
+    ticker: t.symbol, direction,
+    size: `${size} ${sizeUnit}`, usd: `$${usd.toLocaleString()}`,
+    wallet, server: cfg.serverName,
+  });
   const actionLine = pick(
     direction === "BUY"
       ? [
@@ -289,6 +320,7 @@ export async function liveTradePost(): Promise<WebhookPayload> {
         { name: "🎯 Caller", value: dm, inline: true },
         { name: "📍 Move type", value: direction === "BUY" ? "fresh entry" : direction === "TRIM" ? "risk management" : "full exit", inline: true },
       ],
+      image: { url: img },
       footer: { text: `${cfg.serverName} • Live Trades by ${dm} — DM to be in VIP before the next fill` },
       timestamp: new Date().toISOString(),
     }],

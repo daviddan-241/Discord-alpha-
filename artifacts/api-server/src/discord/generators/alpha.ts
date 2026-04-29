@@ -1,4 +1,5 @@
 import type { WebhookPayload } from "../poster";
+import { maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, randInt } from "../data";
 import { loadConfig, dmTarget } from "../config";
 import { topByGain24h, topByVolume, fmtUsd } from "../marketdata";
@@ -52,6 +53,10 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
   ];
   const picks = bullets.sort(() => Math.random() - 0.5).slice(0, 3);
 
+  const img = await maybeAnimatedRenderUrl("alpha", {
+    narrative: bucket.name, server: cfg.serverName,
+  });
+
   return {
     username: cfg.ownerHandle,
     embeds: [{
@@ -66,6 +71,7 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
         `**The full play — specific tickers, entry sizes, and price targets — is inside VIP.**\n\n` +
         `By the time this becomes public news, VIP will have already been in it for hours.\n\n` +
         `DM ${dm} to be inside the next one before the chart moves.`,
+      image: { url: img },
       footer: { text: `${cfg.serverName} • Alpha Lounge — VIP gets the full list` },
       timestamp: new Date().toISOString(),
     }],

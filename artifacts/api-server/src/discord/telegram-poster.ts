@@ -219,8 +219,32 @@ export async function sendToTelegram(
   const tgHandle = tgDmTarget(cfg);
   const { text } = payloadToTelegram(payload, tgHandle);
 
+  // Extract image URL from first embed (if any)
+  const imageUrl = payload.embeds?.[0]?.image?.url;
+
   try {
-    // Always text-only — no photos
+    if (imageUrl) {
+      // Send as photo with caption
+      const caption = text.slice(0, 1024);
+      const photoBody: Record<string, unknown> = {
+        chat_id: chatId, photo: imageUrl, caption, parse_mode: "HTML",
+      };
+      const photoRes = await fetch(`${base}/sendPhoto`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(photoBody),
+      });
+      const j2 = (await photoRes.json().catch(() => ({}))) as { ok: boolean; description?: string; result?: { message_id?: number } };
+      if (j2.ok) {
+        status.sends++;
+        status.lastSendAt = Date.now();
+        status.lastError = undefined;
+        return { ok: true, status: photoRes.status, messageId: j2.result?.message_id };
+      }
+      // fall through to text if photo fails
+    }
+
+    // Text-only send (fallback or no image)
     const body: Record<string, unknown> = {
       chat_id: chatId,
       text,

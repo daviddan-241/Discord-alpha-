@@ -78,15 +78,9 @@ export async function sendToChannel(
     return { ok: false, error: msg };
   }
 
-  // Strip images — text-only embeds for clean, fast Discord posts
-  const cleanEmbeds = payload.embeds?.map((e) => {
-    const { image: _img, thumbnail: _thumb, ...rest } = e;
-    return rest;
-  });
   const body: WebhookPayload = {
     allowed_mentions: { parse: [] },
     ...payload,
-    embeds: cleanEmbeds,
   };
 
   try {

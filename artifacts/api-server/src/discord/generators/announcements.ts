@@ -1,4 +1,5 @@
 import type { WebhookPayload } from "../poster";
+import { maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, pickN, randInt, randFloat } from "../data";
 import { loadConfig, dmTarget } from "../config";
 
@@ -67,12 +68,16 @@ export async function announcementPost(): Promise<WebhookPayload> {
     },
   ];
   const v = pick(variants);
+  const img = await maybeAnimatedRenderUrl("announce", {
+    title: v.tag, body: v.body.slice(0, 100), server: cfg.serverName,
+  });
   return {
     username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.vipPurple,
       title: v.title,
       description: v.body,
+      image: { url: img },
       footer: { text: `${cfg.serverName} • Official • DM ${dm} to get in` },
       timestamp: new Date().toISOString(),
     }],
@@ -139,12 +144,16 @@ export async function joinVipPost(): Promise<WebhookPayload> {
   ];
 
   const v = pick(variants);
+  const vipImg = await maybeAnimatedRenderUrl("vip", {
+    handle: dm, server: cfg.serverName, wins: xWins.join(","),
+  });
   return {
     username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.vipPurple,
       title: v.title,
       description: v.desc,
+      image: { url: vipImg },
       footer: { text: `${cfg.serverName} • DM ${dm} — Join VIP today` },
       timestamp: new Date().toISOString(),
     }],
