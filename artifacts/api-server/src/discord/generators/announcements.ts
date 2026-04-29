@@ -1,5 +1,4 @@
 import type { WebhookPayload } from "../poster";
-import { maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, pickN, randInt, randFloat } from "../data";
 import { loadConfig, dmTarget } from "../config";
 
@@ -8,56 +7,73 @@ export async function announcementPost(): Promise<WebhookPayload> {
   const dm = dmTarget(cfg);
   const variants = [
     {
-      title: "📢 VIP slots just reopened — limited",
-      tag: "VIP SLOTS",
+      title: "📢 VIP slots just reopened — I only have a few",
+      tag: "VIP SLOTS OPEN",
       body:
-        `I just opened **${randInt(5, 12)} new VIP seats**.\n\n` +
-        `I keep VIP intentionally small. Too many members and the calls stop working — slippage, copy-trading, chart manipulation. So when it fills, it locks.\n\n` +
-        `If you've been watching the calls hit from outside, this is the window.\n\n` +
-        `To claim a seat: DM ${dm} and mention **apex-announcements**.`,
+        `Just opened **${randInt(4, 9)} new VIP seats.** That's it.\n\n` +
+        `I keep VIP intentionally small — too many members and the calls get front-run. When it fills, I close it and I don't reopen until someone leaves.\n\n` +
+        `People have been DMing me for weeks asking when the next window opens. This is it.\n\n` +
+        `**If you've been watching the calls hit from the outside — this is your moment.**\n\n` +
+        `DM ${dm} right now and say **"VIP"**. First ${randInt(3, 6)} get in automatically. Rest go on a list.\n\n` +
+        `Don't screenshot this for later. The seats don't wait.`,
     },
     {
-      title: "📢 This week's results — real numbers",
+      title: "📢 This week's results — let the numbers do the talking",
       tag: "WEEKLY RECAP",
       body:
-        `**Top public W's this week:**\n` +
-        `• $${pick(["MOON", "GIGA", "PEPE2", "FROG", "TURBO"])} — ${randFloat(8, 60, 1)}x\n` +
-        `• $${pick(["DEGEN", "SIGMA", "KING", "WIF2", "CAT2"])} — ${randFloat(4, 25, 1)}x\n` +
-        `• $${pick(["ALPHA", "OMEGA", "REKT", "WAGMI"])} — ${randFloat(2, 15, 1)}x\n\n` +
-        `**VIP ate harder.** Those numbers are the public call results — VIP got the entry earlier, sized larger, and trimmed on the way up.\n\n` +
-        `Receipts are in 🏆 proof-results. DM ${dm} if you want next week's entries.`,
+        `**Real W's posted this week:**\n` +
+        `• $${pick(["MOON", "GIGA", "PEPEX", "FROG2", "TURBO"])} — **${randFloat(9, 65, 1)}x** ✅\n` +
+        `• $${pick(["DEGEN", "SIGMA", "KNGZ", "WIF2", "CAT2"])} — **${randFloat(4, 28, 1)}x** ✅\n` +
+        `• $${pick(["ALPHA", "OMEGA", "REKT2", "WAGMI"])} — **${randFloat(3, 16, 1)}x** ✅\n\n` +
+        `**That's free chat.** VIP got all of those entries ${randInt(15, 45)} minutes earlier, sized bigger, and trimmed on the way up before the chart topped.\n\n` +
+        `Every receipt is in 🏆 proof-results. Time-stamped. Verifiable. Real.\n\n` +
+        `Next week's entries start posting in VIP tomorrow. DM ${dm} to be inside them — not watching from the outside.`,
     },
     {
-      title: "📢 I only take a few DMs a day",
-      tag: "REMINDER",
+      title: "📢 I said I'd be straight with you — so here it is",
+      tag: "REAL TALK",
       body:
-        `Just a reminder — I have a small group and I want to keep it that way.\n\n` +
-        `When VIP fills up I stop taking people. No waiting list, no second chance. Next open window could be weeks.\n\n` +
-        `Hit rate last ${randInt(60, 120)} calls: **${randInt(64, 80)}%** green.\n` +
-        `Average multiple on green calls: **${randFloat(4, 12, 1)}x**.\n\n` +
-        `DM ${dm} before the seat count drops to zero.`,
+        `I close VIP with zero notice when it fills. No countdown timer. No second DM.\n\n` +
+        `Hit rate last **${randInt(60, 120)} calls: ${randInt(67, 82)}% green.**\n` +
+        `Average multiple on green calls: **${randFloat(5, 13, 1)}x**.\n` +
+        `Best call this month: **${pick(["196x", "120x", "111x", "88x", "67x"])}.**\n\n` +
+        `One call like that pays for years of VIP. Most members recoup the fee in the first week alone.\n\n` +
+        `If you're in here reading this and you haven't DMed me yet — you are the reason this message exists.\n\n` +
+        `**DM ${dm} before the seat count hits zero.**`,
     },
     {
-      title: "📢 Server cleanup done",
-      tag: "ANNOUNCEMENT",
+      title: "📢 Cleaned up the server — seats opened",
+      tag: "SERVER UPDATE",
       body:
-        `Just removed inactive members — only keeping people who are locked in.\n\n` +
-        `If you got removed but still want in — re-verify in ✅ get-verified and you're back.\n\n` +
-        `VIP seats freed up from the purge. DM ${dm} now while they're available.`,
+        `Just removed dead weight — inactive accounts, lurkers, people who never verified.\n\n` +
+        `This server is for people who are locked in. Not for passive observers.\n\n` +
+        `**VIP seats freed up from the purge.** Usually these go within hours.\n\n` +
+        `If you got removed but you're still here — re-verify in ✅ get-verified and you're back.\n\n` +
+        `If you want VIP: DM ${dm} **right now** while the window is actually open.`,
+    },
+    {
+      title: "📢 Why people who DM me stop missing calls",
+      tag: "VIP RESULTS",
+      body:
+        `I get messages every week from people saying the same thing:\n\n` +
+        `_"I saw the call in free chat and it was already 3x. Why didn't I join VIP sooner?"_\n\n` +
+        `The answer is simple. VIP gets:\n` +
+        `→ Full CA before I post anything publicly\n` +
+        `→ My exact entry price and position size\n` +
+        `→ Direct access to me — I answer VIP members personally\n` +
+        `→ Trim alerts so you know when I'm taking profit\n\n` +
+        `By the time free chat sees a call, VIP has already been in it for 20-40 minutes.\n\n` +
+        `**DM ${dm} and say "VIP". It's one message. Stop watching the calls print without you.**`,
     },
   ];
   const v = pick(variants);
-  const img = await maybeAnimatedRenderUrl("announce", {
-    title: v.tag, body: v.body.slice(0, 100), server: cfg.serverName,
-  });
   return {
     username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.vipPurple,
       title: v.title,
       description: v.body,
-      image: { url: img },
-      footer: { text: `${cfg.serverName} • Official • DM ${dm}` },
+      footer: { text: `${cfg.serverName} • Official • DM ${dm} to get in` },
       timestamp: new Date().toISOString(),
     }],
   };
@@ -70,57 +86,66 @@ export async function joinVipPost(): Promise<WebhookPayload> {
 
   const variants = [
     {
-      title: "💎 What you're actually missing in VIP",
+      title: "💎 This is what you're actually missing every single day",
       desc:
-        `Let me be direct: free chat gets the **scraps**. VIP gets the **raw signal** — the CA, the entry, the exact size I'm going in with.\n\n` +
-        `**Recent VIP wins I called:** ${xWins.join(" • ")}\n\n` +
-        `**What's inside:**\n` +
-        `• 🎯 Full CA before I post anything in public channels\n` +
-        `• 🐋 Whale wallets I track daily — you can copy-trade directly\n` +
-        `• 📈 My live entries AND exits, not delayed\n` +
-        `• 🧠 Daily narrative briefing — where the money is flowing\n` +
-        `• 🤝 Direct message access to me — I answer inside VIP\n\n` +
+        `I'll be direct. Free chat gets the **leftovers**. VIP gets the **signal** — the CA, the entry, the exact size I'm going in with, before the chart moves.\n\n` +
+        `**Recent VIP calls:** ${xWins.join(" • ")} ✅\n\n` +
+        `**What's inside VIP right now:**\n` +
+        `→ 🎯 Full CA sent before I post anything in public channels\n` +
+        `→ 🐋 Whale wallets I track daily — copy-tradeable directly\n` +
+        `→ 📈 My live entries AND exits — zero delays\n` +
+        `→ 🧠 Daily narrative — where the smart money is flowing before it goes public\n` +
+        `→ 💬 Direct access to me — I respond inside VIP personally\n\n` +
         `**How to join:**\n` +
         `1. DM ${dm}\n` +
-        `2. Say _"VIP from the server"_\n` +
-        `3. You're in within the hour.`,
+        `2. Say **"VIP"** and your timezone\n` +
+        `3. You're in within the hour — no waiting list if seats are open.\n\n` +
+        `**Stop reading about other people's wins. DM me now.**`,
     },
     {
-      title: "💎 Stop watching the calls hit without you in them",
+      title: "💎 You've seen the calls hit. You were watching instead of in them.",
       desc:
-        `You've seen it. Called at 12k, hitting 1.2M. You saw the post **after** it was already 10x.\n\n` +
-        `VIP members got that at 12k. That's the only difference.\n\n` +
-        `I've been doing this for ${randInt(18, 36)} months. The calls that matter — the ones that actually move — go to VIP first, every single time.\n\n` +
-        `Real members. Real fills. Real receipts in proof-results.\n\n` +
-        `> DM ${dm} now. I close seats fast.`,
+        `Called at 12k mcap. Hit 1.2M. You saw the post after it was already **10x.**\n\n` +
+        `VIP members got that at **12k.** That is the only difference between them and you.\n\n` +
+        `I've been doing this consistently for ${randInt(18, 36)} months. Every call that matters — the ones that go 10x, 20x, 100x — goes to VIP first. Every single time. No exceptions.\n\n` +
+        `Real entries. Real members. Real receipts in 🏆 proof-results — time-stamped and verifiable.\n\n` +
+        `The gap between VIP and free chat is not a few minutes. It's the difference between being in a bag and watching a bag.\n\n` +
+        `> **DM ${dm} now. Seats close without warning.**`,
     },
     {
-      title: "💎 I'll be honest with you",
+      title: "💎 I trade WITH my members. Here's what that means.",
       desc:
-        `Most signal groups are running their own bags against you. I don't do that.\n\n` +
-        `I trade **with** my members. When I post a CA in VIP, I'm already in it.\n\n` +
-        `**Last 7 days inside VIP:**\n` +
+        `Most signal groups dump their bags on you. I don't do that. When I post a CA in VIP, I'm already in it with my own money.\n\n` +
+        `**VIP results from the last 7 days:**\n` +
         `• ${randInt(8, 22)} calls posted\n` +
-        `• ${randInt(60, 80)}% finished green\n` +
-        `• Top call: ${pick(xWins)}\n\n` +
-        `One good call pays for months. Most members recoup the fee in the first week.\n\n` +
-        `Ready to stop fading? DM ${dm}.`,
+        `• ${randInt(67, 81)}% finished green\n` +
+        `• Top call this week: **${pick(xWins)}**\n` +
+        `• Members who followed all calls: up **${randFloat(2.5, 8, 1)}x** on average\n\n` +
+        `**One good call pays for months.** Most members recoup the fee in the first week.\n\n` +
+        `I'm not selling you hope. Check proof-results. The track record is in there, post by post.\n\n` +
+        `**Ready to stop fading? DM ${dm} right now.**`,
+    },
+    {
+      title: "💎 The people messaging me every day understand something you don't yet",
+      desc:
+        `Every day I get DMs from VIP members saying the same thing:\n\n` +
+        `_"That call just 8x'd. I'm up ${randFloat(3, 15, 1)}x this week alone. Why did I wait so long to join?"_\n\n` +
+        `The answer is always the same — they were watching from free chat, thinking about it, waiting for the "right time."\n\n` +
+        `There is no right time. There's only in or out.\n\n` +
+        `**Wins VIP got this month:** ${xWins.join(" · ")}\n\n` +
+        `Every one of those started with a DM to me.\n\n` +
+        `**DM ${dm}. Two letters: "VIP". That's the whole process.**`,
     },
   ];
 
   const v = pick(variants);
-  const img = await maybeAnimatedRenderUrl("vip", {
-    handle: dm, server: cfg.serverName,
-    wins: xWins.join(","),
-  });
   return {
     username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.vipPurple,
       title: v.title,
       description: v.desc,
-      image: { url: img },
-      footer: { text: `${cfg.serverName} • Join VIP — DM ${dm}` },
+      footer: { text: `${cfg.serverName} • DM ${dm} — Join VIP today` },
       timestamp: new Date().toISOString(),
     }],
   };

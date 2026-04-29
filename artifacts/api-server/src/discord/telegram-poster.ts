@@ -219,60 +219,15 @@ export async function sendToTelegram(
   const tgHandle = tgDmTarget(cfg);
   const { text } = payloadToTelegram(payload, tgHandle);
 
-  // Extract image URL from first embed (if any)
-  const imageUrl = payload.embeds?.[0]?.image?.url;
-
   try {
-    let res: Response;
-    if (imageUrl) {
-      // Send as photo with caption (max 1024 chars for captions)
-      const caption = text.slice(0, 1024);
-      const body: Record<string, unknown> = {
-        chat_id: chatId,
-        photo: imageUrl,
-        caption,
-        parse_mode: "HTML",
-      };
-      res = await fetch(`${base}/sendPhoto`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      // If photo send fails (e.g. URL not yet cached), fall back to text
-      const j2 = (await res.json().catch(() => ({}))) as { ok: boolean; description?: string; result?: { message_id?: number } };
-      if (!j2.ok) {
-        const textBody: Record<string, unknown> = {
-          chat_id: chatId, text, parse_mode: "HTML", disable_web_page_preview: true,
-        };
-        const res2 = await fetch(`${base}/sendMessage`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(textBody),
-        });
-        const j3 = (await res2.json().catch(() => ({}))) as { ok: boolean; description?: string; result?: { message_id?: number } };
-        if (!j3.ok) {
-          status.lastError = j3.description || `HTTP ${res2.status}`;
-          return { ok: false, status: res2.status, error: status.lastError };
-        }
-        status.sends++;
-        status.lastSendAt = Date.now();
-        status.lastError = undefined;
-        return { ok: true, status: res2.status, messageId: j3.result?.message_id };
-      }
-      status.sends++;
-      status.lastSendAt = Date.now();
-      status.lastError = undefined;
-      return { ok: true, status: res.status, messageId: j2.result?.message_id };
-    }
-
-    // Text-only send
+    // Always text-only — no photos
     const body: Record<string, unknown> = {
       chat_id: chatId,
       text,
       parse_mode: "HTML",
       disable_web_page_preview: true,
     };
-    res = await fetch(`${base}/sendMessage`, {
+    const res = await fetch(`${base}/sendMessage`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),

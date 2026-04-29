@@ -1,5 +1,4 @@
 import type { WebhookPayload } from "../poster";
-import { maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, randInt } from "../data";
 import { loadConfig, dmTarget } from "../config";
 import { topByGain24h, topByVolume, fmtUsd } from "../marketdata";
@@ -18,13 +17,14 @@ const NARRATIVE_BUCKETS: Array<{ name: string; chains: string[] }> = [
 ];
 
 const THESIS_OPENERS = [
-  "Most of the chat is fading this. That's the trade.",
-  "Quietly, while everyone watches majors, this rotation is starting:",
-  "Don't sleep on this — early movers will be very rewarded:",
-  "Quick read on what we're positioned in:",
-  "Public attention is wrong rn. Real flow is going here:",
-  "Smart money is already in. Public hasn't noticed yet.",
-  "The next narrative wave is setting up right now:",
+  `Everyone in main chat is fading this. That tells me everything. When the crowd is wrong — that's the trade.`,
+  `While public attention is locked on majors, smart money is rotating quietly into this. I've been watching it for days.`,
+  `This is the narrative that prints next. Early movers right now get the life-changing multiples. Late movers get the dump.`,
+  `Quick read on exactly what I'm positioned in and why. This is the unfiltered version — VIP gets the tickers.`,
+  `Public attention is in the wrong place right now. The real flow — the wallet flow I track — is going here.`,
+  `Smart money finished loading. Public hasn't noticed yet. That gap is where the money is made.`,
+  `The next narrative wave is setting up right now. I've seen this pattern ${randInt(4, 9)} times. It plays the same every time.`,
+  `I don't post this kind of thesis publicly often. Pay attention.`,
 ];
 
 export async function alphaLoungePost(): Promise<WebhookPayload> {
@@ -43,17 +43,14 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
     .join("\n");
 
   const bullets = [
-    `• Top wallets accumulating quietly across ${randInt(3, 9)} tickers in this sector`,
-    `• Liquidity on the leaders is up ${randInt(20, 180)}% week-over-week`,
-    `• Devs from the ${pick(["last cycle", "previous narrative", "old gaming season"])} are launching here`,
-    `• KOLs haven't started shilling yet — that's the early window`,
-    `• Risk: low. Catalysts: ${randInt(2, 5)} confirmed in the next 14 days`,
+    `• Top wallets I track are accumulating quietly across ${randInt(3, 9)} tickers in this sector — no public announcement yet`,
+    `• Liquidity on the leaders is up ${randInt(20, 180)}% week-over-week — capital is arriving`,
+    `• Devs from the ${pick(["last cycle", "previous narrative", "old gaming run"])} are all building here now`,
+    `• KOLs haven't started posting yet — the early window is still open but it closes fast`,
+    `• ${randInt(2, 5)} confirmed catalysts in the next 14 days — low risk, high conviction`,
+    `• On-chain data shows distribution from majors into this sector starting 48 hours ago`,
   ];
   const picks = bullets.sort(() => Math.random() - 0.5).slice(0, 3);
-
-  const img = await maybeAnimatedRenderUrl("alpha", {
-    narrative: bucket.name, server: cfg.serverName,
-  });
 
   return {
     username: cfg.ownerHandle,
@@ -62,13 +59,14 @@ export async function alphaLoungePost(): Promise<WebhookPayload> {
       title: `🧠 Alpha Lounge — ${bucket.name}`,
       description:
         `${opener}\n\n` +
-        `**Narrative:** ${bucket.name}\n` +
-        `**Why now:**\n${picks.join("\n")}\n\n` +
-        `**On our radar right now:**\n${exampleLines || "_(scanner refreshing — check back in a few minutes)_"}\n\n` +
-        `Specific entries + sizing posted in **VIP**.\n` +
-        `DM ${dm} to upgrade.`,
-      image: { url: img },
-      footer: { text: `${cfg.serverName} • Alpha Lounge` },
+        `**Narrative I'm watching: ${bucket.name}**\n\n` +
+        `**Why I'm positioned here right now:**\n${picks.join("\n")}\n\n` +
+        `**Tokens on my radar in this sector:**\n` +
+        `${exampleLines || "_(scanner refreshing — back in a few minutes)_"}\n\n` +
+        `**The full play — specific tickers, entry sizes, and price targets — is inside VIP.**\n\n` +
+        `By the time this becomes public news, VIP will have already been in it for hours.\n\n` +
+        `DM ${dm} to be inside the next one before the chart moves.`,
+      footer: { text: `${cfg.serverName} • Alpha Lounge — VIP gets the full list` },
       timestamp: new Date().toISOString(),
     }],
   };
