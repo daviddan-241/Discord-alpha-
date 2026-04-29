@@ -23,13 +23,13 @@
     "feedback": "https://discord.com/api/webhooks/1498947027784958023/yMePjsqevjSqItxzt0QAEHlfo2hIP1j_iEg9Vitwn7UqeZ87pwed7xzInbAzB4OfI-Sn",
     "report_scams": "https://discord.com/api/webhooks/1498947029638971432/E0asjWr6VeKkeRdC83BXLecMPczOxYDEUjQgHMT3YnWBqtSeBEOG0OMw5u22J7x6T3yp"
   },
-  "ownerHandle": "@baldwin_owner",
+  "ownerHandle": "@alpha",
   "ownerMention": "<@1035212407213133856>",
   "serverName": "Baldwin Calls",
   "autoPost": true,
   "publicBaseUrl": "",
   "telegramEnabled": true,
-  "telegramDmHandle": "@Dave_211",
-  "telegramBroadcastChatId": "",
-  "telegramChats": {}
+  "telegramBroadcastChatId": "-1003461143473",
+  "telegramChats": {},
+  "telegramDmHandle": "@Dave_211"
 }
