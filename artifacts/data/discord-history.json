@@ -1,5 +1,131 @@
 [
   {
+    "ts": 1777462617449,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — ETH alt rotation"
+  },
+  {
+    "ts": 1777462617236,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "→ telegram: live-trades (msg 303)"
+  },
+  {
+    "ts": 1777462614474,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟢 BUY — $EVA"
+  },
+  {
+    "ts": 1777462612279,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "→ telegram: whale-tracker (msg 302)"
+  },
+  {
+    "ts": 1777462611458,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale rotated into $LUNCHMONEY"
+  },
+  {
+    "ts": 1777462609257,
+    "channel": "early_access",
+    "ok": true,
+    "message": "→ telegram: early-access (msg 7)"
+  },
+  {
+    "ts": 1777462608452,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $LEGIT — 21min head start"
+  },
+  {
+    "ts": 1777462606307,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "→ telegram: vip-snipes (msg 6)"
+  },
+  {
+    "ts": 1777462605451,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — Filled @ $466.8K mcap"
+  },
+  {
+    "ts": 1777462604012,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "→ telegram: trending-coins (msg 301)"
+  },
+  {
+    "ts": 1777462602486,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777462599935,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "→ telegram: general-chat (msg 300)"
+  },
+  {
+    "ts": 1777462599494,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "gm degens, who's printing today"
+  },
+  {
+    "ts": 1777462594327,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "→ telegram: proof-results (msg 5)"
+  },
+  {
+    "ts": 1777462593493,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $BULL 1.6x ✅"
+  },
+  {
+    "ts": 1777462591467,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "→ telegram: free-calls (msg 299)"
+  },
+  {
+    "ts": 1777462590633,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "🚨 CALL — $MDGA"
+  },
+  {
+    "ts": 1777462588468,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "→ telegram: join-apex-vip (msg 4)"
+  },
+  {
+    "ts": 1777462587535,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 The people messaging me every day understand something you don't yet"
+  },
+  {
+    "ts": 1777462586097,
+    "channel": "announcements",
+    "ok": true,
+    "message": "→ telegram: apex-announcements (msg 3)"
+  },
+  {
+    "ts": 1777462584564,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 VIP slots just reopened — I only have a few"
+  },
+  {
     "ts": 1777455415853,
     "channel": "free_calls",
     "ok": true,
