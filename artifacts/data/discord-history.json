@@ -1,5 +1,83 @@
 [
   {
+    "ts": 1777464282371,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale took profit on $LEGIT"
+  },
+  {
+    "ts": 1777464280567,
+    "channel": "early_access",
+    "ok": true,
+    "message": "→ telegram: early-access (msg 67)"
+  },
+  {
+    "ts": 1777464279355,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $MDGA — 49min head start"
+  },
+  {
+    "ts": 1777464276368,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777464273369,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "moderators here actually answer, w server"
+  },
+  {
+    "ts": 1777464269690,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "→ telegram: proof-results (msg 66)"
+  },
+  {
+    "ts": 1777464267616,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $EVA 23.7x ✅"
+  },
+  {
+    "ts": 1777464265252,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "→ telegram: join-apex-vip (msg 65)"
+  },
+  {
+    "ts": 1777464264415,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 This is what you're actually missing every single day"
+  },
+  {
+    "ts": 1777464262963,
+    "channel": "announcements",
+    "ok": true,
+    "message": "→ telegram: apex-announcements (msg 64)"
+  },
+  {
+    "ts": 1777464261437,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 Cleaned up the server — seats opened"
+  },
+  {
+    "ts": 1777464253375,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — Liquidity unlock incoming"
+  },
+  {
+    "ts": 1777464250454,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
     "ts": 1777464247437,
     "channel": "price_bot",
     "ok": true,
@@ -1120,83 +1198,5 @@
     "channel": "live_trades",
     "ok": true,
     "message": "🟢 BUY — $MDGA"
-  },
-  {
-    "ts": 1777463093128,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "→ telegram: whale-tracker (msg 316)"
-  },
-  {
-    "ts": 1777463091781,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "🐋 Whale added $EWON"
-  },
-  {
-    "ts": 1777463090565,
-    "channel": "early_access",
-    "ok": true,
-    "message": "→ telegram: early-access (msg 18)"
-  },
-  {
-    "ts": 1777463088881,
-    "channel": "early_access",
-    "ok": true,
-    "message": "🚀 Early Radar — $EVA — 24min head start"
-  },
-  {
-    "ts": 1777463086868,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "→ telegram: trending-coins (msg 315)"
-  },
-  {
-    "ts": 1777463085800,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "🔥 Trending right now"
-  },
-  {
-    "ts": 1777463083157,
-    "channel": "general_chat",
-    "ok": true,
-    "message": "→ telegram: general-chat (msg 314)"
-  },
-  {
-    "ts": 1777463082788,
-    "channel": "general_chat",
-    "ok": true,
-    "message": "should i sell or hold? im up 4x already"
-  },
-  {
-    "ts": 1777463077942,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "→ telegram: proof-results (msg 17)"
-  },
-  {
-    "ts": 1777463076957,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "🏆 RECEIPT — $EVA 24.4x ✅"
-  },
-  {
-    "ts": 1777463075476,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "→ telegram: join-apex-vip (msg 16)"
-  },
-  {
-    "ts": 1777463073813,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "💎 This is what you're actually missing every single day"
-  },
-  {
-    "ts": 1777463072325,
-    "channel": "announcements",
-    "ok": true,
-    "message": "→ telegram: apex-announcements (msg 15)"
   }
 ]
