@@ -1,5 +1,5 @@
 import { logger } from "../lib/logger";
-import { appendHistory, loadConfig, type ChannelKey, CHANNEL_META, publicBaseUrlFromEnv } from "./config";
+import { appendHistory, loadConfig, type ChannelKey, CHANNEL_META, publicBaseUrlFromEnv, TG_MIRROR_CHANNELS } from "./config";
 import { sendToTelegramForChannel, logTelegramResult } from "./telegram-poster";
 
 export type Embed = {
@@ -78,6 +78,8 @@ export async function sendToChannel(
     return { ok: false, error: msg };
   }
 
+  // Default to silent (no @everyone / @here / @user pings). Individual payloads
+  // can override `allowed_mentions` to opt-in for high-impact pings.
   const body: WebhookPayload = {
     allowed_mentions: { parse: [] },
     ...payload,
@@ -100,15 +102,18 @@ export async function sendToChannel(
     await appendHistory({ ts: Date.now(), channel, ok: true, message: summary });
     logger.info({ channel }, `discord: posted ${meta.label}`);
 
-    // Fan out to Telegram (best-effort; never fails the discord send)
-    void (async () => {
-      try {
-        const tg = await sendToTelegramForChannel(channel, payload);
-        await logTelegramResult(channel, tg);
-      } catch (err) {
-        logger.error({ err, channel }, "telegram fan-out threw");
-      }
-    })();
+    // Fan out to Telegram only for the high-signal channels — keeps Telegram
+    // from being spammed by ambient chatter (price, gas, whales, persona chat).
+    if (TG_MIRROR_CHANNELS.has(channel)) {
+      void (async () => {
+        try {
+          const tg = await sendToTelegramForChannel(channel, payload);
+          await logTelegramResult(channel, tg);
+        } catch (err) {
+          logger.error({ err, channel }, "telegram fan-out threw");
+        }
+      })();
+    }
 
     return { ok: true, status: res.status };
   } catch (err) {

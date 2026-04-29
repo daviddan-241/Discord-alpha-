@@ -13,7 +13,7 @@ export async function welcomePost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   return {
-    username: pick(INFO_NAMES),
+    username: cfg.ownerHandle,
     embeds: [
       {
         color: COLORS.vipPurple,
@@ -41,7 +41,7 @@ export async function rulesPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   return {
-    username: pick(INFO_NAMES),
+    username: cfg.ownerHandle,
     embeds: [
       {
         color: COLORS.dark,
@@ -66,7 +66,7 @@ export async function getVerifiedPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   return {
-    username: pick(VERIFY_NAMES),
+    username: cfg.ownerHandle,
     embeds: [
       {
         color: COLORS.green,
@@ -96,7 +96,7 @@ export async function howToJoinVipPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   return {
-    username: pick(INFO_NAMES),
+    username: cfg.ownerHandle,
     embeds: [
       {
         color: COLORS.vipPurple,
@@ -124,7 +124,7 @@ export async function openTicketPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   return {
-    username: pick(SUPPORT_NAMES),
+    username: cfg.ownerHandle,
     embeds: [
       {
         color: COLORS.blue,
@@ -150,7 +150,7 @@ export async function feedbackPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   return {
-    username: pick(INFO_NAMES),
+    username: cfg.ownerHandle,
     embeds: [
       {
         color: COLORS.gold,
@@ -176,7 +176,7 @@ export async function reportScamsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   return {
-    username: pick(SUPPORT_NAMES),
+    username: cfg.ownerHandle,
     embeds: [
       {
         color: COLORS.red,
@@ -204,7 +204,7 @@ export async function botCommandsPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   return {
-    username: pick(INFO_NAMES),
+    username: cfg.ownerHandle,
     embeds: [
       {
         color: COLORS.blue,

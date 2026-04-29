@@ -69,7 +69,7 @@ export async function whaleTrackerPost(): Promise<WebhookPayload> {
     usd: `$${usd.toLocaleString()}`, tag, server: cfg.serverName,
   });
   return {
-    username: pick(WHALE_NAMES),
+    username: cfg.ownerHandle,
     embeds: [{
       color: isExit ? COLORS.red : COLORS.green,
       title: `🐋 Whale ${action} $${t.symbol}`,
@@ -118,7 +118,7 @@ export async function priceBotPost(): Promise<WebhookPayload> {
 
   const img = await maybeAnimatedRenderUrl("price", { items, server: cfg.serverName });
   return {
-    username: pick(PRICE_NAMES),
+    username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.blue,
       title: "📊 Live prices",
@@ -151,7 +151,7 @@ export async function gasTrackerPost(): Promise<WebhookPayload> {
     sol: `${solFee.toFixed(6)} SOL`, server: cfg.serverName,
   });
   return {
-    username: pick(GAS_NAMES),
+    username: cfg.ownerHandle,
     embeds: [{
       color: ethGwei < 12 ? COLORS.green : ethGwei < 35 ? COLORS.gold : COLORS.red,
       title: "⛽ Gas tracker",
@@ -230,7 +230,7 @@ export async function alertsPost(): Promise<WebhookPayload> {
     server: cfg.serverName,
   });
   return {
-    username: pick(ALERT_NAMES),
+    username: cfg.ownerHandle,
     embeds: [{
       color: v.color,
       title: v.title,
@@ -250,7 +250,7 @@ export async function trendingPost(): Promise<WebhookPayload> {
     .join(",");
   const img = await maybeAnimatedRenderUrl("trending", { items, server: cfg.serverName });
   return {
-    username: pick(TRENDING_NAMES),
+    username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.orange,
       title: "🔥 Trending Coins — Top 3 (24h)",

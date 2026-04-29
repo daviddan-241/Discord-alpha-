@@ -142,7 +142,7 @@ export type DiscordConfig = {
 const DEFAULT_CONFIG: DiscordConfig = {
   webhooks: {},
   ownerHandle: "linux_kernel01",
-  ownerMention: "",
+  ownerMention: "<@1035212407213133856>",
   serverName: "Baldwin Calls",
   autoPost: true,
   publicBaseUrl: "",
@@ -164,6 +164,26 @@ export function dmTarget(cfg: Pick<DiscordConfig, "ownerMention" | "ownerHandle"
 export function tgDmTarget(cfg: Pick<DiscordConfig, "telegramDmHandle">): string {
   return cfg.telegramDmHandle || "@Dave_211";
 }
+
+/**
+ * Build the "@everyone + owner mention" Discord ping content for high-impact
+ * posts. Empty string when no owner mention is configured.
+ */
+export function pingContent(cfg: Pick<DiscordConfig, "ownerMention">): string {
+  const mention = (cfg.ownerMention || "").trim();
+  return mention ? `@everyone ${mention}` : "@everyone";
+}
+
+/** Channels that should be mirrored to Telegram. Everything else stays Discord-only to avoid Telegram spam. */
+export const TG_MIRROR_CHANNELS: ReadonlySet<ChannelKey> = new Set<ChannelKey>([
+  "free_calls",
+  "vip_snipes",
+  "proof_results",
+  "early_access",
+  "alpha_lounge",
+  "announcements",
+  "join_vip",
+]);
 
 /** Pick the right telegram chat id for a channel — per-channel override, then VIP group (for VIP channels), then broadcast fallback. */
 export function telegramChatFor(

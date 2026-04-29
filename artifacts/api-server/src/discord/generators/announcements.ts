@@ -1,7 +1,7 @@
 import type { WebhookPayload } from "../poster";
 import { maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, pickN, randInt, randFloat } from "../data";
-import { loadConfig, dmTarget } from "../config";
+import { loadConfig, dmTarget, pingContent } from "../config";
 
 export async function announcementPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
@@ -73,6 +73,8 @@ export async function announcementPost(): Promise<WebhookPayload> {
   });
   return {
     username: cfg.ownerHandle,
+    content: pingContent(cfg),
+    allowed_mentions: { parse: ["everyone", "users"] },
     embeds: [{
       color: COLORS.vipPurple,
       title: v.title,
@@ -149,6 +151,8 @@ export async function joinVipPost(): Promise<WebhookPayload> {
   });
   return {
     username: cfg.ownerHandle,
+    content: pingContent(cfg),
+    allowed_mentions: { parse: ["everyone", "users"] },
     embeds: [{
       color: COLORS.vipPurple,
       title: v.title,

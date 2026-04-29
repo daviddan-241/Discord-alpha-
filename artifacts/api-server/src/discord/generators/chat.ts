@@ -44,9 +44,10 @@ const GENERAL_LINES = [
 ];
 
 export async function generalChatPost(): Promise<WebhookPayload> {
+  const cfg = await loadConfig();
   const p = pick(PERSONAS);
   return {
-    username: p.name,
+    username: cfg.ownerHandle,
     avatar_url: p.avatar,
     content: pick(GENERAL_LINES),
   };
@@ -113,7 +114,7 @@ export async function marketChatPost(): Promise<WebhookPayload> {
   }
 
   return {
-    username: p.name,
+    username: cfg.ownerHandle,
     avatar_url: p.avatar,
     embeds: [
       {
@@ -145,7 +146,7 @@ export async function trendingCoinsPost(): Promise<WebhookPayload> {
     .join(",");
 
   return {
-    username: pick(["TrendBot", "HotList", "DexScan", "MoverBot", "TopGains"]),
+    username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.orange,
       title: "🔥 Trending right now",

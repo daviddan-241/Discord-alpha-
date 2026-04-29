@@ -205,6 +205,17 @@ function embedToHtml(e: Embed, tgHandle: string): string {
  * Telegram captions are capped at 1024 chars (vs 4096 for text), so we
  * keep the output compact and let the image carry the visual punch.
  */
+function stripDiscordOnlyTokens(text: string): string {
+  // @everyone / @here don't translate to Telegram, and the numeric mention
+  // would render as plain "<@1234>" — drop both so captions stay clean.
+  return text
+    .replace(/@everyone/gi, "")
+    .replace(/@here/gi, "")
+    .replace(/<@!?\d+>/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 function payloadToTelegram(
   payload: WebhookPayload,
   tgHandle: string,
@@ -212,7 +223,8 @@ function payloadToTelegram(
   const blocks: string[] = [];
 
   if (payload.content) {
-    blocks.push(richEscape(payload.content, tgHandle));
+    const clean = stripDiscordOnlyTokens(payload.content);
+    if (clean) blocks.push(richEscape(clean, tgHandle));
   }
   for (const e of payload.embeds ?? []) {
     blocks.push(embedToHtml(e, tgHandle));
