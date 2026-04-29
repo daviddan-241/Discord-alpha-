@@ -170,8 +170,7 @@ export function tgDmTarget(cfg: Pick<DiscordConfig, "telegramDmHandle">): string
  * posts. Empty string when no owner mention is configured.
  */
 export function pingContent(cfg: Pick<DiscordConfig, "ownerMention">): string {
-  const mention = (cfg.ownerMention || "").trim();
-  return mention ? `@everyone ${mention}` : "@everyone";
+  return (cfg.ownerMention || "").trim();
 }
 
 /** Channels that should be mirrored to Telegram. Everything else stays Discord-only to avoid Telegram spam. */

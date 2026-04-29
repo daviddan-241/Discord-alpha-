@@ -45,7 +45,7 @@ export async function freeCallLinkedTeaserFor(
   return {
     username: cfg.ownerHandle,
     content: pingContent(cfg),
-    allowed_mentions: { parse: ["everyone", "users"] },
+    allowed_mentions: { parse: ["users"] },
     embeds: [{
       color: COLORS.gold,
       title: `👀 VIP just filled — $${t.symbol} (${vipLeadMin}m head start)`,
@@ -105,7 +105,7 @@ async function freeCallFull(): Promise<WebhookPayload> {
   return {
     username: cfg.ownerHandle,
     content: pingContent(cfg),
-    allowed_mentions: { parse: ["everyone", "users"] },
+    allowed_mentions: { parse: ["users"] },
     embeds: [{
       color: COLORS.emerald,
       title: `🚨 CALL — $${t.symbol}`,
@@ -213,7 +213,7 @@ export async function proofResultsPost(): Promise<WebhookPayload> {
   return {
     username: cfg.ownerHandle,
     content: pingContent(cfg),
-    allowed_mentions: { parse: ["everyone", "users"] },
+    allowed_mentions: { parse: ["users"] },
     embeds: [{
       color: COLORS.gold,
       title: `🏆 RECEIPT — $${t.symbol} ${x}x ✅`,
@@ -259,7 +259,7 @@ export async function vipSnipePostFor(t: RealToken): Promise<WebhookPayload> {
   return {
     username: cfg.ownerHandle,
     content: pingContent(cfg),
-    allowed_mentions: { parse: ["everyone", "users"] },
+    allowed_mentions: { parse: ["users"] },
     embeds: [{
       color: COLORS.vipPurple,
       title: `💎 VIP SNIPE — $${t.symbol} filled @ ${fmtUsd(t.marketCap)} mcap`,
@@ -299,7 +299,7 @@ export async function earlyAccessPost(): Promise<WebhookPayload> {
   return {
     username: cfg.ownerHandle,
     content: pingContent(cfg),
-    allowed_mentions: { parse: ["everyone", "users"] },
+    allowed_mentions: { parse: ["users"] },
     embeds: [{
       color: COLORS.cyan,
       title: `🚀 Early Radar — $${t.symbol} — ${lead}min head start`,

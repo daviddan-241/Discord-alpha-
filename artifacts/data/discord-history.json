@@ -1,5 +1,95 @@
 [
   {
+    "ts": 1777464247437,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1777464245791,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "→ telegram: alpha-lounge (msg 63)"
+  },
+  {
+    "ts": 1777464244460,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — DePIN infrastructure"
+  },
+  {
+    "ts": 1777464241372,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟢 BUY — $LMAO!"
+  },
+  {
+    "ts": 1777464238434,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale fully exited $NICETRUMP"
+  },
+  {
+    "ts": 1777464238128,
+    "channel": "early_access",
+    "ok": true,
+    "message": "→ telegram: early-access (msg 62)"
+  },
+  {
+    "ts": 1777464235356,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $EWON — 17min head start"
+  },
+  {
+    "ts": 1777464232355,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777464229395,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "vip ppl be eating different"
+  },
+  {
+    "ts": 1777464225312,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "→ telegram: proof-results (msg 61)"
+  },
+  {
+    "ts": 1777464223669,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $NICETRUMP 2.2x ✅"
+  },
+  {
+    "ts": 1777464221323,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "→ telegram: join-apex-vip (msg 60)"
+  },
+  {
+    "ts": 1777464220422,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 You've seen the calls hit. You were watching instead of in them."
+  },
+  {
+    "ts": 1777464218996,
+    "channel": "announcements",
+    "ok": true,
+    "message": "→ telegram: apex-announcements (msg 59)"
+  },
+  {
+    "ts": 1777464217471,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 This week's results — let the numbers do the talking"
+  },
+  {
     "ts": 1777464170128,
     "channel": "vip_snipes",
     "ok": false,
@@ -1108,95 +1198,5 @@
     "channel": "announcements",
     "ok": true,
     "message": "→ telegram: apex-announcements (msg 15)"
-  },
-  {
-    "ts": 1777463070895,
-    "channel": "announcements",
-    "ok": true,
-    "message": "📢 Cleaned up the server — seats opened"
-  },
-  {
-    "ts": 1777462955247,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "→ telegram: vip-snipes (msg 14)"
-  },
-  {
-    "ts": 1777462953986,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "💎 VIP SNIPE — $NICE filled @ $161.6K mcap"
-  },
-  {
-    "ts": 1777462947088,
-    "channel": "alerts",
-    "ok": true,
-    "message": "→ telegram: alerts (msg 313)"
-  },
-  {
-    "ts": 1777462946130,
-    "channel": "alerts",
-    "ok": true,
-    "message": "📡 ALERT — VIP just got fed"
-  },
-  {
-    "ts": 1777462944054,
-    "channel": "gas_tracker",
-    "ok": true,
-    "message": "→ telegram: gas-tracker (msg 312)"
-  },
-  {
-    "ts": 1777462943066,
-    "channel": "gas_tracker",
-    "ok": true,
-    "message": "⛽ Gas tracker"
-  },
-  {
-    "ts": 1777462941518,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "→ telegram: price-bot (msg 311)"
-  },
-  {
-    "ts": 1777462940153,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777462938816,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "→ telegram: alpha-lounge (msg 13)"
-  },
-  {
-    "ts": 1777462936959,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "🧠 Alpha Lounge — RWA tokenisation"
-  },
-  {
-    "ts": 1777462935305,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "→ telegram: live-trades (msg 310)"
-  },
-  {
-    "ts": 1777462934014,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "🟡 TRIM — $BELKA"
-  },
-  {
-    "ts": 1777462932431,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "→ telegram: whale-tracker (msg 309)"
-  },
-  {
-    "ts": 1777462930967,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "🐋 Whale fully exited $MDGA"
   }
 ]
