@@ -1,5 +1,5 @@
 import type { WebhookPayload } from "../poster";
-import { renderUrl } from "../poster";
+import { renderUrl, maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, pickN, randInt, randFloat } from "../data";
 import { loadConfig, dmTarget } from "../config";
 
@@ -44,7 +44,7 @@ export async function announcementPost(): Promise<WebhookPayload> {
     },
   ];
   const v = pick(variants);
-  const img = await renderUrl("announce", {
+  const img = await maybeAnimatedRenderUrl("announce", {
     title: v.title.replace(/^📢 /, ""),
     body: v.body.split("\n")[0] ?? "",
     server: cfg.serverName,
@@ -68,7 +68,7 @@ export async function joinVipPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
   const xWins = pickN(["196x", "120x", "111x", "109x", "67x", "48x", "47x", "42x"] as const, 3);
-  const img = await renderUrl("vip", {
+  const img = await maybeAnimatedRenderUrl("vip", {
     handle: cfg.ownerHandle,
     server: cfg.serverName,
     wins: xWins.join(","),

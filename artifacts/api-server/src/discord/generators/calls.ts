@@ -1,5 +1,5 @@
 import type { WebhookPayload } from "../poster";
-import { renderUrl } from "../poster";
+import { renderUrl, maybeAnimatedRenderUrl } from "../poster";
 import {
   COLORS,
   pick,
@@ -141,7 +141,7 @@ async function freeCallVipLocked(): Promise<WebhookPayload> {
   const dm = dmTarget(cfg);
   const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 5_000_000 });
   const masked = `$${t.symbol.slice(0, 2)}•••••`;
-  const img = await renderUrl("snipe", {
+  const img = await maybeAnimatedRenderUrl("snipe", {
     ticker: t.symbol,
     mc: t.marketCap,
     server: cfg.serverName,
@@ -185,7 +185,7 @@ export async function proofResultsPost(): Promise<WebhookPayload> {
   const entryMc = Math.max(8_000, Math.round(t.marketCap / x));
   const pnlInvested = randInt(500, 4000);
   const pnlOut = Math.round(pnlInvested * x);
-  const img = await renderUrl("proof", {
+  const img = await maybeAnimatedRenderUrl("proof", {
     ticker: t.symbol,
     x,
     entry: entryMc,
@@ -225,7 +225,7 @@ export async function vipSnipePost(): Promise<WebhookPayload> {
   const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 8_000_000 });
   const fillSizeUnit = t.chain === "Solana" ? "SOL" : t.chain === "Ethereum" ? "ETH" : "tokens";
   const fillSize = t.chain === "Solana" ? randFloat(2, 18, 2) : randFloat(0.2, 4, 2);
-  const img = await renderUrl("snipe", {
+  const img = await maybeAnimatedRenderUrl("snipe", {
     ticker: t.symbol,
     mc: t.marketCap,
     server: cfg.serverName,
@@ -265,7 +265,7 @@ export async function earlyAccessPost(): Promise<WebhookPayload> {
     t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 8_000_000 });
   }
   const lead = randInt(8, 45);
-  const img = await renderUrl("early", {
+  const img = await maybeAnimatedRenderUrl("early", {
     ticker: t.symbol,
     lead,
     server: cfg.serverName,
@@ -318,7 +318,7 @@ export async function liveTradePost(): Promise<WebhookPayload> {
   const color =
     direction === "BUY" ? COLORS.green : direction === "TRIM" ? COLORS.gold : COLORS.red;
   const emoji = direction === "BUY" ? "🟢" : direction === "TRIM" ? "🟡" : "🔴";
-  const img = await renderUrl("trade", {
+  const img = await maybeAnimatedRenderUrl("trade", {
     direction,
     ticker: t.symbol,
     size: `${size} ${sizeUnit}`,

@@ -41,10 +41,35 @@ All generators in `src/discord/generators/` (`calls`, `trackers`, `chat`, `alpha
 import from `marketdata.ts` so embeds carry real CAs, real DexScreener chart links,
 real explorer links, and the token's own icon as the embed thumbnail.
 
+### Telegram mirror
+Every successful Discord webhook post is fanned out (best-effort, non-blocking)
+to a configurable Telegram chat via the official Bot API:
+- `src/discord/telegram-poster.ts` — converts a Discord `WebhookPayload` into
+  a Telegram `sendPhoto` (with HTML caption) or `sendMessage` call. Rewrites
+  `<@discordId>` mentions to the configured `telegramDmHandle` so the VIP CTA
+  still points users somewhere useful.
+- `src/routes/telegram.ts` — REST: `state`, `config`, `discover` (uses
+  `getUpdates` to find chats the bot has been added to), `probe`, `test`,
+  `post-all`.
+- Token comes from `TELEGRAM_BOT_TOKEN` env var. The dashboard "🔍 Discover
+  chats" button auto-fills the broadcast chat ID.
+
+### Animated images (GIF)
+`src/discord/render/animate.ts` re-runs each static template across N frames
+with an animated overlay (pulsing rings, shimmer sweep, floating arrows, ticker
+tape, heartbeat dot) and encodes to GIF using `gifenc`. Cached 5 min per query.
+Roughly ~35–60% of high-impact embeds (proof / snipe / trending / vip / whale /
+trade / alert) randomly use `.gif` instead of `.png` via `maybeAnimatedRenderUrl`
+in `src/discord/poster.ts`.
+- Endpoints: `GET /api/render/<template>.png` and `GET /api/render/<template>.gif`
+
 ### Key files
 - `src/discord/config.ts` — channel registry, config + history persistence.
 - `src/discord/marketdata.ts` — live token / price / gas data with caching.
-- `src/discord/poster.ts` — webhook send + image URL helper.
+- `src/discord/poster.ts` — webhook send + image URL helper, with
+  `maybeAnimatedRenderUrl` for mixed PNG/GIF embeds and Telegram fan-out.
+- `src/discord/telegram-poster.ts` — Telegram Bot API fan-out + chat discovery.
+- `src/discord/render/animate.ts` — GIF encoder + overlay engine.
 - `src/discord/scheduler.ts` — per-channel jittered timers.
 - `src/discord/generators/` — one file per channel family
   (`info`, `calls`, `announcements`, `chat`, `trackers`, `alpha`).
@@ -52,8 +77,19 @@ real explorer links, and the token's own icon as the embed thumbnail.
 - `src/discord/verify-bot.ts` — react-to-verify bot (gives @Verified role on ✅
   reaction). Needs `DISCORD_BOT_TOKEN` (set), plus `DISCORD_GUILD_ID`,
   `DISCORD_VERIFIED_ROLE_ID`, `DISCORD_VERIFY_CHANNEL_ID` to fully connect.
-- `src/admin/dashboard.ts` — full admin UI as a string.
-- `src/routes/discord.ts`, `src/routes/admin.ts` — REST endpoints + dashboard route.
+- `src/admin/dashboard.ts` — full admin UI (Telegram section included).
+- `src/routes/discord.ts`, `src/routes/telegram.ts`, `src/routes/render.ts`,
+  `src/routes/admin.ts` — REST endpoints + dashboard route.
+
+### Required env / secrets
+- `DISCORD_BOT_TOKEN` (secret) — verify bot.
+- `TELEGRAM_BOT_TOKEN` (env) — Telegram mirror.
+- `DISCORD_GUILD_ID`, `DISCORD_VERIFIED_ROLE_ID`, `DISCORD_VERIFY_CHANNEL_ID`
+  (secrets) — only needed if the verify bot should auto-grant roles.
+
+### Files NEVER commit (gitignored)
+- `artifacts/data/` — contains `discord-config.json` (webhook URLs, telegram
+  chat IDs) and `discord-history.json` (post log).
 
 ### Admin endpoints (under `/api`)
 - `GET  /discord/state` — current channels, webhooks, history, settings.

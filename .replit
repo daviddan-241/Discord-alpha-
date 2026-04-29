@@ -54,3 +54,8 @@ externalPort = 80
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+TELEGRAM_BOT_TOKEN = "7507047699:AAEiGoEhwncdbO4lBwqdYYnAVyNSHtgjcdg"

@@ -110,15 +110,30 @@ export type DiscordConfig = {
   serverName: string;
   autoPost: boolean;
   publicBaseUrl: string;
+  /** Master switch for telegram fan-out. */
+  telegramEnabled: boolean;
+  /**
+   * Default Telegram chat ID where every Discord post is mirrored
+   * (e.g. `-1001234567890` for a channel/group, or a user ID).
+   */
+  telegramBroadcastChatId: string;
+  /** Per-channel override map (channel key → telegram chat id). */
+  telegramChats: Record<string, string>;
+  /** Telegram username users DM for VIP access (e.g. `@Dave_211`). */
+  telegramDmHandle: string;
 };
 
 const DEFAULT_CONFIG: DiscordConfig = {
   webhooks: {},
   ownerHandle: "@baldwin_owner",
-  ownerMention: "",
+  ownerMention: "<@1035212407213133856>",
   serverName: "Baldwin Calls",
   autoPost: true,
   publicBaseUrl: "",
+  telegramEnabled: true,
+  telegramBroadcastChatId: "",
+  telegramChats: {},
+  telegramDmHandle: "@Dave_211",
 };
 
 /**
@@ -127,6 +142,19 @@ const DEFAULT_CONFIG: DiscordConfig = {
  */
 export function dmTarget(cfg: Pick<DiscordConfig, "ownerMention" | "ownerHandle">): string {
   return (cfg.ownerMention && cfg.ownerMention.trim()) || cfg.ownerHandle;
+}
+
+/** Telegram DM target for VIP CTAs. */
+export function tgDmTarget(cfg: Pick<DiscordConfig, "telegramDmHandle">): string {
+  return cfg.telegramDmHandle || "@Dave_211";
+}
+
+/** Pick the right telegram chat id for a channel — per-channel override or broadcast fallback. */
+export function telegramChatFor(
+  cfg: Pick<DiscordConfig, "telegramChats" | "telegramBroadcastChatId">,
+  channel: string,
+): string {
+  return (cfg.telegramChats?.[channel] || "").trim() || (cfg.telegramBroadcastChatId || "").trim();
 }
 
 let cached: DiscordConfig | null = null;

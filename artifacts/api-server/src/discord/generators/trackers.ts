@@ -1,5 +1,5 @@
 import type { WebhookPayload } from "../poster";
-import { renderUrl } from "../poster";
+import { renderUrl, maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, randFloat, randInt } from "../data";
 import { loadConfig, dmTarget } from "../config";
 import {
@@ -56,7 +56,7 @@ export async function whaleTrackerPost(): Promise<WebhookPayload> {
     ? Math.round(size * randInt(140, 220))
     : Math.round(size * randInt(2400, 4400));
   const tag = pick(WHALE_TAGS);
-  const img = await renderUrl("whale", {
+  const img = await maybeAnimatedRenderUrl("whale", {
     action: action === "fully exited" ? "EXITED" : action === "took profit on" ? "TRIMMED" : "BOUGHT",
     ticker: t.symbol,
     wallet: shortAddr(wallet),
@@ -234,7 +234,7 @@ export async function alertsPost(): Promise<WebhookPayload> {
   ];
 
   const v = await pick(variants)();
-  const img = await renderUrl("alert", {
+  const img = await maybeAnimatedRenderUrl("alert", {
     title: v.title.replace(/^📡 ALERT — /, ""),
     body: v.desc.split("\n")[0] ?? "Something is moving.",
     server: cfg.serverName,

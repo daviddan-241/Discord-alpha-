@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import healthRouter from "./health";
 import discordRouter from "./discord";
+import telegramRouter from "./telegram";
 import adminRouter from "./admin";
 import renderRouter from "./render";
 
@@ -16,6 +17,7 @@ const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(discordRouter);
+router.use(telegramRouter);
 router.use(renderRouter);
 router.use(adminRouter);
 

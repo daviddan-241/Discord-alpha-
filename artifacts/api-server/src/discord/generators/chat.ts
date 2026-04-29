@@ -1,5 +1,5 @@
 import type { WebhookPayload } from "../poster";
-import { renderUrl } from "../poster";
+import { renderUrl, maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, randFloat, randInt } from "../data";
 import { loadConfig } from "../config";
 import { fetchMajorPrices, topByGain24h, topByVolume, fmtUsd } from "../marketdata";
@@ -111,7 +111,7 @@ export async function marketChatPost(): Promise<WebhookPayload> {
     trend = "up";
   }
 
-  const img = await renderUrl("market", { take, trend, server: cfg.serverName });
+  const img = await maybeAnimatedRenderUrl("market", { take, trend, server: cfg.serverName });
   return {
     username: p.name,
     avatar_url: p.avatar,
@@ -144,7 +144,7 @@ export async function trendingCoinsPost(): Promise<WebhookPayload> {
   const items = top
     .map((t) => `${t.symbol}:${(t.priceChange24h ?? 0).toFixed(1)}`)
     .join(",");
-  const img = await renderUrl("trending", { items, server: cfg.serverName });
+  const img = await maybeAnimatedRenderUrl("trending", { items, server: cfg.serverName });
 
   return {
     username: `${cfg.serverName} Trending`,

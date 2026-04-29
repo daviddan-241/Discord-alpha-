@@ -7,5 +7,10 @@ attached_assets/
 .cache/
 .pnpm-store/
 data/discord-config.json
+# Workspace-relative — protects webhook URLs / chat IDs / history files
+# anywhere they get persisted under an `artifacts/.../data/` folder.
+artifacts/data/
+artifacts/**/data/discord-config.json
+artifacts/**/data/discord-history.json
 *.log
 .DS_Store

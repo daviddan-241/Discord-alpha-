@@ -243,7 +243,43 @@ export const DASHBOARD_HTML = `<!doctype html>
   </section>
 
   <section class="card" style="margin-bottom: 20px;">
-    <h2>3 · Verification (auto-grant @Verified role)</h2>
+    <h2>3 · Telegram mirror (every Discord post fan-outs here too)</h2>
+    <div class="help" id="tgStatus">…</div>
+    <div class="row" style="margin-top:12px;">
+      <div>
+        <label for="tgBroadcastChatId">Telegram chat ID (where every post lands)</label>
+        <input id="tgBroadcastChatId" type="text" placeholder="-1001234567890 or 123456789" />
+      </div>
+      <div>
+        <label for="tgDmHandle">VIP DM handle on Telegram</label>
+        <input id="tgDmHandle" type="text" placeholder="@Dave_211" />
+      </div>
+    </div>
+    <div class="help" style="margin-top:10px;">
+      <b>How to get the chat ID:</b><br>
+      1. Add your bot to a Telegram group/channel (or DM it directly).<br>
+      2. Post any message in that chat (or DM <code>/start</code> to the bot).<br>
+      3. Click <b>Discover chats</b> below — pick yours from the list (we'll auto-fill the field).<br>
+      Or paste the ID manually: groups start with <code>-100…</code>, personal chats are positive numbers.<br>
+      <span style="color:#fcd34d">⚠️ Anyone with the bot token can post as your bot — keep it in Replit Secrets only.</span>
+    </div>
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <button class="primary" id="tgSave">Save Telegram settings</button>
+      <button id="tgDiscover">🔍 Discover chats</button>
+      <button id="tgTest">Send test now</button>
+      <div class="toggle">
+        <span>Mirror to Telegram</span>
+        <label class="switch">
+          <input type="checkbox" id="tgEnabled" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    <div id="tgChatList" style="margin-top:12px; display:none;"></div>
+  </section>
+
+  <section class="card" style="margin-bottom: 20px;">
+    <h2>4 · Verification (auto-grant @Verified role)</h2>
     <div class="help" id="verifyBotStatus">…</div>
     <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
       <button class="primary" id="dropVerify">🛡️ Drop verification message + seed ✅</button>
@@ -259,7 +295,7 @@ export const DASHBOARD_HTML = `<!doctype html>
   </section>
 
   <section class="card" style="margin-bottom: 20px;">
-    <h2>4 · Channels</h2>
+    <h2>5 · Channels</h2>
     <div class="footer-bar">
       <button class="primary" id="initInfo">Send welcome / rules / get-verified / bot-commands now</button>
       <button id="postAll">Force one post in every channel</button>
@@ -271,7 +307,7 @@ export const DASHBOARD_HTML = `<!doctype html>
   </section>
 
   <section class="card">
-    <h2>5 · Activity log</h2>
+    <h2>6 · Activity log</h2>
     <div class="activity" id="activity"></div>
   </section>
 
@@ -421,16 +457,53 @@ function renderTopBar() {
   $("detectedUrl").textContent = state.detectedPublicBaseUrl || "(none — deploy first)";
 }
 
+let tgState = null;
+
 async function refresh() {
   try {
-    state = await api("/discord/state");
+    const [s, t] = await Promise.all([
+      api("/discord/state"),
+      api("/telegram/state").catch(() => null),
+    ]);
+    state = s;
+    tgState = t;
     renderTopBar();
     renderVerifyBot();
+    renderTelegram();
     renderChannels();
     renderActivity();
   } catch (err) {
     toast("Failed to load state: " + err.message, "bad");
   }
+}
+
+function renderTelegram() {
+  const root = $("tgStatus");
+  if (!tgState) {
+    root.innerHTML = '<span style="color:#fca5a5">⚠️ Telegram routes unreachable.</span>';
+    return;
+  }
+  const parts = [];
+  if (!tgState.hasToken) {
+    parts.push('<span style="color:#fca5a5">⚠️ <code>TELEGRAM_BOT_TOKEN</code> not set in Replit Secrets — bot is offline.</span>');
+  } else if (tgState.botUsername) {
+    parts.push('<span style="color:#86efac">🟢 Bot online as <b>@' + escapeHtml(tgState.botUsername) + '</b></span>');
+  } else {
+    parts.push('<span style="color:#fcd34d">🟡 Token set but bot identity not confirmed yet…</span>');
+  }
+  if (tgState.lastError) {
+    parts.push('<br><span style="color:#fca5a5">last error: ' + escapeHtml(tgState.lastError) + '</span>');
+  }
+  if (tgState.broadcastChatId) {
+    parts.push('<br>Posts mirror to chat <code>' + escapeHtml(tgState.broadcastChatId) + '</code>. Sends so far: <b>' + (tgState.sends || 0) + '</b>.');
+  } else {
+    parts.push('<br>No broadcast chat ID set yet — paste it below or click <b>Discover chats</b>.');
+  }
+  root.innerHTML = parts.join("");
+
+  $("tgEnabled").checked = !!tgState.enabled;
+  $("tgBroadcastChatId").value = tgState.broadcastChatId || "";
+  $("tgDmHandle").value = tgState.dmHandle || "";
 }
 
 async function onChannelAction(ev) {
@@ -585,6 +658,87 @@ $("dropVerify").addEventListener("click", async () => {
     await refresh();
   } catch (err) {
     toast("Error: " + err.message, "bad");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("tgSave").addEventListener("click", async () => {
+  try {
+    await api("/telegram/config", {
+      method: "POST",
+      body: JSON.stringify({
+        broadcastChatId: $("tgBroadcastChatId").value.trim(),
+        dmHandle: $("tgDmHandle").value.trim(),
+        enabled: $("tgEnabled").checked,
+      }),
+    });
+    toast("Telegram settings saved", "ok");
+    await refresh();
+  } catch (err) { toast("Save failed: " + err.message, "bad"); }
+});
+
+$("tgEnabled").addEventListener("change", async (ev) => {
+  try {
+    await api("/telegram/config", { method: "POST", body: JSON.stringify({ enabled: ev.target.checked }) });
+    toast("Telegram mirror " + (ev.target.checked ? "ON" : "OFF"), "ok");
+    await refresh();
+  } catch (err) { toast("Failed: " + err.message, "bad"); }
+});
+
+$("tgDiscover").addEventListener("click", async () => {
+  const btn = $("tgDiscover");
+  btn.disabled = true;
+  try {
+    const out = await api("/telegram/discover", { method: "POST" });
+    const root = $("tgChatList");
+    if (!out.ok) {
+      root.style.display = "block";
+      root.innerHTML = '<div class="help" style="color:#fca5a5">Discovery failed: ' + escapeHtml(out.error || "?") + '</div>';
+      return;
+    }
+    const chats = out.chats || [];
+    if (!chats.length) {
+      root.style.display = "block";
+      root.innerHTML = '<div class="help">No chats found yet. Make sure you posted at least one message in the chat after adding the bot, then try again. (For groups: send any message; for channels: post; for DMs: send <code>/start</code> to the bot.)</div>';
+      return;
+    }
+    root.style.display = "block";
+    root.innerHTML = '<div class="help"><b>Found ' + chats.length + ' chat' + (chats.length === 1 ? '' : 's') + '. Click one to use it as the broadcast destination:</b></div>' +
+      chats.map((c) =>
+        '<div class="channel" style="margin-top:8px"><div class="channel-head">' +
+          '<span class="channel-name">' + escapeHtml(c.title) + '</span>' +
+          '<span class="badge">' + escapeHtml(c.type) + '</span>' +
+          '<span class="badge">id ' + escapeHtml(c.id) + '</span>' +
+          (c.username ? '<span class="badge">@' + escapeHtml(c.username) + '</span>' : '') +
+          '<button class="primary" data-tgpick="' + escapeAttr(c.id) + '">Use this</button>' +
+        '</div></div>'
+      ).join("");
+    root.querySelectorAll('button[data-tgpick]').forEach((b) => {
+      b.addEventListener("click", async () => {
+        $("tgBroadcastChatId").value = b.dataset.tgpick;
+        await api("/telegram/config", { method: "POST", body: JSON.stringify({ broadcastChatId: b.dataset.tgpick }) });
+        toast("Broadcast chat set to " + b.dataset.tgpick, "ok");
+        await refresh();
+      });
+    });
+  } catch (err) {
+    toast("Discovery error: " + err.message, "bad");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("tgTest").addEventListener("click", async () => {
+  const btn = $("tgTest");
+  btn.disabled = true;
+  try {
+    const out = await api("/telegram/test", { method: "POST", body: JSON.stringify({ channel: "join_vip" }) });
+    if (out.ok) toast("Test sent (msg " + (out.messageId || "?") + ")", "ok");
+    else toast("Send failed: " + (out.error || "?"), "bad");
+    await refresh();
+  } catch (err) {
+    toast("Test error: " + err.message, "bad");
   } finally {
     btn.disabled = false;
   }

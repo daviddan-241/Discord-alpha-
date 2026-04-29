@@ -24,8 +24,12 @@
     "report_scams": "https://discord.com/api/webhooks/1498947029638971432/E0asjWr6VeKkeRdC83BXLecMPczOxYDEUjQgHMT3YnWBqtSeBEOG0OMw5u22J7x6T3yp"
   },
   "ownerHandle": "@baldwin_owner",
-  "ownerMention": "",
+  "ownerMention": "<@1035212407213133856>",
   "serverName": "Baldwin Calls",
   "autoPost": true,
-  "publicBaseUrl": ""
+  "publicBaseUrl": "",
+  "telegramEnabled": true,
+  "telegramDmHandle": "@Dave_211",
+  "telegramBroadcastChatId": "",
+  "telegramChats": {}
 }

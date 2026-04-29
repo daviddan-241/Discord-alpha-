@@ -1,5 +1,6 @@
 import { logger } from "../lib/logger";
 import { appendHistory, loadConfig, type ChannelKey, CHANNEL_META, publicBaseUrlFromEnv } from "./config";
+import { sendToTelegramForChannel, logTelegramResult } from "./telegram-poster";
 
 export type Embed = {
   title?: string;
@@ -32,6 +33,7 @@ export type WebhookPayload = {
 export async function renderUrl(
   template: string,
   params: Record<string, string | number | undefined> = {},
+  format: "png" | "gif" = "png",
 ): Promise<string> {
   const cfg = await loadConfig();
   const base = cfg.publicBaseUrl || publicBaseUrlFromEnv();
@@ -42,7 +44,24 @@ export async function renderUrl(
   if (!sp.has("seed")) {
     sp.set("seed", `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`);
   }
-  return `${base}/api/render/${template}.png?${sp.toString()}`;
+  return `${base}/api/render/${template}.${format}?${sp.toString()}`;
+}
+
+/**
+ * Pick PNG or GIF for an embed image. We don't make every post animated —
+ * roughly 1 in 3 (configurable) is a GIF so timelines feel "alive" but the
+ * cheaper PNGs still dominate. Returns the same shape as `renderUrl`.
+ */
+export async function maybeAnimatedRenderUrl(
+  template: string,
+  params: Record<string, string | number | undefined> = {},
+  options: { gifChance?: number; force?: "png" | "gif" } = {},
+): Promise<string> {
+  const force = options.force;
+  if (force) return renderUrl(template, params, force);
+  const chance = options.gifChance ?? 0.35;
+  const fmt: "png" | "gif" = Math.random() < chance ? "gif" : "png";
+  return renderUrl(template, params, fmt);
 }
 
 export async function sendToChannel(
@@ -80,6 +99,17 @@ export async function sendToChannel(
     const summary = payload.embeds?.[0]?.title ?? payload.content?.slice(0, 80) ?? "(empty)";
     await appendHistory({ ts: Date.now(), channel, ok: true, message: summary });
     logger.info({ channel }, `discord: posted ${meta.label}`);
+
+    // Fan out to Telegram (best-effort; never fails the discord send)
+    void (async () => {
+      try {
+        const tg = await sendToTelegramForChannel(channel, payload);
+        await logTelegramResult(channel, tg);
+      } catch (err) {
+        logger.error({ err, channel }, "telegram fan-out threw");
+      }
+    })();
+
     return { ok: true, status: res.status };
   } catch (err) {
     const msg = (err as Error).message ?? String(err);
