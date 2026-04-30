@@ -183,12 +183,82 @@ export async function generalChatPost(): Promise<WebhookPayload> {
 }
 
 /**
+ * Structured "📊 MARKET UPDATE" board — fired ~40% of the time inside
+ * marketChatPost. Real BTC / ETH / SOL prices + 3 live top movers + sentiment.
+ */
+async function dailyMarketUpdate(cfg: Awaited<ReturnType<typeof loadConfig>>): Promise<WebhookPayload> {
+  const prices = await fetchMajorPrices();
+  const btc = prices["BTC"];
+  const eth = prices["ETH"];
+  const sol = prices["SOL"];
+
+  const fmtPrice = (p?: { usd: number; change24h: number }) => {
+    if (!p) return "—";
+    const arrow = p.change24h >= 0 ? "↗️" : "↘️";
+    const usd = p.usd >= 1000
+      ? `$${p.usd.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+      : `$${p.usd.toFixed(2)}`;
+    return `${usd}  ${arrow} ${signed(p.change24h)}%`;
+  };
+
+  let movers: Awaited<ReturnType<typeof topByGain24h>> = [];
+  try { movers = await topByGain24h(3, { minLiqUsd: 25_000 }); } catch { /* ok */ }
+
+  const moversBlock = movers.length
+    ? movers
+      .map((m) => `\`+ $${m.symbol.padEnd(6)}\` ${signed(m.priceChange24h)}% • ${fmtUsd(m.marketCap)} mcap`)
+      .join("\n")
+    : "_loading top movers…_";
+
+  // Sentiment: simple aggregate of BTC + ETH + SOL change
+  const avg = [btc?.change24h, eth?.change24h, sol?.change24h]
+    .filter((n): n is number => Number.isFinite(n))
+    .reduce((a, b, _i, arr) => a + b / arr.length, 0);
+  const sentiment = avg >= 1 ? "Bullish 🐂" : avg <= -1 ? "Bearish 🐻" : "Neutral / Choppy";
+  const focus = btc && btc.change24h >= 0
+    ? `Watching for **BTC continuation**. Alts about to wake up if BTC reclaims.`
+    : btc && btc.change24h <= -1
+      ? `BTC under pressure — **stay nimble**, take profit aggressively, leave dust on runners.`
+      : `Range bound. **Wait for the break**, don't chase wicks.`;
+
+  const desc =
+    `**BTC:** ${fmtPrice(btc)}\n` +
+    `**ETH:** ${fmtPrice(eth)}\n` +
+    `**SOL:** ${fmtPrice(sol)}\n\n` +
+    `🧠 **Market Sentiment:** ${sentiment}\n\n` +
+    `🔥 **Top Movers (24h):**\n${moversBlock}\n\n` +
+    `⚠️ **Focus Today:**\n${focus}\n\n` +
+    `Drop your bias 👇  Bull 🐂 or Bear 🐻?`;
+
+  return {
+    username: cfg.ownerHandle,
+    embeds: [{
+      color: avg >= 0 ? COLORS.green : COLORS.red,
+      title: "📊 MARKET UPDATE",
+      description: desc,
+      footer: { text: `${cfg.serverName} • live data — CoinGecko + DexScreener` },
+      timestamp: new Date().toISOString(),
+    }],
+  };
+}
+
+/**
  * Real market commentary — pulls live BTC/ETH/SOL from CoinGecko and the top
  * mover from DexScreener, then wraps it in a casual "trader take".
+ * 40% of the time it returns a structured "📊 MARKET UPDATE" board instead.
  */
 export async function marketChatPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const p = pick(PERSONAS);
+
+  // 40% of the time: structured Market Update board (premium daily-anchor feel)
+  if (Math.random() < 0.4) {
+    try {
+      return await dailyMarketUpdate(cfg);
+    } catch {
+      // fall through to casual take if upstream APIs are flaky
+    }
+  }
 
   let take = "";
   let trend: "up" | "down" = "up";

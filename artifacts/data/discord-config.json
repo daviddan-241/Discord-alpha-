@@ -23,7 +23,7 @@
     "feedback": "https://discord.com/api/webhooks/1498947027784958023/yMePjsqevjSqItxzt0QAEHlfo2hIP1j_iEg9Vitwn7UqeZ87pwed7xzInbAzB4OfI-Sn",
     "report_scams": "https://discord.com/api/webhooks/1498947029638971432/E0asjWr6VeKkeRdC83BXLecMPczOxYDEUjQgHMT3YnWBqtSeBEOG0OMw5u22J7x6T3yp"
   },
-  "ownerHandle": "linux_kernel01",
+  "ownerHandle": "@linux_kernel01",
   "ownerMention": "<@1035212407213133856>",
   "serverName": "Baldwin Calls",
   "autoPost": true,
