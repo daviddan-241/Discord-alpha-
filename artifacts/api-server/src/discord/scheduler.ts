@@ -2,6 +2,7 @@ import { logger } from "../lib/logger";
 import { CHANNEL_KEYS, CHANNEL_META, type ChannelKey, loadConfig } from "./config";
 import { GENERATORS } from "./generators";
 import { freeCallLinkedTeaserFor, vipSnipePostFor } from "./generators/calls";
+import { dailyRecapPost } from "./generators/announcements";
 import { pickTrending } from "./marketdata";
 import { sendToChannel } from "./poster";
 
@@ -9,7 +10,14 @@ type Timer = ReturnType<typeof setTimeout>;
 
 const timers: Partial<Record<ChannelKey, Timer>> = {};
 let linkedTimer: Timer | undefined;
+let dailyRecapTimer: Timer | undefined;
 let started = false;
+
+/** UTC hour the daily recap fires (22:00 UTC = 6pm ET / 3pm PT). */
+const DAILY_RECAP_HOUR_UTC = 22;
+
+/** Pick which channel the recap goes to (announcements has the broadest reach). */
+const DAILY_RECAP_CHANNEL: ChannelKey = "announcements";
 
 /**
  * Channels that are NEVER scheduled independently — they fire as part of the
@@ -156,6 +164,36 @@ function scheduleNext(channel: ChannelKey): void {
   }, delay);
 }
 
+/** Schedule the next daily-recap fire at the next 22:00 UTC. */
+function scheduleNextDailyRecap(): void {
+  const now = new Date();
+  const next = new Date(Date.UTC(
+    now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+    DAILY_RECAP_HOUR_UTC, 0, 0, 0,
+  ));
+  if (next.getTime() <= now.getTime()) {
+    next.setUTCDate(next.getUTCDate() + 1);
+  }
+  const delayMs = next.getTime() - now.getTime();
+  logger.info({ fireAt: next.toISOString() }, `discord-scheduler: next daily-recap at ${next.toISOString()}`);
+  dailyRecapTimer = setTimeout(async () => {
+    try {
+      const cfg = await loadConfig();
+      if (cfg.autoPost && cfg.webhooks[DAILY_RECAP_CHANNEL]) {
+        const payload = await dailyRecapPost();
+        await sendToChannel(DAILY_RECAP_CHANNEL, payload);
+        logger.info({ channel: DAILY_RECAP_CHANNEL }, "daily-recap: posted");
+      } else {
+        logger.warn("daily-recap: skipped (autoPost off or webhook missing)");
+      }
+    } catch (err) {
+      logger.error({ err }, "daily-recap tick failed");
+    } finally {
+      scheduleNextDailyRecap();
+    }
+  }, delayMs);
+}
+
 export function startScheduler(): void {
   if (started) return;
   started = true;
@@ -165,7 +203,8 @@ export function startScheduler(): void {
     scheduleNext(ch);
   }
   scheduleNextLinkedCycle();
-  logger.info("discord-scheduler: started (with VIP-first linked call cycle)");
+  scheduleNextDailyRecap();
+  logger.info("discord-scheduler: started (with VIP-first linked call cycle + daily recap)");
 }
 
 export function stopScheduler(): void {
@@ -177,6 +216,10 @@ export function stopScheduler(): void {
   if (linkedTimer) {
     clearTimeout(linkedTimer);
     linkedTimer = undefined;
+  }
+  if (dailyRecapTimer) {
+    clearTimeout(dailyRecapTimer);
+    dailyRecapTimer = undefined;
   }
   started = false;
   logger.info("discord-scheduler: stopped");

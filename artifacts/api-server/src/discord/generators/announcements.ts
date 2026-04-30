@@ -1,7 +1,8 @@
 import type { WebhookPayload } from "../poster";
 import { maybeAnimatedRenderUrl } from "../poster";
 import { COLORS, pick, pickN, randInt, randFloat } from "../data";
-import { loadConfig, dmTarget, pingContent } from "../config";
+import { loadConfig, dmTarget, pingContent, loadHistory } from "../config";
+import { topByGain24h, fmtUsd } from "../marketdata";
 
 export async function announcementPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
@@ -159,6 +160,76 @@ export async function joinVipPost(): Promise<WebhookPayload> {
       description: v.desc,
       image: { url: vipImg },
       footer: { text: `${cfg.serverName} • DM ${dm} — Join VIP today` },
+      timestamp: new Date().toISOString(),
+    }],
+  };
+}
+
+/**
+ * End-of-day recap — fired once per day at 22:00 UTC. Summarises the last 24h
+ * of posts: total VIP snipes, total free calls, biggest VIP win (extracted
+ * from the snipe titles in history), and the day's top mover from DexScreener.
+ */
+export async function dailyRecapPost(): Promise<WebhookPayload> {
+  const cfg = await loadConfig();
+  const dm = dmTarget(cfg);
+  const history = await loadHistory();
+  const cutoff = Date.now() - 24 * 60 * 60_000;
+  const recent = history.filter((h) => h.ts >= cutoff && h.ok);
+
+  const vipSnipes = recent.filter((h) => h.channel === "vip_snipes" && h.message.includes("VIP SNIPE"));
+  const freeCalls = recent.filter((h) => h.channel === "free_calls" && h.message.includes("CALL"));
+  const proofPosts = recent.filter((h) => h.channel === "proof_results");
+
+  // Pull a representative VIP win from snipe titles like "💎 VIP SNIPE — $BULL filled @ $6.46M mcap"
+  const snipeRegex = /\$([A-Z0-9]+)\s+filled\s+@\s+\$([0-9.]+[KMB]?)\s+mcap/i;
+  const snipeWins = vipSnipes
+    .map((h) => h.message.match(snipeRegex))
+    .filter((m): m is RegExpMatchArray => m !== null)
+    .map((m) => ({ symbol: m[1], mcap: m[2] }));
+  const featuredWin = snipeWins[0];
+
+  // Top mover from DexScreener for the bonus "today's biggest mover" line
+  let topMover: Awaited<ReturnType<typeof topByGain24h>>[number] | undefined;
+  try {
+    const movers = await topByGain24h(1, { minLiqUsd: 25_000 });
+    topMover = movers[0];
+  } catch { /* ok */ }
+
+  const dateStr = new Date().toUTCString().split(" ").slice(0, 4).join(" "); // e.g. "Wed, 30 Apr 2026"
+
+  const lines: string[] = [];
+  lines.push(`**📅 ${dateStr}** — here's everything that dropped in the last 24h:\n`);
+  lines.push(`💎 **VIP snipes posted:** ${vipSnipes.length}`);
+  lines.push(`🚨 **Free calls posted:** ${freeCalls.length}`);
+  lines.push(`📸 **Receipts dropped:** ${proofPosts.length}`);
+  lines.push("");
+
+  if (featuredWin) {
+    lines.push(`🏆 **Featured VIP fill of the day:**`);
+    lines.push(`   $${featuredWin.symbol} sniped @ $${featuredWin.mcap} mcap`);
+    lines.push("");
+  }
+  if (topMover) {
+    lines.push(`🔥 **Biggest 24h mover today:**`);
+    lines.push(`   $${topMover.symbol} on ${topMover.chain} — ${topMover.priceChange24h >= 0 ? "+" : ""}${topMover.priceChange24h.toFixed(0)}% • ${fmtUsd(topMover.marketCap)} mcap`);
+    lines.push(`   [Open chart](${topMover.url})`);
+    lines.push("");
+  }
+
+  lines.push(`👀 **Tomorrow:** more snipes, more receipts, same setup — VIP fills first, free chat sees the teaser shortly after.`);
+  lines.push("");
+  lines.push(`💎 **Want tomorrow's calls before they print?** DM ${dm} — say "VIP".`);
+
+  return {
+    username: cfg.ownerHandle,
+    content: pingContent(cfg),
+    allowed_mentions: { parse: ["everyone"] },
+    embeds: [{
+      color: COLORS.vipPurple,
+      title: "📊 DAILY RECAP — that's a wrap",
+      description: lines.join("\n"),
+      footer: { text: `${cfg.serverName} • Daily recap • DM ${dm} for VIP` },
       timestamp: new Date().toISOString(),
     }],
   };
