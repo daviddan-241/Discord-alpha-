@@ -85,7 +85,7 @@ async function runLinkedCallCycle(): Promise<void> {
     logger.warn("linked-cycle: vip_snipes has no webhook — skipping VIP leg");
   }
   // 2) Free chat after a short, randomised lead — masked CA + "VIP got this N min ago".
-  const leadMin = randInt(8, 22);
+  const leadMin = randInt(3, 9);
   logger.info({ leadMin, token: token.symbol }, "linked-cycle: scheduling free-chat teaser");
   setTimeout(async () => {
     try {
@@ -110,8 +110,8 @@ function randInt(min: number, max: number): number {
 
 function scheduleNextLinkedCycle(): void {
   // Recurring cadence between cycles (independent of the per-cycle lead).
-  // Bias toward 25–55 min so VIP / free pairs never starve and never spam.
-  const delayMs = (Math.random() * (55 - 25) + 25) * 60_000;
+  // Tightened to 15–28 min so the free channel stays active without spamming.
+  const delayMs = (Math.random() * (28 - 15) + 15) * 60_000;
   const next = Math.round(delayMs / 60_000);
   logger.info({ nextInMin: next }, `discord-scheduler: next linked-call-cycle in ~${next}m`);
   linkedTimer = setTimeout(async () => {

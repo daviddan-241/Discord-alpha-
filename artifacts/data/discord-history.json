@@ -1,5 +1,221 @@
 [
   {
+    "ts": 1777566813843,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "→ telegram: vip-snipes (msg 96)"
+  },
+  {
+    "ts": 1777566812556,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — $MYSTERY filled @ $2.52M mcap"
+  },
+  {
+    "ts": 1777566804460,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — VIP just got fed"
+  },
+  {
+    "ts": 1777566801580,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1777566798600,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1777566795487,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — Solana memecoin season"
+  },
+  {
+    "ts": 1777566792488,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟢 BUY — $CATCOIN"
+  },
+  {
+    "ts": 1777566789527,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale fully exited $MYSTERY"
+  },
+  {
+    "ts": 1777566786514,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $DISBELIEF — 36min head start"
+  },
+  {
+    "ts": 1777566783461,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777566782130,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "→ telegram: free-calls (msg 346)"
+  },
+  {
+    "ts": 1777566780467,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "yall see that last call? clean entry"
+  },
+  {
+    "ts": 1777566779681,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "🔒 VIP CALL — $WI••••• [LOCKED for public]"
+  },
+  {
+    "ts": 1777566776575,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "→ telegram: proof-results (msg 95)"
+  },
+  {
+    "ts": 1777566774744,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $FREE 2.9x ✅"
+  },
+  {
+    "ts": 1777566772768,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "→ telegram: join-apex-vip (msg 94)"
+  },
+  {
+    "ts": 1777566771497,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 The people messaging me every day understand something you don't yet"
+  },
+  {
+    "ts": 1777566768523,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 Cleaned up the server — seats opened"
+  },
+  {
+    "ts": 1777566674714,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "→ telegram: vip-snipes (msg 93)"
+  },
+  {
+    "ts": 1777566672061,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — $BP filled @ $82.3K mcap"
+  },
+  {
+    "ts": 1777566664044,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — Movers heating up (1h)"
+  },
+  {
+    "ts": 1777566661091,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1777566658129,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1777566655033,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — DePIN infrastructure"
+  },
+  {
+    "ts": 1777566652016,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🔴 EXIT — $CATCOIN"
+  },
+  {
+    "ts": 1777566649044,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale rotated into $EVA"
+  },
+  {
+    "ts": 1777566646085,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $DISBELIEF — 22min head start"
+  },
+  {
+    "ts": 1777566643097,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777566640061,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "still mad i faded the chsn call"
+  },
+  {
+    "ts": 1777566636760,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "→ telegram: free-calls (msg 345)"
+  },
+  {
+    "ts": 1777566635595,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "👀 Already running — $FOFAR (you missed the entry)"
+  },
+  {
+    "ts": 1777566635115,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "→ telegram: proof-results (msg 92)"
+  },
+  {
+    "ts": 1777566634220,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $FREE 2.9x ✅"
+  },
+  {
+    "ts": 1777566632374,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "→ telegram: join-apex-vip (msg 91)"
+  },
+  {
+    "ts": 1777566631079,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 This is what you're actually missing every single day"
+  },
+  {
+    "ts": 1777566628077,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 VIP slots just reopened — I only have a few"
+  },
+  {
     "ts": 1777566535897,
     "channel": "vip_snipes",
     "ok": true,
@@ -982,221 +1198,5 @@
     "channel": "early_access",
     "ok": true,
     "message": "🚀 Early Radar — $EWON — 41min head start"
-  },
-  {
-    "ts": 1777464139633,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "🔥 Trending right now"
-  },
-  {
-    "ts": 1777464136664,
-    "channel": "general_chat",
-    "ok": true,
-    "message": "stop asking for refunds you didnt buy anything"
-  },
-  {
-    "ts": 1777464132828,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "→ telegram: proof-results (msg 52)"
-  },
-  {
-    "ts": 1777464130848,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "🏆 RECEIPT — $EVA 24.7x ✅"
-  },
-  {
-    "ts": 1777464128775,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "→ telegram: join-apex-vip (msg 51)"
-  },
-  {
-    "ts": 1777464127661,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "💎 The people messaging me every day understand something you don't yet"
-  },
-  {
-    "ts": 1777464126539,
-    "channel": "announcements",
-    "ok": true,
-    "message": "→ telegram: apex-announcements (msg 50)"
-  },
-  {
-    "ts": 1777464124736,
-    "channel": "announcements",
-    "ok": true,
-    "message": "📢 This week's results — let the numbers do the talking"
-  },
-  {
-    "ts": 1777463906274,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "→ telegram: vip-snipes (msg 49)"
-  },
-  {
-    "ts": 1777463904991,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "💎 VIP SNIPE — $IMOUT filled @ $434.1K mcap"
-  },
-  {
-    "ts": 1777463896975,
-    "channel": "alerts",
-    "ok": true,
-    "message": "📡 ALERT — Movers heating up (1h)"
-  },
-  {
-    "ts": 1777463894053,
-    "channel": "gas_tracker",
-    "ok": true,
-    "message": "⛽ Gas tracker"
-  },
-  {
-    "ts": 1777463891024,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777463890428,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "→ telegram: alpha-lounge (msg 48)"
-  },
-  {
-    "ts": 1777463887992,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "🧠 Alpha Lounge — Base micro-caps"
-  },
-  {
-    "ts": 1777463884981,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "🟢 BUY — $EVA"
-  },
-  {
-    "ts": 1777463882087,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "🐋 Whale rotated into $IMOUT"
-  },
-  {
-    "ts": 1777463881351,
-    "channel": "early_access",
-    "ok": true,
-    "message": "→ telegram: early-access (msg 47)"
-  },
-  {
-    "ts": 1777463878972,
-    "channel": "early_access",
-    "ok": true,
-    "message": "🚀 Early Radar — $MDGA — 33min head start"
-  },
-  {
-    "ts": 1777463876134,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "🔥 Trending right now"
-  },
-  {
-    "ts": 1777463873009,
-    "channel": "general_chat",
-    "ok": true,
-    "message": "lmao someone pls tell newcomers to read the rules first"
-  },
-  {
-    "ts": 1777463868026,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "→ telegram: proof-results (msg 46)"
-  },
-  {
-    "ts": 1777463867176,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "🏆 RECEIPT — $LEGIT 3.3x ✅"
-  },
-  {
-    "ts": 1777463865071,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "→ telegram: join-apex-vip (msg 45)"
-  },
-  {
-    "ts": 1777463863993,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "💎 I trade WITH my members. Here's what that means."
-  },
-  {
-    "ts": 1777463862583,
-    "channel": "announcements",
-    "ok": true,
-    "message": "→ telegram: apex-announcements (msg 44)"
-  },
-  {
-    "ts": 1777463861137,
-    "channel": "announcements",
-    "ok": true,
-    "message": "📢 I said I'd be straight with you — so here it is"
-  },
-  {
-    "ts": 1777463857662,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777463856242,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "→ telegram: alpha-lounge (msg 43)"
-  },
-  {
-    "ts": 1777463854406,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "🧠 Alpha Lounge — Base micro-caps"
-  },
-  {
-    "ts": 1777463851427,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "🔴 EXIT — $IMOUT"
-  },
-  {
-    "ts": 1777463848418,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "🐋 Whale rotated into $LEGIT"
-  },
-  {
-    "ts": 1777463846680,
-    "channel": "early_access",
-    "ok": true,
-    "message": "→ telegram: early-access (msg 42)"
-  },
-  {
-    "ts": 1777463845433,
-    "channel": "early_access",
-    "ok": true,
-    "message": "🚀 Early Radar — $EWON — 20min head start"
-  },
-  {
-    "ts": 1777463842417,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "🔥 Trending right now"
-  },
-  {
-    "ts": 1777463839440,
-    "channel": "general_chat",
-    "ok": true,
-    "message": "anyone else holding from yesterday's pick?"
   }
 ]
