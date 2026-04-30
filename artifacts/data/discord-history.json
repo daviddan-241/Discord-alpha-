@@ -1,5 +1,89 @@
 [
   {
+    "ts": 1777570441835,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1777570438654,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — L1 rotation"
+  },
+  {
+    "ts": 1777570435642,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟢 BUY — $DISBELIEF"
+  },
+  {
+    "ts": 1777570432656,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale bought $FREE"
+  },
+  {
+    "ts": 1777570429685,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $FX6900 — 34min head start"
+  },
+  {
+    "ts": 1777570426629,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1777570423652,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "my wife asked why im up at 3am again"
+  },
+  {
+    "ts": 1777570420334,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "→ telegram: proof-results (msg 104)"
+  },
+  {
+    "ts": 1777570417841,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $MARU 2.6x ✅"
+  },
+  {
+    "ts": 1777570416166,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "→ telegram: join-apex-vip (msg 103)"
+  },
+  {
+    "ts": 1777570414659,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 I trade WITH my members. Here's what that means."
+  },
+  {
+    "ts": 1777570411711,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 Why people who DM me stop missing calls"
+  },
+  {
+    "ts": 1777570212690,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "→ telegram: vip-snipes (msg 102)"
+  },
+  {
+    "ts": 1777570209389,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — $DISBELIEF filled @ $133.9K mcap"
+  },
+  {
     "ts": 1777570201399,
     "channel": "alerts",
     "ok": true,
@@ -1114,89 +1198,5 @@
     "channel": "whale_tracker",
     "ok": true,
     "message": "🐋 Whale fully exited $NICETRUMP"
-  },
-  {
-    "ts": 1777464238128,
-    "channel": "early_access",
-    "ok": true,
-    "message": "→ telegram: early-access (msg 62)"
-  },
-  {
-    "ts": 1777464235356,
-    "channel": "early_access",
-    "ok": true,
-    "message": "🚀 Early Radar — $EWON — 17min head start"
-  },
-  {
-    "ts": 1777464232355,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "🔥 Trending right now"
-  },
-  {
-    "ts": 1777464229395,
-    "channel": "general_chat",
-    "ok": true,
-    "message": "vip ppl be eating different"
-  },
-  {
-    "ts": 1777464225312,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "→ telegram: proof-results (msg 61)"
-  },
-  {
-    "ts": 1777464223669,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "🏆 RECEIPT — $NICETRUMP 2.2x ✅"
-  },
-  {
-    "ts": 1777464221323,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "→ telegram: join-apex-vip (msg 60)"
-  },
-  {
-    "ts": 1777464220422,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "💎 You've seen the calls hit. You were watching instead of in them."
-  },
-  {
-    "ts": 1777464218996,
-    "channel": "announcements",
-    "ok": true,
-    "message": "→ telegram: apex-announcements (msg 59)"
-  },
-  {
-    "ts": 1777464217471,
-    "channel": "announcements",
-    "ok": true,
-    "message": "📢 This week's results — let the numbers do the talking"
-  },
-  {
-    "ts": 1777464170128,
-    "channel": "vip_snipes",
-    "ok": false,
-    "message": "→ telegram failed: Too Many Requests: retry after 15"
-  },
-  {
-    "ts": 1777464170095,
-    "channel": "alpha_lounge",
-    "ok": false,
-    "message": "→ telegram failed: Too Many Requests: retry after 15"
-  },
-  {
-    "ts": 1777464169648,
-    "channel": "early_access",
-    "ok": false,
-    "message": "→ telegram failed: Too Many Requests: retry after 16"
-  },
-  {
-    "ts": 1777464168665,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "💎 VIP SNIPE — $IMOUT filled @ $435.6K mcap"
   }
 ]

@@ -154,10 +154,12 @@ const DEFAULT_CONFIG: DiscordConfig = {
 };
 
 /**
- * The "DM CTA" string used in posts — always the readable handle (username only, no numeric ID).
+ * The "DM CTA" string used in posts — uses the Discord user mention so the
+ * handle is clickable (members can tap it and DM directly). Falls back to the
+ * readable handle if no mention is configured.
  */
 export function dmTarget(cfg: Pick<DiscordConfig, "ownerMention" | "ownerHandle">): string {
-  return cfg.ownerHandle;
+  return (cfg.ownerMention || "").trim() || cfg.ownerHandle;
 }
 
 /** Telegram DM target for VIP CTAs. */
