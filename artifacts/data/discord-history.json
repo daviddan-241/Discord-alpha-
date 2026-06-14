@@ -1,5 +1,11 @@
 [
   {
+    "ts": 1781428516850,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — $GRINDFUN filled @ $70.3K mcap"
+  },
+  {
     "ts": 1781428508852,
     "channel": "alerts",
     "ok": true,
@@ -1192,11 +1198,5 @@
     "channel": "price_bot",
     "ok": true,
     "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777570457190,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "→ telegram: vip-snipes (msg 105)"
   }
 ]
