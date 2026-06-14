@@ -8,7 +8,12 @@ served by the API server artifact at `/api/`. All call/snipe/trade/whale/proof/t
 posts use **real on-chain token data** (real CAs, real prices, real mcap/liquidity)
 pulled live from DexScreener + CoinGecko + a public Ethereum RPC.
 
-## Recent changes (April 2026)
+## Recent changes (June 2026)
+- **Dark cinematic image redesign**: All 16 card templates completely overhauled to a pure-black/silver/gold palette — no neon, no bright colors. Backgrounds use smoke particle wisps, heavy cinematic vignette, film grain, and a silver/gold edge frame. Candles use dark gold (up) and steel silver (down). Pushed to GitHub at `https://github.com/daviddan-241/Discord-alpha-`.
+- **TEMPLATES registry**: Added named export `TEMPLATES` map to `templates.ts` so the render route can dynamically resolve all 16 slugs.
+- **Reference image**: `artifacts/api-server/public/dark-bg.jpg` added — the dark statue/figure reference that inspired the color scheme.
+
+## Previous changes (April 2026)
 - **Premium card images**: All 16 Discord/Telegram card templates completely redesigned with premium dark atmospheric backgrounds, glowing hero typography, money-stack decorations, glowing orb mascot elements, accent lines, and film grain — inspired by TokenScan-style broadcast graphics.
 - **Per-channel bot names**: Each channel now picks a unique name from its own pool (AlphaBot, SignalBot, ReceiptBot, WhaleBotent, etc.) instead of a single username.
 - **Telegram photo sending**: Re-enabled — bot sends `sendPhoto` with caption when image URL is available, falls back to `sendMessage` if the photo URL fails.
