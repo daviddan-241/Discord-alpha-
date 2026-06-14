@@ -306,8 +306,17 @@ export const DASHBOARD_HTML = `<!doctype html>
     <div class="channels-grid" id="channels"></div>
   </section>
 
+  <section class="card" style="margin-bottom: 20px;">
+    <h2>6 · Live card previews <span style="font-size:11px;font-weight:400;color:var(--muted);text-transform:none">— real data from DexScreener &amp; CoinGecko</span></h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+      <button onclick="refreshPreviews()">🔄 Refresh all cards</button>
+      <span style="font-size:12px;color:var(--muted);align-self:center">Click any card to open full size</span>
+    </div>
+    <div id="liveCardGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+  </section>
+
   <section class="card">
-    <h2>6 · Activity log</h2>
+    <h2>7 · Activity log</h2>
     <div class="activity" id="activity"></div>
   </section>
 
@@ -777,6 +786,57 @@ document.addEventListener("keydown", (ev) => {
 
 refresh();
 setInterval(refresh, 15000);
+
+// ── Live card previews ────────────────────────────────────────────────────────
+const CARD_TYPES = [
+  { slug: "call",     label: "Free Call" },
+  { slug: "proof",    label: "Proof Receipt" },
+  { slug: "snipe",    label: "VIP Snipe" },
+  { slug: "early",    label: "Early Access" },
+  { slug: "whale",    label: "Whale Tracker" },
+  { slug: "trade",    label: "Live Trade" },
+  { slug: "trending", label: "Trending Coins" },
+  { slug: "price",    label: "Live Prices" },
+  { slug: "gas",      label: "Gas Tracker" },
+  { slug: "alert",    label: "Alert" },
+  { slug: "market",   label: "Market Update" },
+  { slug: "vip",      label: "Join VIP" },
+  { slug: "announce", label: "Announcement" },
+  { slug: "info",     label: "Info / Welcome" },
+  { slug: "chat",     label: "General Chat" },
+  { slug: "snipe",    label: "Snipe Preview" },
+];
+
+function refreshPreviews() {
+  const grid = $("liveCardGrid");
+  grid.innerHTML = "";
+  const seen = new Set();
+  for (const { slug, label } of CARD_TYPES) {
+    if (seen.has(slug)) continue;
+    seen.add(slug);
+    const seed = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const url = "/api/render/" + slug + ".png?live=1&seed=" + seed;
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;background:#000;";
+    wrap.title = "Click to open " + label + " full size";
+    const labelEl = document.createElement("div");
+    labelEl.style.cssText = "font-size:11px;font-weight:700;color:var(--muted);padding:6px 10px;letter-spacing:0.5px;text-transform:uppercase;";
+    labelEl.textContent = label;
+    const img = document.createElement("img");
+    img.style.cssText = "width:100%;display:block;";
+    img.src = url;
+    img.alt = label;
+    img.loading = "lazy";
+    img.onerror = () => { img.style.display = "none"; labelEl.textContent += " (error)"; };
+    wrap.appendChild(labelEl);
+    wrap.appendChild(img);
+    wrap.addEventListener("click", () => window.open(url, "_blank"));
+    grid.appendChild(wrap);
+  }
+}
+
+// Load previews on first paint
+refreshPreviews();
 </script>
 </body>
 </html>`;
