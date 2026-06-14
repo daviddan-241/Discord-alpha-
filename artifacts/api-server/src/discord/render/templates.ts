@@ -111,8 +111,9 @@ export const proofTemplate: RenderTemplate = (ctx, input, rng) => {
     size: 20, weight: "700", color: hexAlpha("#d0d0d0", 0.75),
   });
 
-  drawMoneyStacks(ctx, W - 200, 390, accent, rng);
-  drawGlowOrb(ctx, W - 195, 195, 76, accent, rng);
+  let proofOhlcv: { t: number; c: number }[] = [];
+  try { const r = input["ohlcv"]; if (r) proofOhlcv = JSON.parse(r); } catch { /* sparkline */ }
+  drawRealPriceChart(ctx, 508, 96, W - 526, 362, proofOhlcv, ticker, accent, rng);
 
   brandFooter(ctx, server, `Receipts · ${new Date().toUTCString().slice(5, 22)}`, palette);
 };
@@ -417,8 +418,9 @@ export const whaleTemplate: RenderTemplate = (ctx, input, rng) => {
   statBlock(ctx, 274, 340, "VALUE", usdStr, palette);
   statBlock(ctx, 512, 340, "STATUS", "ON-CHAIN", palette);
 
-  drawSparkline(ctx, W - 420, 100, 380, 210, rng, isExit ? "down" : "up", accent);
-  drawGlowOrb(ctx, W - 200, 340, 65, actionColor, rng);
+  let whaleOhlcv: { t: number; c: number }[] = [];
+  try { const r = input["ohlcv"]; if (r) whaleOhlcv = JSON.parse(r); } catch { /* sparkline */ }
+  drawRealPriceChart(ctx, W - 424, 96, 396, 228, whaleOhlcv, ticker, actionColor, rng);
 
   brandFooter(ctx, server, "TRACKING 1,200+ WALLETS", palette);
 };
@@ -457,7 +459,9 @@ export const tradeTemplate: RenderTemplate = (ctx, input, rng) => {
     glowColor: hexAlpha("#ffffff", 0.15), glowRadius: 8,
   });
 
-  drawCandles(ctx, W - 450, 88, 410, 240, rng, isBuy ? "up" : "down");
+  let tradeOhlcv: { t: number; c: number }[] = [];
+  try { const r = input["ohlcv"]; if (r) tradeOhlcv = JSON.parse(r); } catch { /* sparkline */ }
+  drawRealPriceChart(ctx, W - 450, 88, 428, 245, tradeOhlcv, ticker, accentColor, rng);
 
   statBlock(ctx, 36, 348, "SIZE", sizeStr, palette);
   statBlock(ctx, 274, 348, "USD VALUE", usdStr, palette);
@@ -658,7 +662,9 @@ export const snipeTemplate: RenderTemplate = (ctx, input, rng) => {
     glowColor: accent, glowRadius: 10,
   });
 
-  drawCandles(ctx, W - 440, 88, 400, 240, rng, "up");
+  let snipeOhlcv: { t: number; c: number }[] = [];
+  try { const r = input["ohlcv"]; if (r) snipeOhlcv = JSON.parse(r); } catch { /* sparkline */ }
+  drawRealPriceChart(ctx, W - 440, 88, 416, 255, snipeOhlcv, `${ticker.slice(0, 2)}•••`, accent, rng);
 
   // Locked badge — dark with gold border
   roundedRect(ctx, W / 2 - 240, 360, 480, 72, 36);
@@ -702,7 +708,10 @@ export const alphaTemplate: RenderTemplate = (ctx, input, rng) => {
     glowColor: accent, glowRadius: 16, maxWidth: W * 0.6,
   });
 
-  drawSparkline(ctx, 36, 275, W - 72, 130, rng, "up", accent);
+  let alphaOhlcv: { t: number; c: number }[] = [];
+  try { const r = input["ohlcv"]; if (r) alphaOhlcv = JSON.parse(r); } catch { /* sparkline */ }
+  const alphaTicker = str(input, "ticker", "TOKEN");
+  drawRealPriceChart(ctx, 36, 265, W - 72, 170, alphaOhlcv, alphaTicker, accent, rng);
 
   const insight = pickFrom(rng, [
     "Smart wallets accumulating quietly. Public attention has not arrived yet.",
@@ -732,7 +741,10 @@ export const marketTemplate: RenderTemplate = (ctx, input, rng) => {
 
   drawHeaderBar(ctx, "MARKET UPDATE", new Date().toUTCString().slice(5, 22), accent);
 
-  drawCandles(ctx, 28, 88, W - 56, 310, rng, trend);
+  let marketOhlcv: { t: number; c: number }[] = [];
+  try { const r = input["ohlcv"]; if (r) marketOhlcv = JSON.parse(r); } catch { /* candles */ }
+  const marketTicker = str(input, "chartTicker", "BTC");
+  drawRealPriceChart(ctx, 28, 88, W - 56, 310, marketOhlcv, marketTicker, accent, rng);
 
   roundedRect(ctx, 28, 418, W - 56, 68, 14);
   ctx.fillStyle = hexAlpha("#000000", 0.72);
@@ -837,29 +849,9 @@ export const earlyTemplate: RenderTemplate = (ctx, input, rng) => {
     glowColor: accent, glowRadius: 8,
   });
 
-  // Radar rings
-  const cx = W - 195, cy = 295, maxR = 145;
-  for (let i = 1; i <= 5; i++) {
-    ctx.beginPath();
-    ctx.arc(cx, cy, (maxR * i) / 5, 0, Math.PI * 2);
-    ctx.strokeStyle = hexAlpha(accent, 0.06 + i * 0.04);
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-  ctx.save();
-  ctx.shadowColor = hexAlpha(accent, 0.4);
-  ctx.shadowBlur = 12;
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + maxR * 0.82, cy - maxR * 0.56);
-  ctx.strokeStyle = hexAlpha(accent, 0.65);
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-  ctx.restore();
-  ctx.beginPath();
-  ctx.arc(cx, cy, 10, 0, Math.PI * 2);
-  ctx.fillStyle = accent;
-  ctx.fill();
+  let earlyOhlcv: { t: number; c: number }[] = [];
+  try { const r = input["ohlcv"]; if (r) earlyOhlcv = JSON.parse(r); } catch { /* sparkline */ }
+  drawRealPriceChart(ctx, W - 444, 88, 416, 290, earlyOhlcv, ticker, accent, rng);
 
   drawText(ctx, `DM ${handle} for the CA`, 36, H - 70, {
     size: 22, weight: "800", color: "#e8e8e8",

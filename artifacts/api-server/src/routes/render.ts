@@ -61,17 +61,23 @@ async function buildLiveInput(type: string): Promise<Record<string, string | und
         const pct = Math.max(40, t.priceChange24h);
         const x = Number((1 + pct / 100).toFixed(1));
         const entry = Math.max(8_000, Math.round(t.marketCap / x));
-        return { ticker: t.symbol, x: String(x), entry: String(entry), server, handle };
+        let ohlcv = "";
+        try { const pts = await fetchOhlcv(t.chainId, t.pairAddress); if (pts.length > 0) ohlcv = JSON.stringify(pts); } catch { /* skip */ }
+        return { ticker: t.symbol, x: String(x), entry: String(entry), server, handle, ohlcv };
       }
       case "snipe": {
         const t = await pickTrending({ minLiqUsd: 8_000, maxMcUsd: 8_000_000 });
-        return { ticker: t.symbol, mc: String(t.marketCap), handle, server };
+        let ohlcv = "";
+        try { const pts = await fetchOhlcv(t.chainId, t.pairAddress); if (pts.length > 0) ohlcv = JSON.stringify(pts); } catch { /* skip */ }
+        return { ticker: t.symbol, mc: String(t.marketCap), handle, server, ohlcv };
       }
       case "early": {
         const t = await pickTrending({ maxAgeMin: 60 * 24, minLiqUsd: 8_000, maxMcUsd: 5_000_000 })
           .catch(() => pickTrending({ minLiqUsd: 8_000, maxMcUsd: 8_000_000 }));
         const lead = String(12 + Math.floor(Math.random() * 43));
-        return { ticker: t.symbol, lead, handle, server };
+        let ohlcv = "";
+        try { const pts = await fetchOhlcv(t.chainId, t.pairAddress); if (pts.length > 0) ohlcv = JSON.stringify(pts); } catch { /* skip */ }
+        return { ticker: t.symbol, lead, handle, server, ohlcv };
       }
       case "whale": {
         const t = await pickTrending({ minLiqUsd: 20_000 });
@@ -83,6 +89,8 @@ async function buildLiveInput(type: string): Promise<Record<string, string | und
           : (0.2 + Math.random() * 4).toFixed(2);
         const unit = isSol ? "SOL" : t.chain === "Ethereum" ? "ETH" : "USD";
         const usd = Math.round(parseFloat(sizeNum) * (isSol ? 180 : t.chain === "Ethereum" ? 3200 : 1));
+        let ohlcv = "";
+        try { const pts = await fetchOhlcv(t.chainId, t.pairAddress); if (pts.length > 0) ohlcv = JSON.stringify(pts); } catch { /* skip */ }
         return {
           ticker: t.symbol,
           action,
@@ -90,6 +98,7 @@ async function buildLiveInput(type: string): Promise<Record<string, string | und
           size: `${sizeNum} ${unit}`,
           usd: `$${usd.toLocaleString()}`,
           tag: "Smart Money",
+          ohlcv,
           server,
         };
       }
@@ -103,12 +112,15 @@ async function buildLiveInput(type: string): Promise<Record<string, string | und
           : (500 + Math.random() * 8000).toFixed(0);
         const unit = isSol ? "SOL" : t.chain === "Ethereum" ? "ETH" : "USD";
         const usd = Math.round(parseFloat(sizeNum) * (isSol ? 180 : t.chain === "Ethereum" ? 3200 : 1));
+        let ohlcv = "";
+        try { const pts = await fetchOhlcv(t.chainId, t.pairAddress); if (pts.length > 0) ohlcv = JSON.stringify(pts); } catch { /* skip */ }
         return {
           ticker: t.symbol,
           direction,
           size: `${sizeNum} ${unit}`,
           usd: `$${usd.toLocaleString()}`,
           wallet: `${t.address.slice(0, 4)}…${t.address.slice(-4)}`,
+          ohlcv,
           server,
         };
       }
@@ -145,6 +157,14 @@ async function buildLiveInput(type: string): Promise<Record<string, string | und
           server,
         };
       }
+      case "alpha": {
+        const t = await pickTrending({ minLiqUsd: 10_000 });
+        let ohlcv = "";
+        try { const pts = await fetchOhlcv(t.chainId, t.pairAddress); if (pts.length > 0) ohlcv = JSON.stringify(pts); } catch { /* skip */ }
+        const narratives = ["AI Agents", "DeFi Yield", "Meme Season", "RWA", "Gaming", "Layer 2", "Staking"];
+        const narrative = narratives[Math.floor(Math.random() * narratives.length)]!;
+        return { narrative, ticker: t.symbol, ohlcv, server };
+      }
       case "alert": {
         const t = await pickTrending({ minLiqUsd: 10_000 });
         return {
@@ -161,7 +181,14 @@ async function buildLiveInput(type: string): Promise<Record<string, string | und
         const take = btc
           ? `BTC ${fmtUsd(btc.usd)} (${btc.change24h >= 0 ? "+" : ""}${btc.change24h.toFixed(2)}%) · ETH ${eth ? fmtUsd(eth.usd) : "—"} · Market is ${trend === "up" ? "risk-on" : "risk-off"}.`
           : "Market data loading…";
-        return { take, trend, server };
+        let ohlcv = "";
+        let chartTicker = "BTC";
+        try {
+          const top = await pickTrending({ minLiqUsd: 50_000 });
+          const pts = await fetchOhlcv(top.chainId, top.pairAddress);
+          if (pts.length > 0) { ohlcv = JSON.stringify(pts); chartTicker = top.symbol; }
+        } catch { /* skip */ }
+        return { take, trend, server, ohlcv, chartTicker };
       }
       default:
         return { server, handle };

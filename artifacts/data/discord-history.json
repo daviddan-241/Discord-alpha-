@@ -1,5 +1,89 @@
 [
   {
+    "ts": 1781428948544,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — $SIEGE filled @ $112.7K mcap"
+  },
+  {
+    "ts": 1781428940542,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — VIP just got fed"
+  },
+  {
+    "ts": 1781428937592,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1781428934536,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1781428931513,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — L1 rotation"
+  },
+  {
+    "ts": 1781428928585,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟢 BUY — $BLX"
+  },
+  {
+    "ts": 1781428925525,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale added $GRINDFUN"
+  },
+  {
+    "ts": 1781428922665,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $GRINDFUN — 46min head start"
+  },
+  {
+    "ts": 1781428919546,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1781428916557,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "alpha rooms popping rn"
+  },
+  {
+    "ts": 1781428910504,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $BLX 5.8x ✅"
+  },
+  {
+    "ts": 1781428908089,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 The people messaging me every day understand something you don't yet"
+  },
+  {
+    "ts": 1781428904586,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 Cleaned up the server — seats opened"
+  },
+  {
+    "ts": 1781428873171,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
     "ts": 1781428516850,
     "channel": "vip_snipes",
     "ok": true,
@@ -1114,89 +1198,5 @@
     "channel": "alerts",
     "ok": true,
     "message": "📡 ALERT — Movers heating up (1h)"
-  },
-  {
-    "ts": 1777570889575,
-    "channel": "gas_tracker",
-    "ok": true,
-    "message": "⛽ Gas tracker"
-  },
-  {
-    "ts": 1777570886529,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777570883411,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "🧠 Alpha Lounge — DePIN infrastructure"
-  },
-  {
-    "ts": 1777570880481,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "🔴 EXIT — $MARU"
-  },
-  {
-    "ts": 1777570877424,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "🐋 Whale took profit on $RCON"
-  },
-  {
-    "ts": 1777570874484,
-    "channel": "early_access",
-    "ok": true,
-    "message": "🚀 Early Radar — $FX6900 — 40min head start"
-  },
-  {
-    "ts": 1777570871444,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "🔥 Trending right now"
-  },
-  {
-    "ts": 1777570868455,
-    "channel": "general_chat",
-    "ok": true,
-    "message": "💬 **Quick poll** — what's the next narrative that runs?\n• AI agents 🤖\n• Solana"
-  },
-  {
-    "ts": 1777570865381,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "→ telegram: proof-results (msg 107)"
-  },
-  {
-    "ts": 1777570862637,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "🏆 RECEIPT — $BP 2.8x ✅"
-  },
-  {
-    "ts": 1777570861576,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "→ telegram: join-apex-vip (msg 106)"
-  },
-  {
-    "ts": 1777570859446,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "💎 I trade WITH my members. Here's what that means."
-  },
-  {
-    "ts": 1777570856465,
-    "channel": "announcements",
-    "ok": true,
-    "message": "📢 I said I'd be straight with you — so here it is"
-  },
-  {
-    "ts": 1777570825408,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
   }
 ]
