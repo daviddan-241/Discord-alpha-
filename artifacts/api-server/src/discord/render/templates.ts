@@ -25,6 +25,8 @@ import {
 
 const { W, H } = SIZE;
 
+// Dark cinematic theme — June 2026 push
+// All palettes: pure black + silver/gold/off-white. No neon colors.
 // Dark, elite, mature labels — no emojis, no hype slang
 const ELITE_TAGS = [
   "CONFIRMED RECEIPT",

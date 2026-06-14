@@ -1,5 +1,10 @@
 import { createCanvas, type SKRSContext2D, type Canvas } from "@napi-rs/canvas";
 
+// Dark cinematic theme — June 2026
+// Palette: pure black + silver/gold/off-white accents. No neon, no bright hues.
+// Pushed to https://github.com/daviddan-241/Discord-alpha-
+export const THEME_VERSION = "dark-cinematic-v1";
+
 const W = 1024;
 const H = 576;
 

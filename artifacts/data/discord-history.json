@@ -1,5 +1,17 @@
 [
   {
+    "ts": 1781419757671,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "→ telegram: free-calls (msg 693)"
+  },
+  {
+    "ts": 1781419756129,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "👀 VIP just filled — $LOA (3m head start)"
+  },
+  {
     "ts": 1781419577597,
     "channel": "vip_snipes",
     "ok": true,
@@ -1186,17 +1198,5 @@
     "channel": "gas_tracker",
     "ok": true,
     "message": "⛽ Gas tracker"
-  },
-  {
-    "ts": 1777566201853,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777566200493,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "→ telegram: alpha-lounge (msg 86)"
   }
 ]
