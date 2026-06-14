@@ -1,5 +1,41 @@
 [
   {
+    "ts": 1781419532015,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 Cleaned up the server — seats opened"
+  },
+  {
+    "ts": 1781387093285,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1781387077572,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale fully exited $GOATUNC"
+  },
+  {
+    "ts": 1781386925315,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1781386808513,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "→ telegram: free-calls (msg 692)"
+  },
+  {
+    "ts": 1781386806938,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "👀 VIP just filled — $DAVVI (6m head start)"
+  },
+  {
     "ts": 1781386448403,
     "channel": "vip_snipes",
     "ok": true,
@@ -1162,41 +1198,5 @@
     "channel": "price_bot",
     "ok": true,
     "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777490610455,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "→ telegram: vip-snipes (msg 81)"
-  },
-  {
-    "ts": 1777490608953,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "💎 VIP SNIPE — $LUNCHMONEY filled @ $925.9K mcap"
-  },
-  {
-    "ts": 1777490600945,
-    "channel": "alerts",
-    "ok": true,
-    "message": "📡 ALERT — VIP just got fed"
-  },
-  {
-    "ts": 1777490598048,
-    "channel": "gas_tracker",
-    "ok": true,
-    "message": "⛽ Gas tracker"
-  },
-  {
-    "ts": 1777490595085,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777490593141,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "→ telegram: alpha-lounge (msg 80)"
   }
 ]
