@@ -75,12 +75,12 @@ export function paintBackground(
   ctx.fillStyle = c1;
   ctx.fillRect(0, 0, W, H);
 
-  // ── Statue image — left ~48% cover, used by ALL templates
+  // ── Statue image — LEFT PANEL ONLY (x=0 to 420), right side is pure dark
   const bgImg = _bgImage;
   if (bgImg) {
     ctx.save();
-    ctx.globalAlpha = 0.85;
-    const targetW = 490;
+    ctx.globalAlpha = 0.88;
+    const targetW = 420;
     const imgAspect = bgImg.width  / bgImg.height;
     const tgtAspect = targetW / H;
     let sx = 0, sy = 0, sw = bgImg.width, sh = bgImg.height;
@@ -96,14 +96,25 @@ export function paintBackground(
     ctx.restore();
   }
 
-  // ── Horizontal fade: statue → dark content area
+  // ── Hard fade at divider: statue fades into black by x≈440
   const fade = ctx.createLinearGradient(0, 0, W, 0);
   fade.addColorStop(0,    "rgba(0,0,0,0)");
-  fade.addColorStop(0.30, "rgba(0,0,0,0.1)");
-  fade.addColorStop(0.48, "rgba(0,0,0,0.68)");
-  fade.addColorStop(1,    "rgba(0,0,0,0.88)");
+  fade.addColorStop(0.32, "rgba(0,0,0,0.15)");
+  fade.addColorStop(0.40, "rgba(0,0,0,0.82)");
+  fade.addColorStop(0.43, "rgba(0,0,0,0.97)");
+  fade.addColorStop(1,    "rgba(0,0,0,1)");
   ctx.fillStyle = fade;
   ctx.fillRect(0, 0, W, H);
+
+  // ── Thin vertical accent rule at the divider (x≈432)
+  const divX = 432;
+  const divRule = ctx.createLinearGradient(0, 0, 0, H);
+  divRule.addColorStop(0,   "rgba(0,0,0,0)");
+  divRule.addColorStop(0.15, hexAlpha(accent, 0.28));
+  divRule.addColorStop(0.85, hexAlpha(accent, 0.28));
+  divRule.addColorStop(1,   "rgba(0,0,0,0)");
+  ctx.fillStyle = divRule;
+  ctx.fillRect(divX, 0, 1, H);
 
   // Smoke / mist particles — composited so they don't erase the background
   const smokeC = createCanvas(W, H);

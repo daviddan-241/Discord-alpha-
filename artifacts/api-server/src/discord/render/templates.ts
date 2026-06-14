@@ -3,7 +3,6 @@ import {
   brandFooter,
   drawAccentLine,
   drawAvatar,
-  drawCandles,
   drawChip,
   drawFilmGrain,
   drawGlowOrb,
@@ -29,9 +28,15 @@ import {
 
 const { W, H } = SIZE;
 
-// Dark cinematic theme — June 2026 push
-// All palettes: pure black + silver/gold/off-white. No neon colors.
-// Dark, elite, mature labels — no emojis, no hype slang
+// ─── Right-panel layout constants ────────────────────────────────────────────
+// Statue image occupies x=0..420 (left panel). ALL content lives on the right.
+const RX  = 444;                          // right-panel x start
+const RW  = W - RX - 12;                 // right-panel content width  ≈ 568
+const RC  = RX + Math.round(RW / 2);     // right-panel center x       ≈ 728
+const SW3 = Math.floor((RW - 24) / 3);   // stat-block width when 3    ≈ 181
+const SW2 = Math.floor((RW - 12) / 2);   // stat-block width when 2    ≈ 278
+
+// Dark, elite label pool for proof badges
 const ELITE_TAGS = [
   "CONFIRMED RECEIPT",
   "VIP HAD IT FIRST",
@@ -46,8 +51,8 @@ const ELITE_TAGS = [
 function fmtMoney(n: number): string {
   if (!isFinite(n)) return "—";
   if (n >= 1_000_000_000) return `$${(n / 1e9).toFixed(2)}B`;
-  if (n >= 1_000_000) return `$${(n / 1e6).toFixed(2)}M`;
-  if (n >= 1_000) return `$${(n / 1e3).toFixed(1)}K`;
+  if (n >= 1_000_000)     return `$${(n / 1e6).toFixed(2)}M`;
+  if (n >= 1_000)         return `$${(n / 1e3).toFixed(1)}K`;
   return `$${n.toFixed(2)}`;
 }
 
@@ -63,64 +68,71 @@ function str(input: RenderInput, key: string, fallback: string): string {
   return v && v.length ? v : fallback;
 }
 
+function parseOhlcv(input: RenderInput): { t: number; c: number }[] {
+  try {
+    const r = input["ohlcv"];
+    if (r) return JSON.parse(r) as { t: number; c: number }[];
+  } catch { /* fall back */ }
+  return [];
+}
+
 // =================================================================
-// PROOF — dark luxury multiplier receipt card
+// PROOF — left: statue | right: ticker + multiplier + chart + badges
 // =================================================================
 export const proofTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Rich black + dark gold
   const palette = paintBackground(ctx, rng, ["#000000", "#0a0800", "#d4af37"]);
   const [, , accent] = palette;
   const ticker = str(input, "ticker", "TOKEN");
-  const x = num(input, "x", 50);
-  const entry = num(input, "entry", 12_300);
-  const ath = Math.round(entry * x);
+  const x      = num(input, "x", 50);
+  const entry  = num(input, "entry", 12_300);
+  const ath    = Math.round(entry * x);
   const server = str(input, "server", "Baldwin Calls");
   const handle = str(input, "handle", "@apex");
-  const xText = `${x.toFixed(x >= 100 ? 0 : 1)}x`;
+  const xText  = `${x.toFixed(x >= 100 ? 0 : 1)}x`;
+  const ohlcv  = parseOhlcv(input);
 
   drawHeaderBar(ctx, "PROOF RECEIPT", server.toUpperCase(), accent);
 
-  drawText(ctx, `$${ticker.toUpperCase()}`, 36, 150, {
-    size: 70, weight: "900", color: "#e8e8e8",
+  // Ticker label
+  drawText(ctx, `$${ticker.toUpperCase()}`, RX, 116, {
+    size: 52, weight: "900", color: "#e8e8e8",
   });
-  drawAccentLine(ctx, 36, 158, 180, accent);
+  drawAccentLine(ctx, RX, 122, 200, accent);
 
-  // Large multiplier — gold glow, white fill
+  // Big multiplier — gold glow
   ctx.save();
   ctx.shadowColor = accent;
-  ctx.shadowBlur = 35;
-  ctx.font = `900 ${x >= 100 ? 148 : 168}px Sans`;
-  ctx.fillStyle = accent;
-  ctx.textAlign = "left";
+  ctx.shadowBlur  = 35;
+  ctx.font        = `900 ${x >= 100 ? 128 : 148}px Sans`;
+  ctx.fillStyle   = accent;
+  ctx.textAlign   = "left";
   ctx.textBaseline = "alphabetic";
-  for (let i = 0; i < 3; i++) ctx.fillText(xText, 36, 340);
+  for (let i = 0; i < 3; i++) ctx.fillText(xText, RX, 265);
   ctx.restore();
-  ctx.font = `900 ${x >= 100 ? 148 : 168}px Sans`;
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "left";
+  ctx.font        = `900 ${x >= 100 ? 128 : 148}px Sans`;
+  ctx.fillStyle   = "#ffffff";
+  ctx.textAlign   = "left";
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(xText, 36, 340);
+  ctx.fillText(xText, RX, 265);
 
-  let bx = 36;
-  ctx.font = `800 15px Sans`;
-  bx += drawPremiumBadge(ctx, bx, 420, `Entry ${fmtMoney(entry)}`, accent);
-  bx += drawPremiumBadge(ctx, bx, 420, `ATH ${fmtMoney(ath)}`, accent);
-  bx += drawPremiumBadge(ctx, bx, 420, pickFrom(rng, ELITE_TAGS), accent, true);
+  // Real price chart
+  drawRealPriceChart(ctx, RX, 282, RW - 8, 168, ohlcv, ticker, accent, rng);
 
-  drawText(ctx, `DM ${handle} to access VIP`, 36, 490, {
-    size: 20, weight: "700", color: hexAlpha("#d0d0d0", 0.75),
+  // Badges
+  let bx = RX;
+  bx += drawPremiumBadge(ctx, bx, 464, `Entry ${fmtMoney(entry)}`, accent);
+  bx += drawPremiumBadge(ctx, bx, 464, `ATH ${fmtMoney(ath)}`, accent);
+  bx += drawPremiumBadge(ctx, bx, 464, pickFrom(rng, ELITE_TAGS), accent, true);
+
+  drawText(ctx, `DM ${handle} to access VIP`, RX, 500, {
+    size: 18, weight: "700", color: hexAlpha("#d0d0d0", 0.72),
   });
-
-  let proofOhlcv: { t: number; c: number }[] = [];
-  try { const r = input["ohlcv"]; if (r) proofOhlcv = JSON.parse(r); } catch { /* sparkline */ }
-  drawRealPriceChart(ctx, 508, 96, W - 526, 362, proofOhlcv, ticker, accent, rng);
 
   brandFooter(ctx, server, `Receipts · ${new Date().toUTCString().slice(5, 22)}`, palette);
 };
 
 // =================================================================
-// CALL — screenshot-matched redesign with real OHLCV chart
-// Layout: statue bg left | content right | real price chart
+// CALL — left: statue | right: ticker + stat boxes + chart + badges
 // =================================================================
 export const callTemplate: RenderTemplate = (ctx, input, rng) => {
   const palette: [string, string, string] = ["#000000", "#0c0c0c", "#c8c8c8"];
@@ -132,55 +144,49 @@ export const callTemplate: RenderTemplate = (ctx, input, rng) => {
   const chain  = str(input, "chain", "Solana");
   const dex    = str(input, "dex",   "PumpSwap");
   const server = str(input, "server", "Baldwin Calls");
-
-  // Parse real OHLCV from pre-fetched JSON string
-  let ohlcv: { t: number; c: number }[] = [];
-  try {
-    const raw = input["ohlcv"];
-    if (raw) ohlcv = JSON.parse(raw) as { t: number; c: number }[];
-  } catch { /* fall back to sparkline */ }
+  const ohlcv  = parseOhlcv(input);
 
   // ── Background: true black
   ctx.fillStyle = "#000000";
   ctx.fillRect(0, 0, W, H);
 
-  // ── Statue image — left ~45% of card, "cover" fill
+  // ── Statue image — LEFT PANEL ONLY (0..420)
   const bgImg = getBackgroundImage();
   if (bgImg) {
     ctx.save();
     ctx.globalAlpha = 0.88;
-    const targetW = 450;
-    const imgAspect  = bgImg.width  / bgImg.height;
-    const tgtAspect  = targetW / H;
+    const targetW   = 420;
+    const imgAspect = bgImg.width  / bgImg.height;
+    const tgtAspect = targetW / H;
     let sx = 0, sy = 0, sw = bgImg.width, sh = bgImg.height;
-    if (imgAspect > tgtAspect) {
-      sh = bgImg.height;
-      sw = bgImg.height * tgtAspect;
-      sx = (bgImg.width - sw) / 2;
-    } else {
-      sw = bgImg.width;
-      sh = bgImg.width / tgtAspect;
-      sy = (bgImg.height - sh) / 2;
-    }
+    if (imgAspect > tgtAspect) { sw = bgImg.height * tgtAspect; sx = (bgImg.width - sw) / 2; }
+    else                        { sh = bgImg.width / tgtAspect;  sy = (bgImg.height - sh) / 2; }
     ctx.drawImage(bgImg as unknown as Parameters<typeof ctx.drawImage>[0], sx, sy, sw, sh, 0, 0, targetW, H);
     ctx.globalAlpha = 1;
     ctx.restore();
   }
 
-  // ── Gradient overlay: fade statue into dark content area
+  // ── Hard fade + divider rule
   const fade = ctx.createLinearGradient(0, 0, W, 0);
   fade.addColorStop(0,    "rgba(0,0,0,0)");
-  fade.addColorStop(0.28, "rgba(0,0,0,0.08)");
-  fade.addColorStop(0.44, "rgba(0,0,0,0.62)");
-  fade.addColorStop(1,    "rgba(0,0,0,0.84)");
+  fade.addColorStop(0.32, "rgba(0,0,0,0.15)");
+  fade.addColorStop(0.40, "rgba(0,0,0,0.82)");
+  fade.addColorStop(0.43, "rgba(0,0,0,0.97)");
+  fade.addColorStop(1,    "rgba(0,0,0,1)");
   ctx.fillStyle = fade;
   ctx.fillRect(0, 0, W, H);
+  const divRule = ctx.createLinearGradient(0, 0, 0, H);
+  divRule.addColorStop(0,    "rgba(0,0,0,0)");
+  divRule.addColorStop(0.15, hexAlpha(accent, 0.28));
+  divRule.addColorStop(0.85, hexAlpha(accent, 0.28));
+  divRule.addColorStop(1,    "rgba(0,0,0,0)");
+  ctx.fillStyle = divRule;
+  ctx.fillRect(432, 0, 1, H);
 
-  // ── Film grain (composited, preserves background opacity)
   drawFilmGrain(ctx, rng, 18);
 
   // ── Premium edge frame
-  const inset = 8;
+  const inset    = 8;
   const edgeGrad = ctx.createLinearGradient(0, 0, W, H);
   edgeGrad.addColorStop(0,   hexAlpha(accent, 0.55));
   edgeGrad.addColorStop(0.5, hexAlpha("#ffffff", 0.15));
@@ -200,29 +206,20 @@ export const callTemplate: RenderTemplate = (ctx, input, rng) => {
   divGrad.addColorStop(1,   "rgba(0,0,0,0)");
   ctx.fillStyle = divGrad;
   ctx.fillRect(0, 51, W, 1);
-
-  // ⚡ BALDWIN CALLS — top-left
   ctx.save();
-  ctx.shadowColor = hexAlpha(accent, 0.4);
-  ctx.shadowBlur  = 8;
-  ctx.font        = "800 18px Sans";
-  ctx.fillStyle   = "#ffffff";
-  ctx.textAlign   = "left";
+  ctx.shadowColor  = hexAlpha(accent, 0.4);
+  ctx.shadowBlur   = 8;
+  ctx.font         = "800 18px Sans";
+  ctx.fillStyle    = "#ffffff";
+  ctx.textAlign    = "left";
   ctx.textBaseline = "alphabetic";
   ctx.fillText("⚡ BALDWIN CALLS", 22, 35);
   ctx.restore();
-
-  // CHAIN • DEX — centre-right of header
-  ctx.font        = "600 13px Sans";
-  ctx.fillStyle   = hexAlpha("#c8c8c8", 0.65);
-  ctx.textAlign   = "right";
+  ctx.font         = "600 13px Sans";
+  ctx.fillStyle    = hexAlpha("#c8c8c8", 0.65);
+  ctx.textAlign    = "right";
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(
-    `${chain.toUpperCase()} • ${dex.toUpperCase()}`,
-    W - 104, 35,
-  );
-
-  // LIVE ● badge — top-right
+  ctx.fillText(`${chain.toUpperCase()} • ${dex.toUpperCase()}`, W - 104, 35);
   const liveX = W - 92;
   roundedRect(ctx, liveX, 13, 76, 26, 13);
   ctx.fillStyle = hexAlpha("#000000", 0.8);
@@ -231,90 +228,69 @@ export const callTemplate: RenderTemplate = (ctx, input, rng) => {
   ctx.strokeStyle = hexAlpha(accent, 0.5);
   ctx.lineWidth   = 1.5;
   ctx.stroke();
-  ctx.font        = "800 13px Sans";
-  ctx.fillStyle   = "#ffffff";
-  ctx.textAlign   = "left";
-  ctx.textBaseline = "alphabetic";
+  ctx.font      = "800 13px Sans";
+  ctx.fillStyle = "#ffffff";
+  ctx.textAlign = "left";
   ctx.fillText("LIVE", liveX + 10, 31);
   ctx.beginPath();
   ctx.arc(liveX + 60, 26, 5, 0, Math.PI * 2);
   ctx.fillStyle = "#4ade80";
   ctx.fill();
 
-  // ── Content area (right of statue): CX = 385
-  const CX = 385;
-
-  // Ticker $SYMBOL — large glow text
-  drawGlowText(ctx, `$${ticker.toUpperCase()}`, CX, 170, {
-    size: 100, weight: "900", color: "#ffffff",
+  // ── Ticker (right panel)
+  drawGlowText(ctx, `$${ticker.toUpperCase()}`, RX, 152, {
+    size: 86, weight: "900", color: "#ffffff",
     glowColor: "#ffffff", glowRadius: 18,
   });
-
-  // Tagline
-  drawText(ctx, "ENTRY OPEN  —  MOVE NOW", CX, 196, {
-    size: 18, weight: "800", color: hexAlpha(accent, 0.88),
+  drawText(ctx, "ENTRY OPEN  —  MOVE NOW", RX, 174, {
+    size: 16, weight: "800", color: hexAlpha(accent, 0.88),
   });
 
-  // ── 3 stat boxes with sub-tags
-  const boxY  = 212;
-  const boxW  = Math.floor((W - CX - 20 - 2 * 8) / 3);  // ~196
-  const boxGap = 8;
-  const mcTag  = mc  < 500_000 ? "👑 LOW MCAP"
-               : mc  < 5_000_000 ? "📊 MID MCAP"
-               : "📈 HIGH MCAP";
-  const liqTag = liq > 20_000 ? "💧 STRONG LIQUIDITY"
-               : liq > 5_000  ? "💧 GOOD LIQUIDITY"
-               : "💧 THIN LIQUIDITY";
-
-  statBlockWithTag(ctx, CX,                          boxY, boxW, "MARKET CAP", fmtMoney(mc),  mcTag,              palette);
-  statBlockWithTag(ctx, CX + boxW + boxGap,           boxY, boxW, "LIQUIDITY",  fmtMoney(liq), liqTag,             palette);
-  statBlockWithTag(ctx, CX + (boxW + boxGap) * 2,     boxY, boxW, "ENTRY",      "OPEN",         "🎯 EARLY ENTRY",  palette);
+  // ── 3 stat boxes
+  const boxY  = 190;
+  const boxW  = SW3;
+  const mcTag  = mc  < 500_000 ? "LOW MCAP" : mc  < 5_000_000 ? "MID MCAP" : "HIGH MCAP";
+  const liqTag = liq > 20_000  ? "STRONG LIQ" : liq > 5_000 ? "GOOD LIQ" : "THIN LIQ";
+  statBlockWithTag(ctx, RX,              boxY, boxW, "MARKET CAP", fmtMoney(mc),  mcTag,       palette);
+  statBlockWithTag(ctx, RX + SW3 + 12,   boxY, boxW, "LIQUIDITY",  fmtMoney(liq), liqTag,      palette);
+  statBlockWithTag(ctx, RX + (SW3+12)*2, boxY, boxW, "ENTRY",      "OPEN",        "EARLY",     palette);
 
   // ── Real price chart
-  const chartX = CX;
-  const chartW = W - CX - 18;
-  const chartY = 315;
-  const chartH = 155;
-  drawRealPriceChart(ctx, chartX, chartY, chartW, chartH, ohlcv, ticker, accent, rng);
+  drawRealPriceChart(ctx, RX, 295, RW - 6, 160, ohlcv, ticker, accent, rng);
 
   // ── Bottom pill badges
   const badgeTags = [
-    "🚀 LOW MCAP",
-    "⚡ FRESH LAUNCH",
-    pickFrom(rng, ["★ PRECISION PLAY", "★ VIP FIRST", "★ ALPHA ENTRY", "★ FIRST WAVE"]),
+    "LOW MCAP",
+    "FRESH LAUNCH",
+    pickFrom(rng, ["★ VIP FIRST", "★ ALPHA ENTRY", "★ FIRST WAVE", "★ PRECISION"]),
   ];
-  let bx = CX;
-  for (const tag of badgeTags) {
-    bx += drawPremiumBadge(ctx, bx, 487, tag, accent, false);
-  }
+  let bx = RX;
+  for (const tag of badgeTags) bx += drawPremiumBadge(ctx, bx, 468, tag, accent, false);
 
   brandFooter(ctx, server, "Free Calls · DYOR", palette);
 };
 
 // =================================================================
-// VIP — dark luxury sales card
+// VIP — left: statue | right: pitch text + bullets + CTA
 // =================================================================
 export const vipTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + warm gold — most premium
   const palette = paintBackground(ctx, rng, ["#000000", "#0d0a00", "#c5a028"]);
   const [, , accent] = palette;
   const handle = str(input, "handle", "@apex");
   const server = str(input, "server", "Baldwin Calls");
-  const wins = (input["wins"] ?? "196x,120x,109x").split(",").slice(0, 3);
+  const wins   = (input["wins"] ?? "196x,120x,109x").split(",").slice(0, 3);
 
   drawHeaderBar(ctx, "JOIN VIP", "PRIVATE ACCESS", accent);
 
-  drawGlowText(ctx, "Stop watching.", 36, 175, {
-    size: 58, weight: "900", color: "#ffffff", glowColor: accent, glowRadius: 12,
+  drawGlowText(ctx, "Stop watching.", RX, 162, {
+    size: 52, weight: "900", color: "#ffffff", glowColor: accent, glowRadius: 12,
   });
-  drawGlowText(ctx, "Start winning.", 36, 248, {
-    size: 58, weight: "900", color: accent, glowColor: accent, glowRadius: 18,
+  drawGlowText(ctx, "Start winning.", RX, 224, {
+    size: 52, weight: "900", color: accent, glowColor: accent, glowRadius: 18,
   });
 
-  let cx = 36;
-  for (const w of wins) {
-    cx += drawPremiumBadge(ctx, cx, 308, w.trim().toUpperCase(), accent, true);
-  }
+  let cx = RX;
+  for (const w of wins) cx += drawPremiumBadge(ctx, cx, 276, w.trim().toUpperCase(), accent, true);
 
   const bullets = [
     "CA before the public chart opens",
@@ -323,38 +299,35 @@ export const vipTemplate: RenderTemplate = (ctx, input, rng) => {
     "Daily alpha and narrative briefing",
     "Private VIP-only channel access",
   ];
-  let by = 350;
+  let by = 322;
   for (const b of bullets) {
-    drawText(ctx, `—  ${b}`, 36, by, { size: 20, weight: "600", color: hexAlpha("#d8d8d8", 0.85) });
-    by += 34;
+    drawText(ctx, `—  ${b}`, RX, by, { size: 19, weight: "600", color: hexAlpha("#d8d8d8", 0.85) });
+    by += 33;
   }
 
-  drawText(ctx, `DM ${handle} to get in`, 36, H - 72, {
-    size: 26, weight: "900", color: "#ffffff",
+  drawText(ctx, `DM ${handle} to get in`, RX, H - 68, {
+    size: 24, weight: "900", color: "#ffffff",
   });
-
-  drawGlowOrb(ctx, W - 200, 280, 120, accent, rng);
 
   brandFooter(ctx, server, "VIP · Limited Seats", palette);
 };
 
 // =================================================================
-// ALERT — dark breaking alert card
+// ALERT — left: statue | right: breaking alert text
 // =================================================================
 export const alertTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + cool silver — urgent but controlled
   const palette = paintBackground(ctx, rng, ["#000000", "#0d0d0d", "#d0d0d0"]);
   const [, , accent] = palette;
-  const title = str(input, "title", "ALERT");
-  const body = str(input, "body", "Something is moving.");
+  const title  = str(input, "title", "ALERT");
+  const body   = str(input, "body", "Something is moving.");
   const server = str(input, "server", "Baldwin Calls");
 
   drawHeaderBar(ctx, "BREAKING ALERT", "REAL-TIME", accent);
 
-  // Pulsing indicator dot
+  // Pulsing indicator dot — top right
   ctx.beginPath();
-  ctx.arc(W - 56, 36, 16, 0, Math.PI * 2);
-  const dot = ctx.createRadialGradient(W - 56, 36, 0, W - 56, 36, 16);
+  ctx.arc(W - 56, 36, 14, 0, Math.PI * 2);
+  const dot = ctx.createRadialGradient(W - 56, 36, 0, W - 56, 36, 14);
   dot.addColorStop(0, "#ffffff");
   dot.addColorStop(0.5, accent);
   dot.addColorStop(1, hexAlpha(accent, 0.6));
@@ -362,154 +335,148 @@ export const alertTemplate: RenderTemplate = (ctx, input, rng) => {
   ctx.fill();
   for (let i = 3; i >= 1; i--) {
     ctx.beginPath();
-    ctx.arc(W - 56, 36, 16 + i * 12, 0, Math.PI * 2);
-    ctx.strokeStyle = hexAlpha(accent, 0.06 + i * 0.04);
-    ctx.lineWidth = 2;
+    ctx.arc(W - 56, 36, 14 + i * 10, 0, Math.PI * 2);
+    ctx.strokeStyle = hexAlpha(accent, 0.07 + i * 0.04);
+    ctx.lineWidth   = 2;
     ctx.stroke();
   }
 
-  drawAccentLine(ctx, 36, 100, 200, accent);
+  drawAccentLine(ctx, RX, 94, 210, accent);
 
-  drawGlowText(ctx, title.toUpperCase(), 36, 190, {
+  drawGlowText(ctx, title.toUpperCase(), RX, 186, {
     size: 56, weight: "900", color: "#ffffff",
-    glowColor: accent, glowRadius: 16, maxWidth: W - 72,
+    glowColor: accent, glowRadius: 16, maxWidth: RW,
   });
 
-  wrapText(ctx, body, 36, 250, W - 80, 38, {
-    size: 24, weight: "600", color: hexAlpha("#e8e8e8", 0.88),
+  wrapText(ctx, body, RX, 248, RW - 12, 38, {
+    size: 22, weight: "600", color: hexAlpha("#e8e8e8", 0.88),
   });
 
   brandFooter(ctx, server, "ALERTS · LIVE", palette);
 };
 
 // =================================================================
-// WHALE — dark on-chain wallet movement card
+// WHALE — left: statue | right: action + ticker + chart + stats
 // =================================================================
 export const whaleTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + icy silver
-  const palette = paintBackground(ctx, rng, ["#000000", "#08090a", "#b8c8d0"]);
+  const palette    = paintBackground(ctx, rng, ["#000000", "#08090a", "#b8c8d0"]);
   const [, , accent] = palette;
-  const action = str(input, "action", "BOUGHT");
-  const ticker = str(input, "ticker", "TOKEN");
-  const wallet = str(input, "wallet", "ABCD…WXYZ");
-  const sizeStr = str(input, "size", "240 SOL");
-  const usdStr = str(input, "usd", "$48,000");
-  const tag = str(input, "tag", "Smart Money #1");
-  const server = str(input, "server", "Baldwin Calls");
-  const isExit = action.toLowerCase().includes("exit") || action.toLowerCase().includes("trim");
-  // Gold for buy, silver for sell — no neon
+  const action     = str(input, "action", "BOUGHT");
+  const ticker     = str(input, "ticker", "TOKEN");
+  const wallet     = str(input, "wallet", "ABCD…WXYZ");
+  const sizeStr    = str(input, "size", "240 SOL");
+  const usdStr     = str(input, "usd", "$48,000");
+  const tag        = str(input, "tag", "Smart Money #1");
+  const server     = str(input, "server", "Baldwin Calls");
+  const isExit     = action.toLowerCase().includes("exit") || action.toLowerCase().includes("trim");
   const actionColor = isExit ? "#909090" : "#d4af37";
+  const ohlcv      = parseOhlcv(input);
 
   drawHeaderBar(ctx, "WHALE TRACKER", tag.toUpperCase(), accent);
 
-  drawAvatar(ctx, 90, 220, 62, rng, palette);
-
-  drawGlowText(ctx, action.toUpperCase(), 180, 200, {
-    size: 52, weight: "900", color: actionColor, glowColor: actionColor, glowRadius: 14,
+  // Hero action + ticker
+  drawGlowText(ctx, action.toUpperCase(), RX, 152, {
+    size: 68, weight: "900", color: actionColor, glowColor: actionColor, glowRadius: 16,
   });
-  drawText(ctx, `$${ticker.toUpperCase()}`, 180, 258, {
-    size: 40, weight: "900", color: "#e8e8e8",
+  drawGlowText(ctx, `$${ticker.toUpperCase()}`, RX, 212, {
+    size: 50, weight: "900", color: "#e8e8e8",
+    glowColor: hexAlpha("#ffffff", 0.1), glowRadius: 6,
   });
-  drawText(ctx, `Wallet  ${wallet}`, 180, 298, {
-    size: 18, weight: "600", color: hexAlpha("#c8c8c8", 0.6),
+  drawText(ctx, `Wallet  ${wallet}`, RX, 240, {
+    size: 15, weight: "600", color: hexAlpha("#c8c8c8", 0.55),
   });
 
-  statBlock(ctx, 36, 340, "SIZE", sizeStr, palette);
-  statBlock(ctx, 274, 340, "VALUE", usdStr, palette);
-  statBlock(ctx, 512, 340, "STATUS", "ON-CHAIN", palette);
+  // Real price chart
+  drawRealPriceChart(ctx, RX, 256, RW - 8, 170, ohlcv, ticker, actionColor, rng);
 
-  let whaleOhlcv: { t: number; c: number }[] = [];
-  try { const r = input["ohlcv"]; if (r) whaleOhlcv = JSON.parse(r); } catch { /* sparkline */ }
-  drawRealPriceChart(ctx, W - 424, 96, 396, 228, whaleOhlcv, ticker, actionColor, rng);
+  // 2 stat blocks: SIZE + VALUE
+  statBlock(ctx, RX,         438, "SIZE",  sizeStr, palette);
+  statBlock(ctx, RX + SW2 + 12, 438, "VALUE", usdStr,  palette);
 
   brandFooter(ctx, server, "TRACKING 1,200+ WALLETS", palette);
 };
 
 // =================================================================
-// TRADE — dark live entry/trim/exit card
+// TRADE — left: statue | right: direction + ticker + chart + stats
 // =================================================================
 export const tradeTemplate: RenderTemplate = (ctx, input, rng) => {
-  const direction = str(input, "direction", "BUY");
-  const isBuy = direction === "BUY";
-  const isExit = direction === "EXIT";
-  // Gold for buy, mid-silver for trim, dark silver for exit
+  const direction   = str(input, "direction", "BUY");
+  const isBuy       = direction === "BUY";
+  const isExit      = direction === "EXIT";
   const accentColor = isBuy ? "#d4af37" : isExit ? "#888888" : "#a8a020";
   const bgPalette: [string, string, string] = isBuy
     ? ["#000000", "#0a0800", "#d4af37"]
     : isExit
     ? ["#000000", "#0d0d0d", "#888888"]
     : ["#000000", "#0a0900", "#a8a020"];
-  const palette = paintBackground(ctx, rng, bgPalette);
+  const palette  = paintBackground(ctx, rng, bgPalette);
   const [, , accent] = palette;
-
-  const ticker = str(input, "ticker", "TOKEN");
-  const sizeStr = str(input, "size", "12 SOL");
-  const usdStr = str(input, "usd", "$2,400");
-  const wallet = str(input, "wallet", "ABCD…WXYZ");
-  const server = str(input, "server", "Baldwin Calls");
+  const ticker   = str(input, "ticker", "TOKEN");
+  const sizeStr  = str(input, "size", "12 SOL");
+  const usdStr   = str(input, "usd", "$2,400");
+  const wallet   = str(input, "wallet", "ABCD…WXYZ");
+  const server   = str(input, "server", "Baldwin Calls");
+  const ohlcv    = parseOhlcv(input);
 
   drawHeaderBar(ctx, "LIVE TRADE", wallet, accent);
 
-  drawGlowText(ctx, direction, 36, 220, {
-    size: 94, weight: "900", color: accentColor,
+  // Hero direction + ticker
+  drawGlowText(ctx, direction, RX, 162, {
+    size: 86, weight: "900", color: accentColor,
     glowColor: accentColor, glowRadius: 24,
   });
-  drawGlowText(ctx, `$${ticker.toUpperCase()}`, 36, 305, {
-    size: 58, weight: "900", color: "#ffffff",
-    glowColor: hexAlpha("#ffffff", 0.15), glowRadius: 8,
+  drawGlowText(ctx, `$${ticker.toUpperCase()}`, RX, 238, {
+    size: 52, weight: "900", color: "#ffffff",
+    glowColor: hexAlpha("#ffffff", 0.12), glowRadius: 8,
   });
 
-  let tradeOhlcv: { t: number; c: number }[] = [];
-  try { const r = input["ohlcv"]; if (r) tradeOhlcv = JSON.parse(r); } catch { /* sparkline */ }
-  drawRealPriceChart(ctx, W - 450, 88, 428, 245, tradeOhlcv, ticker, accentColor, rng);
+  // Real price chart
+  drawRealPriceChart(ctx, RX, 254, RW - 8, 175, ohlcv, ticker, accentColor, rng);
 
-  statBlock(ctx, 36, 348, "SIZE", sizeStr, palette);
-  statBlock(ctx, 274, 348, "USD VALUE", usdStr, palette);
-  statBlock(ctx, 512, 348, "STATUS", isBuy ? "FILLED" : isExit ? "CLOSED" : "TRIMMED", palette);
+  // 3 stat blocks
+  statBlock(ctx, RX,              440, "SIZE",     sizeStr,                                   palette);
+  statBlock(ctx, RX + SW3 + 12,   440, "USD VALUE", usdStr,                                   palette);
+  statBlock(ctx, RX + (SW3+12)*2, 440, "STATUS",   isBuy ? "FILLED" : isExit ? "CLOSED" : "TRIMMED", palette);
 
   brandFooter(ctx, server, "Live Trades", palette);
 };
 
 // =================================================================
-// TRENDING — dark top movers list card
+// TRENDING — left: statue | right: top-3 mover rows
 // =================================================================
 export const trendingTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + warm gold
   const palette = paintBackground(ctx, rng, ["#000000", "#0c0900", "#c5a028"]);
   const [, , accent] = palette;
-  const items = (input["items"] ?? "DEGEN:+220,WIF2:+148,BONK2:+92").split(",").slice(0, 3);
+  const items  = (input["items"] ?? "DEGEN:+220,WIF2:+148,BONK2:+92").split(",").slice(0, 3);
   const server = str(input, "server", "Baldwin Calls");
 
   drawHeaderBar(ctx, "TRENDING", "LAST 24H", accent);
 
-  let y = 95;
-  // Gold tier / silver tier / bronze tier — no neon
+  let y = 88;
   const rankColors = [accent, hexAlpha("#b0b0b0", 0.9), hexAlpha("#8b6914", 0.85)];
   let rank = 1;
   for (const it of items) {
     const [name, change] = (it ?? "").split(":");
-    roundedRect(ctx, 28, y, W - 56, 100, 16);
-    const rowGrad = ctx.createLinearGradient(28, y, W - 56, y);
+    const rowW = RW + 8;
+    roundedRect(ctx, RX - 4, y, rowW, 104, 14);
+    const rowGrad = ctx.createLinearGradient(RX - 4, y, RX - 4 + rowW, y);
     rowGrad.addColorStop(0, hexAlpha("#000000", 0.75));
     rowGrad.addColorStop(1, hexAlpha("#000000", 0.35));
     ctx.fillStyle = rowGrad;
     ctx.fill();
-    roundedRect(ctx, 28, y, W - 56, 100, 16);
+    roundedRect(ctx, RX - 4, y, rowW, 104, 14);
     ctx.strokeStyle = hexAlpha(rankColors[rank - 1]!, 0.28);
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth   = 1.5;
     ctx.stroke();
 
-    ctx.fillStyle = rankColors[rank - 1]!;
-    ctx.fillRect(28, y + 8, 4, 84);
-
-    drawText(ctx, `#${rank}`, 56, y + 66, { size: 38, weight: "900", color: rankColors[rank - 1]! });
-    drawText(ctx, `$${(name ?? "TOKEN").toUpperCase()}`, 130, y + 66, {
-      size: 36, weight: "900", color: "#e8e8e8",
+    drawText(ctx, `#${rank}`, RX + 14, y + 64, { size: 36, weight: "900", color: rankColors[rank - 1]! });
+    drawText(ctx, `$${(name ?? "TOKEN").toUpperCase()}`, RX + 82, y + 64, {
+      size: 34, weight: "900", color: "#e8e8e8",
     });
-    drawSparkline(ctx, W - 340, y + 12, 180, 70, rng, "up", rankColors[rank - 1]!);
+    drawSparkline(ctx, RX + 240, y + 12, 180, 70, rng, "up", rankColors[rank - 1]!);
     const changeVal = change ?? "+0";
-    drawGlowText(ctx, `${changeVal}%`, W - 130, y + 66, {
-      size: 34, weight: "900", color: accent,
+    drawGlowText(ctx, `${changeVal}%`, W - 28, y + 64, {
+      size: 32, weight: "900", color: accent,
       glowColor: accent, glowRadius: 10, align: "right",
     });
     y += 118;
@@ -520,46 +487,43 @@ export const trendingTemplate: RenderTemplate = (ctx, input, rng) => {
 };
 
 // =================================================================
-// PRICE — dark market ticker card
+// PRICE — left: statue | right: 6-coin dark market ticker grid
 // =================================================================
 export const priceTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + silver
   const palette = paintBackground(ctx, rng, ["#000000", "#0c0c0c", "#b8b8b8"]);
   const [, , accent] = palette;
   const server = str(input, "server", "Baldwin Calls");
-  const items = (input["items"] ?? "BTC:65000:+1.2,ETH:3200:+2.1,SOL:185:+4.5,WIF:2.10:+8.4").split(",");
+  const items  = (input["items"] ?? "BTC:65000:+1.2,ETH:3200:+2.1,SOL:185:+4.5,WIF:2.10:+8.4,BNB:580:+0.9,DOGE:0.18:+5.2").split(",");
 
   drawHeaderBar(ctx, "LIVE PRICES", `${new Date().toUTCString().slice(17, 25)} UTC`, accent);
 
+  const cols   = 3;
+  const gutter = 12;
+  const colW   = Math.floor((RW - gutter * (cols - 1)) / cols);
   let i = 0;
-  const cols = 3;
-  const gutter = 14;
-  const colW = (W - 56 - gutter * (cols - 1)) / cols;
   for (const it of items.slice(0, 6)) {
     const [sym, p, ch] = (it ?? "").split(":");
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    const cx = 28 + col * (colW + gutter);
-    const cy = 88 + row * 196;
-    roundedRect(ctx, cx, cy, colW, 182, 16);
+    const col  = i % cols;
+    const row  = Math.floor(i / cols);
+    const cx   = RX + col * (colW + gutter);
+    const cy   = 84 + row * 196;
+    roundedRect(ctx, cx, cy, colW, 182, 14);
     const cardGrad = ctx.createLinearGradient(cx, cy, cx, cy + 182);
     cardGrad.addColorStop(0, hexAlpha("#ffffff", 0.04));
     cardGrad.addColorStop(1, hexAlpha("#000000", 0.65));
     ctx.fillStyle = cardGrad;
     ctx.fill();
-    roundedRect(ctx, cx, cy, colW, 182, 16);
+    roundedRect(ctx, cx, cy, colW, 182, 14);
     const isUp = !(ch ?? "+0").startsWith("-");
-    // Gold up / silver down
     ctx.strokeStyle = hexAlpha(isUp ? "#d4af37" : "#888888", 0.28);
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth   = 1.5;
     ctx.stroke();
-    drawText(ctx, sym ?? "?", cx + 18, cy + 42, { size: 22, weight: "800", color: hexAlpha("#c8c8c8", 0.75) });
-    drawText(ctx, `$${p ?? "0"}`, cx + 18, cy + 86, { size: 30, weight: "900", color: "#ffffff" });
-    const ch2 = ch ?? "+0";
-    drawText(ctx, `${ch2}%  24h`, cx + 18, cy + 120, {
-      size: 16, weight: "800", color: isUp ? "#d4af37" : "#888888",
+    drawText(ctx, sym ?? "?", cx + 16, cy + 40, { size: 20, weight: "800", color: hexAlpha("#c8c8c8", 0.75) });
+    drawText(ctx, `$${p ?? "0"}`, cx + 16, cy + 82, { size: 28, weight: "900", color: "#ffffff" });
+    drawText(ctx, `${ch ?? "+0"}%  24h`, cx + 16, cy + 116, {
+      size: 14, weight: "800", color: isUp ? "#d4af37" : "#888888",
     });
-    drawSparkline(ctx, cx + colW - 118, cy + 60, 100, 62, rng, isUp ? "up" : "down", isUp ? "#d4af37" : "#888888");
+    drawSparkline(ctx, cx + colW - 108, cy + 56, 92, 60, rng, isUp ? "up" : "down", isUp ? "#d4af37" : "#888888");
     i++;
   }
 
@@ -567,151 +531,146 @@ export const priceTemplate: RenderTemplate = (ctx, input, rng) => {
 };
 
 // =================================================================
-// GAS — dark fees tracker card
+// GAS — left: statue | right: 3-chain fee cards
 // =================================================================
 export const gasTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + steel
   const palette = paintBackground(ctx, rng, ["#000000", "#0a0a0c", "#a0a8b0"]);
   const [, , accent] = palette;
   const server = str(input, "server", "Baldwin Calls");
-  const eth = str(input, "eth", "12 gwei");
-  const base = str(input, "base", "0.05 gwei");
-  const sol = str(input, "sol", "0.000007 SOL");
+  const eth    = str(input, "eth", "12 gwei");
+  const base   = str(input, "base", "0.05 gwei");
+  const sol    = str(input, "sol", "0.000007 SOL");
 
   drawHeaderBar(ctx, "GAS TRACKER", "LIVE FEES", accent);
 
   const chains = [
-    { name: "ETHEREUM", fee: eth, status: "nominal" },
-    { name: "BASE", fee: base, status: "cheap" },
-    { name: "SOLANA", fee: sol, status: "spammable" },
+    { name: "ETHEREUM", fee: eth,  status: "nominal" },
+    { name: "BASE",     fee: base, status: "cheap" },
+    { name: "SOLANA",   fee: sol,  status: "spammable" },
   ];
-  const cw = (W - 56 - 24) / 3;
+  const gutter = 10;
+  const cw     = Math.floor((RW - gutter * 2) / 3);
   for (let i2 = 0; i2 < 3; i2++) {
     const chain2 = chains[i2]!;
-    const cx = 28 + i2 * (cw + 12);
-    const cy = 88;
-    roundedRect(ctx, cx, cy, cw, H - 88 - 56, 18);
-    const bg2 = ctx.createLinearGradient(cx, cy, cx, cy + H - 144);
+    const cx     = RX + i2 * (cw + gutter);
+    const cy     = 84;
+    roundedRect(ctx, cx, cy, cw, H - 84 - 52, 16);
+    const bg2 = ctx.createLinearGradient(cx, cy, cx, cy + H - 136);
     bg2.addColorStop(0, hexAlpha("#ffffff", 0.04));
     bg2.addColorStop(1, hexAlpha("#000000", 0.65));
     ctx.fillStyle = bg2;
     ctx.fill();
-    roundedRect(ctx, cx, cy, cw, H - 88 - 56, 18);
+    roundedRect(ctx, cx, cy, cw, H - 84 - 52, 16);
     ctx.strokeStyle = hexAlpha(accent, 0.2);
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth   = 1.5;
     ctx.stroke();
-
-    drawText(ctx, chain2.name, cx + 20, cy + 50, { size: 20, weight: "900", color: accent });
-    drawText(ctx, chain2.fee, cx + 20, cy + 130, { size: 22, weight: "800", color: "#e0e0e0" });
-    drawText(ctx, chain2.status, cx + 20, cy + 175, { size: 16, weight: "700", color: hexAlpha("#c8c8c8", 0.6) });
-    drawSparkline(ctx, cx + 14, cy + 230, cw - 28, 100, rng, "wave", accent);
+    drawText(ctx, chain2.name, cx + 16, cy + 46, { size: 18, weight: "900", color: accent });
+    drawText(ctx, chain2.fee,  cx + 16, cy + 124, { size: 18, weight: "800", color: "#e0e0e0" });
+    drawText(ctx, chain2.status, cx + 16, cy + 165, { size: 14, weight: "700", color: hexAlpha("#c8c8c8", 0.6) });
+    drawSparkline(ctx, cx + 12, cy + 210, cw - 24, 100, rng, "wave", accent);
   }
 
   brandFooter(ctx, server, "Network fees live", palette);
 };
 
 // =================================================================
-// ANNOUNCEMENT — dark official server announcement card
+// ANNOUNCEMENT — left: statue | right: official text
 // =================================================================
 export const announceTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Pick from default palettes — all cinematic dark
   const palette = paintBackground(ctx, rng);
   const [, , accent] = palette;
-  const title = str(input, "title", "ANNOUNCEMENT");
-  const body = str(input, "body", "Big news coming.");
+  const title  = str(input, "title", "ANNOUNCEMENT");
+  const body   = str(input, "body", "Big news coming.");
   const server = str(input, "server", "Baldwin Calls");
 
   drawHeaderBar(ctx, "OFFICIAL", server.toUpperCase(), accent);
 
-  drawAccentLine(ctx, 36, 100, 260, accent);
+  drawAccentLine(ctx, RX, 94, 260, accent);
 
-  drawGlowText(ctx, title.toUpperCase(), 36, 210, {
-    size: 58, weight: "900", color: "#ffffff",
-    glowColor: accent, glowRadius: 12, maxWidth: W - 72,
+  drawGlowText(ctx, title.toUpperCase(), RX, 196, {
+    size: 54, weight: "900", color: "#ffffff",
+    glowColor: accent, glowRadius: 12, maxWidth: RW,
   });
 
-  wrapText(ctx, body, 36, 270, W - 80, 38, {
-    size: 24, weight: "600", color: hexAlpha("#e8e8e8", 0.88),
+  wrapText(ctx, body, RX, 258, RW - 12, 38, {
+    size: 23, weight: "600", color: hexAlpha("#e8e8e8", 0.88),
   });
 
-  drawPremiumBadge(ctx, 36, 490, pickFrom(rng, ["IMPORTANT", "READ NOW", "PRIORITY", "MANDATORY", "ACTION REQUIRED"]), accent, true);
+  drawPremiumBadge(ctx, RX, 468, pickFrom(rng, ["IMPORTANT", "READ NOW", "PRIORITY", "MANDATORY", "ACTION REQUIRED"]), accent, true);
 
   brandFooter(ctx, server, "Official Channel", palette);
 };
 
 // =================================================================
-// VIP SNIPE — dark partially blurred preview card
+// VIP SNIPE — left: statue | right: chart + obscured ticker + lock
 // =================================================================
 export const snipeTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + dark gold — VIP exclusivity
   const palette = paintBackground(ctx, rng, ["#000000", "#0c0900", "#c5a028"]);
   const [, , accent] = palette;
   const ticker = str(input, "ticker", "TOKEN");
-  const mc = num(input, "mc", 12_500);
+  const mc     = num(input, "mc", 12_500);
   const handle = str(input, "handle", "@apex");
   const server = str(input, "server", "Baldwin Calls");
+  const ohlcv  = parseOhlcv(input);
 
   drawHeaderBar(ctx, "VIP SNIPE", "PREVIEW ONLY", accent);
 
-  drawGlowText(ctx, `$${ticker.slice(0, 2).toUpperCase()}•••`, 36, 215, {
-    size: 94, weight: "900", color: "#e8e8e8",
+  // Chart at top of right panel
+  drawRealPriceChart(ctx, RX, 84, RW - 8, 230, ohlcv, `${ticker.slice(0, 2)}•••`, accent, rng);
+
+  // Obscured ticker
+  drawGlowText(ctx, `$${ticker.slice(0, 2).toUpperCase()}•••`, RX, 356, {
+    size: 72, weight: "900", color: "#e8e8e8",
     glowColor: accent, glowRadius: 18,
   });
-  drawGlowText(ctx, `Filled @ ${fmtMoney(mc)}`, 36, 278, {
-    size: 34, weight: "800", color: accent,
+  drawGlowText(ctx, `Filled @ ${fmtMoney(mc)}`, RX, 398, {
+    size: 28, weight: "800", color: accent,
     glowColor: accent, glowRadius: 10,
   });
 
-  let snipeOhlcv: { t: number; c: number }[] = [];
-  try { const r = input["ohlcv"]; if (r) snipeOhlcv = JSON.parse(r); } catch { /* sparkline */ }
-  drawRealPriceChart(ctx, W - 440, 88, 416, 255, snipeOhlcv, `${ticker.slice(0, 2)}•••`, accent, rng);
-
-  // Locked badge — dark with gold border
-  roundedRect(ctx, W / 2 - 240, 360, 480, 72, 36);
-  ctx.fillStyle = hexAlpha("#000000", 0.85);
+  // Lock badge
+  roundedRect(ctx, RX, 416, RW - 8, 62, 31);
+  ctx.fillStyle   = hexAlpha("#000000", 0.85);
   ctx.fill();
-  roundedRect(ctx, W / 2 - 240, 360, 480, 72, 36);
+  roundedRect(ctx, RX, 416, RW - 8, 62, 31);
   ctx.strokeStyle = hexAlpha(accent, 0.65);
-  ctx.lineWidth = 2;
+  ctx.lineWidth   = 2;
   ctx.stroke();
-  drawGlowText(ctx, "CA LOCKED — VIP ONLY", W / 2, 404, {
-    size: 22, weight: "900", color: accent,
+  drawGlowText(ctx, "CA LOCKED — VIP ONLY", RC, 456, {
+    size: 20, weight: "900", color: accent,
     glowColor: accent, glowRadius: 10, align: "center",
   });
 
-  drawText(ctx, `DM ${handle} to join VIP`, W / 2, 466, {
-    size: 22, weight: "700", color: hexAlpha("#d0d0d0", 0.8), align: "center",
+  drawText(ctx, `DM ${handle} to join VIP`, RC, 502, {
+    size: 20, weight: "700", color: hexAlpha("#d0d0d0", 0.8), align: "center",
   });
-
-  drawGlowOrb(ctx, W - 110, 300, 55, accent, rng);
 
   brandFooter(ctx, server, "VIP Snipes", palette);
 };
 
 // =================================================================
-// ALPHA — dark narrative thesis card
+// ALPHA — left: statue | right: narrative label + chart + insight
 // =================================================================
 export const alphaTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + silver
-  const palette = paintBackground(ctx, rng, ["#000000", "#0d0d0d", "#b8b8b8"]);
+  const palette    = paintBackground(ctx, rng, ["#000000", "#0d0d0d", "#b8b8b8"]);
   const [, , accent] = palette;
-  const narrative = str(input, "narrative", "AI Agents");
-  const server = str(input, "server", "Baldwin Calls");
+  const narrative  = str(input, "narrative", "AI Agents");
+  const server     = str(input, "server", "Baldwin Calls");
+  const ohlcv      = parseOhlcv(input);
+  const alphaTicker = str(input, "ticker", "TOKEN");
 
   drawHeaderBar(ctx, "ALPHA LOUNGE", "VIP DAILY BRIEF", accent);
 
-  drawText(ctx, "NARRATIVE", 36, 130, { size: 14, weight: "800", color: hexAlpha(accent, 0.65) });
-  drawAccentLine(ctx, 36, 136, 140, accent);
+  drawText(ctx, "NARRATIVE", RX, 108, { size: 13, weight: "800", color: hexAlpha(accent, 0.65) });
+  drawAccentLine(ctx, RX, 114, 140, accent);
 
-  drawGlowText(ctx, narrative.toUpperCase(), 36, 235, {
-    size: 68, weight: "900", color: "#ffffff",
-    glowColor: accent, glowRadius: 16, maxWidth: W * 0.6,
+  drawGlowText(ctx, narrative.toUpperCase(), RX, 200, {
+    size: 58, weight: "900", color: "#ffffff",
+    glowColor: accent, glowRadius: 16, maxWidth: RW,
   });
 
-  let alphaOhlcv: { t: number; c: number }[] = [];
-  try { const r = input["ohlcv"]; if (r) alphaOhlcv = JSON.parse(r); } catch { /* sparkline */ }
-  const alphaTicker = str(input, "ticker", "TOKEN");
-  drawRealPriceChart(ctx, 36, 265, W - 72, 170, alphaOhlcv, alphaTicker, accent, rng);
+  // Real price chart
+  drawRealPriceChart(ctx, RX, 214, RW - 8, 200, ohlcv, alphaTicker, accent, rng);
 
   const insight = pickFrom(rng, [
     "Smart wallets accumulating quietly. Public attention has not arrived yet.",
@@ -720,141 +679,140 @@ export const alphaTemplate: RenderTemplate = (ctx, input, rng) => {
     "Early movers identified. The window is narrowing.",
     "High-conviction play backed by strong on-chain confirmation.",
   ]);
-  wrapText(ctx, insight, 36, 450, W - 80, 30, {
-    size: 20, weight: "600", color: hexAlpha("#d8d8d8", 0.82),
+  wrapText(ctx, insight, RX, 440, RW - 12, 28, {
+    size: 17, weight: "600", color: hexAlpha("#d8d8d8", 0.82),
   });
-
-  drawGlowOrb(ctx, W - 140, 200, 80, accent, rng);
 
   brandFooter(ctx, server, "Alpha Lounge", palette);
 };
 
 // =================================================================
-// MARKET — dark full-width chart card
+// MARKET — left: statue | right: full chart + market take
 // =================================================================
 export const marketTemplate: RenderTemplate = (ctx, input, rng) => {
   const palette = paintBackground(ctx, rng);
   const [, , accent] = palette;
-  const take = str(input, "take", "Range bound. Patience pays.");
-  const server = str(input, "server", "Baldwin Calls");
-  const trend: "up" | "down" = (input["trend"] === "down") ? "down" : "up";
+  const take        = str(input, "take", "Range bound. Patience pays.");
+  const server      = str(input, "server", "Baldwin Calls");
+  const chartTicker = str(input, "chartTicker", "BTC");
+  const ohlcv       = parseOhlcv(input);
 
   drawHeaderBar(ctx, "MARKET UPDATE", new Date().toUTCString().slice(5, 22), accent);
 
-  let marketOhlcv: { t: number; c: number }[] = [];
-  try { const r = input["ohlcv"]; if (r) marketOhlcv = JSON.parse(r); } catch { /* candles */ }
-  const marketTicker = str(input, "chartTicker", "BTC");
-  drawRealPriceChart(ctx, 28, 88, W - 56, 310, marketOhlcv, marketTicker, accent, rng);
+  // Full right-panel chart
+  drawRealPriceChart(ctx, RX, 84, RW - 6, 310, ohlcv, chartTicker, accent, rng);
 
-  roundedRect(ctx, 28, 418, W - 56, 68, 14);
+  roundedRect(ctx, RX, 404, RW - 6, 64, 12);
   ctx.fillStyle = hexAlpha("#000000", 0.72);
   ctx.fill();
-  roundedRect(ctx, 28, 418, W - 56, 68, 14);
+  roundedRect(ctx, RX, 404, RW - 6, 64, 12);
   ctx.strokeStyle = hexAlpha(accent, 0.28);
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth   = 1.5;
   ctx.stroke();
 
-  wrapText(ctx, take, 50, 458, W - 100, 32, {
-    size: 22, weight: "600", color: hexAlpha("#e8e8e8", 0.92),
+  wrapText(ctx, take, RX + 18, 438, RW - 40, 28, {
+    size: 20, weight: "600", color: hexAlpha("#e8e8e8", 0.92),
   });
 
+  const trend = (input["trend"] === "down") ? "down" : "up";
   brandFooter(ctx, server, trend === "up" ? "RISK ON" : "RISK OFF", palette);
 };
 
 // =================================================================
-// INFO CARDS — welcome / rules / verified / commands
+// INFO CARDS — left: statue | right: label + title + subtitle
 // =================================================================
 export const infoTemplate: RenderTemplate = (ctx, input, rng) => {
   const palette = paintBackground(ctx, rng, ["#000000", "#0d0d0d", "#c8c8c8"]);
   const [, , accent] = palette;
-  const tag = str(input, "tag", "WELCOME");
-  const title = str(input, "title", "WELCOME TO APEX");
+  const tag      = str(input, "tag", "WELCOME");
+  const title    = str(input, "title", "WELCOME TO APEX");
   const subtitle = str(input, "subtitle", "");
-  const server = str(input, "server", "Baldwin Calls");
+  const server   = str(input, "server", "Baldwin Calls");
 
   drawHeaderBar(ctx, tag, server.toUpperCase(), accent);
 
-  drawAccentLine(ctx, 36, 96, 220, accent);
-  drawGlowText(ctx, title.toUpperCase(), 36, 210, {
-    size: 52, weight: "900", color: "#ffffff",
-    glowColor: accent, glowRadius: 14, maxWidth: W - 72,
+  drawAccentLine(ctx, RX, 88, 220, accent);
+  drawGlowText(ctx, title.toUpperCase(), RX, 204, {
+    size: 46, weight: "900", color: "#ffffff",
+    glowColor: accent, glowRadius: 14, maxWidth: RW,
   });
 
   if (subtitle) {
-    wrapText(ctx, subtitle, 36, 268, W - 80, 38, {
-      size: 24, weight: "600", color: hexAlpha("#e0e0e0", 0.85),
+    wrapText(ctx, subtitle, RX, 262, RW - 12, 38, {
+      size: 22, weight: "600", color: hexAlpha("#e0e0e0", 0.85),
     });
   }
 
-  drawGlowOrb(ctx, W - 160, 320, 100, accent, rng);
+  drawGlowOrb(ctx, W - 120, 320, 80, accent, rng);
   brandFooter(ctx, server, tag.toLowerCase(), palette);
 };
 
 // =================================================================
-// GENERAL CHAT — dark premium quote bubble
+// GENERAL CHAT — left: statue | right: avatar + quote bubble
 // =================================================================
 export const chatTemplate: RenderTemplate = (ctx, input, rng) => {
   const palette = paintBackground(ctx, rng);
   const [, , accent] = palette;
-  const quote = str(input, "quote", "patience is the only edge that matters");
+  const quote   = str(input, "quote", "patience is the only edge that matters");
   const persona = str(input, "persona", "anon");
-  const server = str(input, "server", "Baldwin Calls");
+  const server  = str(input, "server", "Baldwin Calls");
 
   drawHeaderBar(ctx, "CHAT", server.toUpperCase(), accent);
 
-  drawAvatar(ctx, 100, 260, 70, rng, palette);
+  drawAvatar(ctx, RX + 44, 264, 60, rng, palette);
 
-  roundedRect(ctx, 195, 165, W - 230, 200, 22);
-  const bubbleGrad = ctx.createLinearGradient(195, 165, 195, 365);
+  const bubbleX = RX + 118;
+  const bubbleW = RW - 126;
+  roundedRect(ctx, bubbleX, 170, bubbleW, 190, 20);
+  const bubbleGrad = ctx.createLinearGradient(bubbleX, 170, bubbleX, 360);
   bubbleGrad.addColorStop(0, hexAlpha("#ffffff", 0.06));
   bubbleGrad.addColorStop(1, hexAlpha("#000000", 0.65));
   ctx.fillStyle = bubbleGrad;
   ctx.fill();
-  roundedRect(ctx, 195, 165, W - 230, 200, 22);
+  roundedRect(ctx, bubbleX, 170, bubbleW, 190, 20);
   ctx.strokeStyle = hexAlpha(accent, 0.22);
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth   = 1.5;
   ctx.stroke();
 
-  drawText(ctx, persona, 218, 215, { size: 18, weight: "800", color: accent });
-  wrapText(ctx, quote, 218, 258, W - 280, 34, {
-    size: 24, weight: "600", color: "#e8e8e8",
+  drawText(ctx, persona, bubbleX + 18, 218, { size: 17, weight: "800", color: accent });
+  wrapText(ctx, quote, bubbleX + 18, 258, bubbleW - 36, 34, {
+    size: 22, weight: "600", color: "#e8e8e8",
   });
 
   brandFooter(ctx, server, "general-chat", palette);
 };
 
 // =================================================================
-// EARLY ACCESS — dark radar countdown card
+// EARLY ACCESS — left: statue | right: ticker + chart + radar CTA
 // =================================================================
 export const earlyTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + gold — VIP early
   const palette = paintBackground(ctx, rng, ["#000000", "#0c0900", "#c5a028"]);
   const [, , accent] = palette;
   const ticker = str(input, "ticker", "TOKEN");
-  const lead = str(input, "lead", "20");
+  const lead   = str(input, "lead", "20");
   const handle = str(input, "handle", "@apex");
   const server = str(input, "server", "Baldwin Calls");
+  const ohlcv  = parseOhlcv(input);
 
   drawHeaderBar(ctx, "EARLY ACCESS", "VIP RADAR", accent);
 
-  drawText(ctx, "ON THE RADAR", 36, 130, { size: 14, weight: "800", color: hexAlpha(accent, 0.65) });
-  drawAccentLine(ctx, 36, 136, 160, accent);
+  drawText(ctx, "ON THE RADAR", RX, 104, { size: 13, weight: "800", color: hexAlpha(accent, 0.65) });
+  drawAccentLine(ctx, RX, 110, 160, accent);
 
-  drawGlowText(ctx, `$${ticker.toUpperCase()}`, 36, 248, {
-    size: 90, weight: "900", color: "#ffffff",
+  drawGlowText(ctx, `$${ticker.toUpperCase()}`, RX, 206, {
+    size: 74, weight: "900", color: "#ffffff",
     glowColor: accent, glowRadius: 20,
   });
-  drawGlowText(ctx, `${lead} MIN BEFORE PUBLIC`, 36, 306, {
-    size: 26, weight: "800", color: accent,
+  drawGlowText(ctx, `${lead} MIN BEFORE PUBLIC`, RX, 242, {
+    size: 22, weight: "800", color: accent,
     glowColor: accent, glowRadius: 8,
   });
 
-  let earlyOhlcv: { t: number; c: number }[] = [];
-  try { const r = input["ohlcv"]; if (r) earlyOhlcv = JSON.parse(r); } catch { /* sparkline */ }
-  drawRealPriceChart(ctx, W - 444, 88, 416, 290, earlyOhlcv, ticker, accent, rng);
+  // Real price chart
+  drawRealPriceChart(ctx, RX, 256, RW - 8, 215, ohlcv, ticker, accent, rng);
 
-  drawText(ctx, `DM ${handle} for the CA`, 36, H - 70, {
-    size: 22, weight: "800", color: "#e8e8e8",
+  drawText(ctx, `DM ${handle} for the CA`, RX, H - 62, {
+    size: 20, weight: "800", color: "#e8e8e8",
   });
 
   brandFooter(ctx, server, "Early Access", palette);
@@ -864,20 +822,20 @@ export const earlyTemplate: RenderTemplate = (ctx, input, rng) => {
 // TEMPLATE REGISTRY — maps URL slug → render function
 // =================================================================
 export const TEMPLATES: Record<string, RenderTemplate> = {
-  proof:     proofTemplate,
-  call:      callTemplate,
-  vip:       vipTemplate,
-  alert:     alertTemplate,
-  whale:     whaleTemplate,
-  trade:     tradeTemplate,
-  trending:  trendingTemplate,
-  price:     priceTemplate,
-  gas:       gasTemplate,
-  announce:  announceTemplate,
-  snipe:     snipeTemplate,
-  alpha:     alphaTemplate,
-  market:    marketTemplate,
-  info:      infoTemplate,
-  chat:      chatTemplate,
-  early:     earlyTemplate,
+  proof:    proofTemplate,
+  call:     callTemplate,
+  vip:      vipTemplate,
+  alert:    alertTemplate,
+  whale:    whaleTemplate,
+  trade:    tradeTemplate,
+  trending: trendingTemplate,
+  price:    priceTemplate,
+  gas:      gasTemplate,
+  announce: announceTemplate,
+  snipe:    snipeTemplate,
+  alpha:    alphaTemplate,
+  market:   marketTemplate,
+  info:     infoTemplate,
+  chat:     chatTemplate,
+  early:    earlyTemplate,
 };
