@@ -1,5 +1,95 @@
 [
   {
+    "ts": 1781419577597,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "→ telegram: vip-snipes (msg 817)"
+  },
+  {
+    "ts": 1781419575914,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — $LOA filled @ $2.80M mcap"
+  },
+  {
+    "ts": 1781419567934,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — Stop bleeding"
+  },
+  {
+    "ts": 1781419565040,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1781419561963,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1781419558888,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — BSC degen plays"
+  },
+  {
+    "ts": 1781419555958,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🔴 EXIT — $SPCX69"
+  },
+  {
+    "ts": 1781419552903,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale took profit on $GRINDFUN"
+  },
+  {
+    "ts": 1781419549903,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $NORDICS — 29min head start"
+  },
+  {
+    "ts": 1781419546901,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1781419543911,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "vip ppl be eating different"
+  },
+  {
+    "ts": 1781419538973,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "→ telegram: proof-results (msg 816)"
+  },
+  {
+    "ts": 1781419538087,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $USBC 3x ✅"
+  },
+  {
+    "ts": 1781419536446,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "→ telegram: join-apex-vip (msg 815)"
+  },
+  {
+    "ts": 1781419534930,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 This is what you're actually missing every single day"
+  },
+  {
     "ts": 1781419532015,
     "channel": "announcements",
     "ok": true,
@@ -1108,95 +1198,5 @@
     "channel": "alpha_lounge",
     "ok": true,
     "message": "→ telegram: alpha-lounge (msg 86)"
-  },
-  {
-    "ts": 1777566198727,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "🧠 Alpha Lounge — GameFi revival"
-  },
-  {
-    "ts": 1777566195743,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "🟢 BUY — $FOFAR"
-  },
-  {
-    "ts": 1777566192717,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "🐋 Whale took profit on $RCON"
-  },
-  {
-    "ts": 1777566192054,
-    "channel": "early_access",
-    "ok": true,
-    "message": "→ telegram: early-access (msg 85)"
-  },
-  {
-    "ts": 1777566189741,
-    "channel": "early_access",
-    "ok": true,
-    "message": "🚀 Early Radar — $DISBELIEF — 20min head start"
-  },
-  {
-    "ts": 1777566186786,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "🔥 Trending right now"
-  },
-  {
-    "ts": 1777566183736,
-    "channel": "general_chat",
-    "ok": true,
-    "message": "anyone else holding from yesterday's pick?"
-  },
-  {
-    "ts": 1777566178887,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "→ telegram: proof-results (msg 84)"
-  },
-  {
-    "ts": 1777566177988,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "🏆 RECEIPT — $VISION 3.3x ✅"
-  },
-  {
-    "ts": 1777566176063,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "→ telegram: join-apex-vip (msg 83)"
-  },
-  {
-    "ts": 1777566174768,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "💎 This is what you're actually missing every single day"
-  },
-  {
-    "ts": 1777566173063,
-    "channel": "announcements",
-    "ok": true,
-    "message": "→ telegram: apex-announcements (msg 82)"
-  },
-  {
-    "ts": 1777566171808,
-    "channel": "announcements",
-    "ok": true,
-    "message": "📢 Cleaned up the server — seats opened"
-  },
-  {
-    "ts": 1777491079983,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "🟡 TRIM — $BELKA"
-  },
-  {
-    "ts": 1777490976903,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
   }
 ]
