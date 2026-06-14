@@ -56,5 +56,4 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
-TELEGRAM_BOT_TOKEN = "7507047699:AAEiGoEhwncdbO4lBwqdYYnAVyNSHtgjcdg"
 PORT = "5000"
