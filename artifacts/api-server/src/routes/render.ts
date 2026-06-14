@@ -7,6 +7,7 @@ import {
   topByGain24h,
   fetchMajorPrices,
   fetchGas,
+  fetchOhlcv,
   solanaAvgFee,
   baseGasGwei,
   fmtUsd,
@@ -38,12 +39,18 @@ async function buildLiveInput(type: string): Promise<Record<string, string | und
       // --- Token call / snipe / proof / early ---
       case "call": {
         const t = await pickTrending({ minLiqUsd: 15_000, maxMcUsd: 50_000_000 });
+        let ohlcv = "";
+        try {
+          const pts = await fetchOhlcv(t.chainId, t.pairAddress);
+          if (pts.length > 0) ohlcv = JSON.stringify(pts);
+        } catch { /* silently skip — chart will fall back to sparkline */ }
         return {
           ticker: t.symbol,
           mc: String(t.marketCap),
           liq: String(t.liquidityUsd),
           chain: t.chain,
           dex: t.dexId,
+          ohlcv,
           server,
         };
       }

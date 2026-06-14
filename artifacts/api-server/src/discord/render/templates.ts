@@ -5,19 +5,23 @@ import {
   drawAvatar,
   drawCandles,
   drawChip,
+  drawFilmGrain,
   drawGlowOrb,
   drawGlowText,
   drawHeaderBar,
   drawMoneyStacks,
   drawPremiumBadge,
+  drawRealPriceChart,
   drawSparkline,
   drawText,
+  getBackgroundImage,
   hexAlpha,
   paintBackground,
   pickFrom,
   roundedRect,
   SIZE,
   statBlock,
+  statBlockWithTag,
   wrapText,
   type RenderInput,
   type RenderTemplate,
@@ -114,42 +118,174 @@ export const proofTemplate: RenderTemplate = (ctx, input, rng) => {
 };
 
 // =================================================================
-// CALL — dark cinematic new call card
+// CALL — screenshot-matched redesign with real OHLCV chart
+// Layout: statue bg left | content right | real price chart
 // =================================================================
 export const callTemplate: RenderTemplate = (ctx, input, rng) => {
-  // Black + silver
-  const palette = paintBackground(ctx, rng, ["#000000", "#0c0c0c", "#c8c8c8"]);
+  const palette: [string, string, string] = ["#000000", "#0c0c0c", "#c8c8c8"];
   const [, , accent] = palette;
+
   const ticker = str(input, "ticker", "TOKEN");
-  const mc = num(input, "mc", 18_400);
-  const liq = num(input, "liq", 24_500);
-  const chain = str(input, "chain", "Solana");
-  const dex = str(input, "dex", "PumpSwap");
+  const mc     = num(input, "mc",  178_200);
+  const liq    = num(input, "liq",  32_500);
+  const chain  = str(input, "chain", "Solana");
+  const dex    = str(input, "dex",   "PumpSwap");
   const server = str(input, "server", "Baldwin Calls");
 
-  drawHeaderBar(ctx, "NEW CALL", `${chain} · ${dex}`, accent);
+  // Parse real OHLCV from pre-fetched JSON string
+  let ohlcv: { t: number; c: number }[] = [];
+  try {
+    const raw = input["ohlcv"];
+    if (raw) ohlcv = JSON.parse(raw) as { t: number; c: number }[];
+  } catch { /* fall back to sparkline */ }
 
-  drawGlowText(ctx, `$${ticker.toUpperCase()}`, 36, 185, {
-    size: 96, weight: "900", color: "#ffffff",
-    glowColor: accent, glowRadius: 20,
-  });
-  drawAccentLine(ctx, 36, 193, 220, accent);
+  // ── Background: true black
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, W, H);
 
-  drawText(ctx, "ENTRY OPEN  —  MOVE NOW", 36, 235, {
-    size: 20, weight: "800", color: accent,
-  });
-
-  statBlock(ctx, 36, 268, "MARKET CAP", fmtMoney(mc), palette);
-  statBlock(ctx, 274, 268, "LIQUIDITY", fmtMoney(liq), palette);
-  statBlock(ctx, 512, 268, "ENTRY", "OPEN", palette);
-
-  let bx = 36;
-  const tags = ["LOW MCAP", "FRESH LAUNCH", pickFrom(rng, ["VIP FIRST", "PRECISION PLAY", "ALPHA ENTRY", "FIRST WAVE"])];
-  for (let i = 0; i < tags.length; i++) {
-    bx += drawPremiumBadge(ctx, bx, 440, tags[i]!, accent, i === 2);
+  // ── Statue image — left ~45% of card, "cover" fill
+  const bgImg = getBackgroundImage();
+  if (bgImg) {
+    ctx.save();
+    ctx.globalAlpha = 0.88;
+    const targetW = 450;
+    const imgAspect  = bgImg.width  / bgImg.height;
+    const tgtAspect  = targetW / H;
+    let sx = 0, sy = 0, sw = bgImg.width, sh = bgImg.height;
+    if (imgAspect > tgtAspect) {
+      sh = bgImg.height;
+      sw = bgImg.height * tgtAspect;
+      sx = (bgImg.width - sw) / 2;
+    } else {
+      sw = bgImg.width;
+      sh = bgImg.width / tgtAspect;
+      sy = (bgImg.height - sh) / 2;
+    }
+    ctx.drawImage(bgImg as unknown as Parameters<typeof ctx.drawImage>[0], sx, sy, sw, sh, 0, 0, targetW, H);
+    ctx.globalAlpha = 1;
+    ctx.restore();
   }
 
-  drawSparkline(ctx, W - 440, 100, 400, 330, rng, "up", accent);
+  // ── Gradient overlay: fade statue into dark content area
+  const fade = ctx.createLinearGradient(0, 0, W, 0);
+  fade.addColorStop(0,    "rgba(0,0,0,0)");
+  fade.addColorStop(0.28, "rgba(0,0,0,0.08)");
+  fade.addColorStop(0.44, "rgba(0,0,0,0.62)");
+  fade.addColorStop(1,    "rgba(0,0,0,0.84)");
+  ctx.fillStyle = fade;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Film grain (composited, preserves background opacity)
+  drawFilmGrain(ctx, rng, 18);
+
+  // ── Premium edge frame
+  const inset = 8;
+  const edgeGrad = ctx.createLinearGradient(0, 0, W, H);
+  edgeGrad.addColorStop(0,   hexAlpha(accent, 0.55));
+  edgeGrad.addColorStop(0.5, hexAlpha("#ffffff", 0.15));
+  edgeGrad.addColorStop(1,   hexAlpha(accent, 0.55));
+  roundedRect(ctx, inset, inset, W - inset * 2, H - inset * 2, 16);
+  ctx.strokeStyle = edgeGrad;
+  ctx.lineWidth   = 1.5;
+  ctx.stroke();
+
+  // ── Top bar
+  ctx.fillStyle = hexAlpha("#000000", 0.55);
+  ctx.fillRect(0, 0, W, 52);
+  const divGrad = ctx.createLinearGradient(0, 0, W, 0);
+  divGrad.addColorStop(0,   "rgba(0,0,0,0)");
+  divGrad.addColorStop(0.1, hexAlpha(accent, 0.4));
+  divGrad.addColorStop(0.9, hexAlpha(accent, 0.4));
+  divGrad.addColorStop(1,   "rgba(0,0,0,0)");
+  ctx.fillStyle = divGrad;
+  ctx.fillRect(0, 51, W, 1);
+
+  // ⚡ BALDWIN CALLS — top-left
+  ctx.save();
+  ctx.shadowColor = hexAlpha(accent, 0.4);
+  ctx.shadowBlur  = 8;
+  ctx.font        = "800 18px Sans";
+  ctx.fillStyle   = "#ffffff";
+  ctx.textAlign   = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText("⚡ BALDWIN CALLS", 22, 35);
+  ctx.restore();
+
+  // CHAIN • DEX — centre-right of header
+  ctx.font        = "600 13px Sans";
+  ctx.fillStyle   = hexAlpha("#c8c8c8", 0.65);
+  ctx.textAlign   = "right";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText(
+    `${chain.toUpperCase()} • ${dex.toUpperCase()}`,
+    W - 104, 35,
+  );
+
+  // LIVE ● badge — top-right
+  const liveX = W - 92;
+  roundedRect(ctx, liveX, 13, 76, 26, 13);
+  ctx.fillStyle = hexAlpha("#000000", 0.8);
+  ctx.fill();
+  roundedRect(ctx, liveX, 13, 76, 26, 13);
+  ctx.strokeStyle = hexAlpha(accent, 0.5);
+  ctx.lineWidth   = 1.5;
+  ctx.stroke();
+  ctx.font        = "800 13px Sans";
+  ctx.fillStyle   = "#ffffff";
+  ctx.textAlign   = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText("LIVE", liveX + 10, 31);
+  ctx.beginPath();
+  ctx.arc(liveX + 60, 26, 5, 0, Math.PI * 2);
+  ctx.fillStyle = "#4ade80";
+  ctx.fill();
+
+  // ── Content area (right of statue): CX = 385
+  const CX = 385;
+
+  // Ticker $SYMBOL — large glow text
+  drawGlowText(ctx, `$${ticker.toUpperCase()}`, CX, 170, {
+    size: 100, weight: "900", color: "#ffffff",
+    glowColor: "#ffffff", glowRadius: 18,
+  });
+
+  // Tagline
+  drawText(ctx, "ENTRY OPEN  —  MOVE NOW", CX, 196, {
+    size: 18, weight: "800", color: hexAlpha(accent, 0.88),
+  });
+
+  // ── 3 stat boxes with sub-tags
+  const boxY  = 212;
+  const boxW  = Math.floor((W - CX - 20 - 2 * 8) / 3);  // ~196
+  const boxGap = 8;
+  const mcTag  = mc  < 500_000 ? "👑 LOW MCAP"
+               : mc  < 5_000_000 ? "📊 MID MCAP"
+               : "📈 HIGH MCAP";
+  const liqTag = liq > 20_000 ? "💧 STRONG LIQUIDITY"
+               : liq > 5_000  ? "💧 GOOD LIQUIDITY"
+               : "💧 THIN LIQUIDITY";
+
+  statBlockWithTag(ctx, CX,                          boxY, boxW, "MARKET CAP", fmtMoney(mc),  mcTag,              palette);
+  statBlockWithTag(ctx, CX + boxW + boxGap,           boxY, boxW, "LIQUIDITY",  fmtMoney(liq), liqTag,             palette);
+  statBlockWithTag(ctx, CX + (boxW + boxGap) * 2,     boxY, boxW, "ENTRY",      "OPEN",         "🎯 EARLY ENTRY",  palette);
+
+  // ── Real price chart
+  const chartX = CX;
+  const chartW = W - CX - 18;
+  const chartY = 315;
+  const chartH = 155;
+  drawRealPriceChart(ctx, chartX, chartY, chartW, chartH, ohlcv, ticker, accent, rng);
+
+  // ── Bottom pill badges
+  const badgeTags = [
+    "🚀 LOW MCAP",
+    "⚡ FRESH LAUNCH",
+    pickFrom(rng, ["★ PRECISION PLAY", "★ VIP FIRST", "★ ALPHA ENTRY", "★ FIRST WAVE"]),
+  ];
+  let bx = CX;
+  for (const tag of badgeTags) {
+    bx += drawPremiumBadge(ctx, bx, 487, tag, accent, false);
+  }
 
   brandFooter(ctx, server, "Free Calls · DYOR", palette);
 };

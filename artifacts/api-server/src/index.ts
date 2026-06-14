@@ -4,6 +4,7 @@ import { loadConfig } from "./discord/config";
 import { startScheduler, startupBurst } from "./discord/scheduler";
 import { startVerifyBot } from "./discord/verify-bot";
 import { startKeepalive } from "./discord/keepalive";
+import { initCanvasAssets } from "./discord/render/canvas";
 
 const rawPort = process.env["PORT"];
 
@@ -28,6 +29,9 @@ app.listen(port, async (err) => {
   logger.info({ port }, "Server listening");
 
   try {
+    // Pre-load the statue background image for card rendering
+    await initCanvasAssets();
+
     await loadConfig();
 
     // Always start the scheduler — every tick re-checks autoPost & webhook

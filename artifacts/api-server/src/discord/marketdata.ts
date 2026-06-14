@@ -366,6 +366,71 @@ export function shortAddr(addr: string): string {
   return `${addr.slice(0, 4)}…${addr.slice(-4)}`;
 }
 
+// ─── GeckoTerminal OHLCV (real price history for chart rendering) ────────────
+
+const GECKO_CHAIN: Record<string, string> = {
+  solana: "solana",
+  ethereum: "eth",
+  base: "base",
+  bsc: "bsc",
+  arbitrum: "arbitrum",
+  polygon: "polygon_pos",
+  avalanche: "avax",
+  optimism: "optimism",
+  blast: "blast",
+  zksync: "zksync",
+  sui: "sui",
+  ton: "ton",
+};
+
+export type OhlcvPoint = { t: number; c: number };
+
+const ohlcvCache = new Map<string, { ts: number; points: OhlcvPoint[] }>();
+const OHLCV_TTL_MS = 5 * 60 * 1000;
+
+/**
+ * Fetch hourly OHLCV for the last 24 hours for a token pair from GeckoTerminal.
+ * Returns an empty array on failure so callers can gracefully fall back.
+ */
+export async function fetchOhlcv(
+  chainId: string,
+  pairAddress: string,
+): Promise<OhlcvPoint[]> {
+  const cacheKey = `${chainId}:${pairAddress}`;
+  const cached = ohlcvCache.get(cacheKey);
+  if (cached && Date.now() - cached.ts < OHLCV_TTL_MS) return cached.points;
+
+  const network = GECKO_CHAIN[chainId.toLowerCase()] ?? chainId.toLowerCase();
+  // EVM addresses need to be lowercase for GeckoTerminal
+  const addr =
+    chainId.toLowerCase() === "solana" ? pairAddress : pairAddress.toLowerCase();
+  const url = `https://api.geckoterminal.com/api/v2/networks/${network}/pools/${addr}/ohlcv/hour?aggregate=1&limit=24&currency=usd`;
+
+  try {
+    const json = await fetchJson<{
+      data?: { attributes?: { ohlcv_list?: number[][] } };
+    }>(url, 8000);
+
+    const raw = json?.data?.attributes?.ohlcv_list;
+    if (!Array.isArray(raw) || raw.length === 0)
+      throw new Error("empty ohlcv from GeckoTerminal");
+
+    // GeckoTerminal returns newest-first — reverse to chronological
+    const points: OhlcvPoint[] = [...raw]
+      .reverse()
+      .map(([t, , , , c]) => ({ t: (t ?? 0) * 1000, c: c ?? 0 }));
+
+    ohlcvCache.set(cacheKey, { ts: Date.now(), points });
+    logger.info({ count: points.length, chainId }, "marketdata: ohlcv fetched");
+    return points;
+  } catch (err) {
+    logger.warn({ err: (err as Error).message }, "marketdata: ohlcv fetch failed");
+    const stale = ohlcvCache.get(cacheKey);
+    if (stale) return stale.points;
+    return [];
+  }
+}
+
 /** Human-format dollar amount with K/M/B suffixes. */
 export function fmtUsd(n: number): string {
   if (!Number.isFinite(n) || n <= 0) return "—";

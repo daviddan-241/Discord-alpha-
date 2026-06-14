@@ -1,4 +1,6 @@
-import { createCanvas, type SKRSContext2D, type Canvas } from "@napi-rs/canvas";
+import { createCanvas, loadImage, type SKRSContext2D, type Canvas } from "@napi-rs/canvas";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
 // Dark cinematic theme — June 2026
 // Palette: pure black + silver/gold/off-white accents. No neon, no bright hues.
@@ -681,3 +683,216 @@ export function drawChip(
 }
 
 export const SIZE = { W, H } as const;
+
+// ─── Background image (statue/figure) loaded once at startup ─────────────────
+
+type CanvasImage = Awaited<ReturnType<typeof loadImage>>;
+let _bgImage: CanvasImage | null = null;
+
+export async function initCanvasAssets(): Promise<void> {
+  try {
+    const dir = dirname(fileURLToPath(import.meta.url));
+    const imgPath = join(dir, "public", "dark-bg.jpg");
+    _bgImage = await loadImage(imgPath);
+    console.log("[canvas] background image loaded:", imgPath, _bgImage.width, "x", _bgImage.height);
+  } catch (err) {
+    console.warn("[canvas] background image not loaded:", (err as Error).message);
+  }
+}
+
+export function getBackgroundImage(): CanvasImage | null {
+  return _bgImage;
+}
+
+// ─── Film grain that composites ON TOP without replacing alpha ───────────────
+
+export function drawFilmGrain(ctx: SKRSContext2D, rng: () => number, opacity = 18): void {
+  const grainC = createCanvas(W, H);
+  const grainG = grainC.getContext("2d");
+  const img = grainG.createImageData(W, H);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const v = Math.floor(rng() * 26);
+    d[i] = v; d[i + 1] = v; d[i + 2] = v; d[i + 3] = opacity;
+  }
+  grainG.putImageData(img, 0, 0);
+  ctx.drawImage(grainC as unknown as Parameters<typeof ctx.drawImage>[0], 0, 0);
+}
+
+// ─── Stat block with a sub-tag line ──────────────────────────────────────────
+
+export function statBlockWithTag(
+  ctx: SKRSContext2D,
+  x: number,
+  y: number,
+  w: number,
+  label: string,
+  value: string,
+  tag: string,
+  palette: [string, string, string],
+): void {
+  const bh = 92;
+  const [, , accent] = palette;
+  roundedRect(ctx, x, y, w, bh, 14);
+  ctx.fillStyle = hexAlpha("#000000", 0.72);
+  ctx.fill();
+  roundedRect(ctx, x, y, w, bh, 14);
+  ctx.strokeStyle = hexAlpha(accent, 0.22);
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  drawText(ctx, label, x + 16, y + 24, { size: 12, weight: "700", color: hexAlpha(accent, 0.6) });
+  drawText(ctx, value, x + 16, y + 60, { size: 26, weight: "900", color: "#e8e8e8" });
+  drawText(ctx, tag, x + 16, y + 83, { size: 11, weight: "700", color: hexAlpha("#c8c8c8", 0.5) });
+}
+
+// ─── Real OHLCV price chart ───────────────────────────────────────────────────
+
+function fmtChartPrice(p: number): string {
+  if (p >= 1000) return p.toLocaleString("en", { maximumFractionDigits: 0 });
+  if (p >= 1) return p.toFixed(2);
+  if (p >= 0.01) return p.toFixed(4);
+  if (p >= 0.0001) return p.toFixed(6);
+  return p.toExponential(2);
+}
+
+export function drawRealPriceChart(
+  ctx: SKRSContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  points: { t: number; c: number }[],
+  ticker: string,
+  accent: string,
+  rng: () => number,
+): void {
+  const PAD_T = 28;
+  const PAD_B = 22;
+  const PAD_R = 64;
+
+  const cX = x;
+  const cY = y + PAD_T;
+  const cW = w - PAD_R;
+  const cH = h - PAD_T - PAD_B;
+
+  // Chart container
+  roundedRect(ctx, x, y, w, h, 12);
+  ctx.fillStyle = hexAlpha("#000000", 0.6);
+  ctx.fill();
+  roundedRect(ctx, x, y, w, h, 12);
+  ctx.strokeStyle = hexAlpha("#ffffff", 0.07);
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Header label
+  ctx.font = "800 11px Sans";
+  ctx.fillStyle = hexAlpha("#ffffff", 0.88);
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText(`$${ticker.toUpperCase()} PRICE ACTION`, cX + 12, y + 18);
+
+  // Live dot + label
+  const labelW = ctx.measureText(`$${ticker.toUpperCase()} PRICE ACTION`).width;
+  ctx.beginPath();
+  ctx.arc(cX + 12 + labelW + 18, y + 14, 4, 0, Math.PI * 2);
+  ctx.fillStyle = "#4ade80";
+  ctx.fill();
+  ctx.font = "600 10px Sans";
+  ctx.fillStyle = hexAlpha("#ffffff", 0.4);
+  ctx.fillText("LIVE CHART", cX + 12 + labelW + 28, y + 18);
+
+  // If no real data — fall back to a generated sparkline inside the container
+  if (points.length < 3) {
+    drawSparkline(ctx, cX + 4, cY + 4, cW - 8, cH - 8, rng, "up", accent);
+    return;
+  }
+
+  const prices = points.map((p) => p.c);
+  const times = points.map((p) => p.t);
+  const minP = Math.min(...prices) * 0.993;
+  const maxP = Math.max(...prices) * 1.007;
+  const priceRange = maxP - minP || 1;
+
+  const toY = (p: number): number => cY + cH - ((p - minP) / priceRange) * cH;
+  const toXi = (i: number): number => cX + (i / (points.length - 1)) * cW;
+
+  // Subtle horizontal grid lines
+  for (let i = 0; i <= 4; i++) {
+    const gy = cY + (i / 4) * cH;
+    ctx.beginPath();
+    ctx.moveTo(cX, gy);
+    ctx.lineTo(cX + cW, gy);
+    ctx.strokeStyle = hexAlpha("#ffffff", 0.05);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Filled area under line
+  ctx.beginPath();
+  ctx.moveTo(toXi(0), cY + cH);
+  for (let i = 0; i < points.length; i++) ctx.lineTo(toXi(i), toY(prices[i]!));
+  ctx.lineTo(toXi(points.length - 1), cY + cH);
+  ctx.closePath();
+  const areaGrad = ctx.createLinearGradient(0, cY, 0, cY + cH);
+  areaGrad.addColorStop(0, hexAlpha("#ffffff", 0.22));
+  areaGrad.addColorStop(1, hexAlpha("#ffffff", 0.01));
+  ctx.fillStyle = areaGrad;
+  ctx.fill();
+
+  // Price line
+  ctx.beginPath();
+  ctx.moveTo(toXi(0), toY(prices[0]!));
+  for (let i = 1; i < points.length; i++) ctx.lineTo(toXi(i), toY(prices[i]!));
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.stroke();
+
+  // End dot
+  const lx = toXi(points.length - 1);
+  const ly = toY(prices[prices.length - 1]!);
+  const dotGlow = ctx.createRadialGradient(lx, ly, 0, lx, ly, 14);
+  dotGlow.addColorStop(0, hexAlpha("#ffffff", 0.4));
+  dotGlow.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = dotGlow;
+  ctx.fillRect(lx - 16, ly - 16, 32, 32);
+  ctx.beginPath();
+  ctx.arc(lx, ly, 5, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(lx, ly, 2.5, 0, Math.PI * 2);
+  ctx.fillStyle = "#e0e0e0";
+  ctx.fill();
+
+  // Y-axis labels (right side)
+  ctx.font = "600 10px Sans";
+  ctx.fillStyle = hexAlpha("#c8c8c8", 0.6);
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  for (let i = 0; i <= 3; i++) {
+    const p = maxP - (priceRange * i) / 3;
+    const gy = cY + (i / 3) * cH;
+    ctx.fillText(fmtChartPrice(p), cX + cW + 4, gy);
+  }
+
+  // X-axis time labels
+  ctx.font = "600 10px Sans";
+  ctx.fillStyle = hexAlpha("#c8c8c8", 0.55);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  const step = Math.max(1, Math.floor(points.length / 7));
+  const shown = new Set<number>();
+  for (let i = 0; i < points.length - 1; i += step) {
+    const t = new Date(times[i]!);
+    const label = `${String(t.getUTCHours()).padStart(2, "0")}:00`;
+    ctx.fillText(label, toXi(i), cY + cH + 4);
+    shown.add(i);
+  }
+  // Always show NOW at the last point
+  const lastIdx = points.length - 1;
+  if (!shown.has(lastIdx)) {
+    ctx.fillText("NOW", toXi(lastIdx), cY + cH + 4);
+  }
+}
