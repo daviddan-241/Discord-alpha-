@@ -69,61 +69,75 @@ export function paintBackground(
   palette?: [string, string, string],
 ): [string, string, string] {
   const p = palette ?? pickFrom(rng, PALETTES);
-  const [c1, c2, accent] = p;
+  const [c1, , accent] = p;
 
   // Base fill — true black
   ctx.fillStyle = c1;
   ctx.fillRect(0, 0, W, H);
 
-  // Subtle radial gradient centre glow — keeps depth without colour
-  const centreGlow = ctx.createRadialGradient(W * 0.5, H * 0.42, 0, W * 0.5, H * 0.42, 480);
-  centreGlow.addColorStop(0, hexAlpha(c2, 0.9));
-  centreGlow.addColorStop(0.5, hexAlpha(c2, 0.4));
-  centreGlow.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = centreGlow;
+  // ── Statue image — left ~48% cover, used by ALL templates
+  const bgImg = _bgImage;
+  if (bgImg) {
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    const targetW = 490;
+    const imgAspect = bgImg.width  / bgImg.height;
+    const tgtAspect = targetW / H;
+    let sx = 0, sy = 0, sw = bgImg.width, sh = bgImg.height;
+    if (imgAspect > tgtAspect) {
+      sw = bgImg.height * tgtAspect;
+      sx = (bgImg.width - sw) / 2;
+    } else {
+      sh = bgImg.width / tgtAspect;
+      sy = (bgImg.height - sh) / 2;
+    }
+    ctx.drawImage(bgImg as unknown as Parameters<typeof ctx.drawImage>[0], sx, sy, sw, sh, 0, 0, targetW, H);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  // ── Horizontal fade: statue → dark content area
+  const fade = ctx.createLinearGradient(0, 0, W, 0);
+  fade.addColorStop(0,    "rgba(0,0,0,0)");
+  fade.addColorStop(0.30, "rgba(0,0,0,0.1)");
+  fade.addColorStop(0.48, "rgba(0,0,0,0.68)");
+  fade.addColorStop(1,    "rgba(0,0,0,0.88)");
+  ctx.fillStyle = fade;
   ctx.fillRect(0, 0, W, H);
 
-  // Two very dim accent orbs — barely visible, adds cinematic depth
-  for (let i = 0; i < 2; i++) {
-    const cx = rng() * W;
-    const cy = rng() * H;
-    const r = 260 + rng() * 280;
-    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    g.addColorStop(0, hexAlpha(accent, i === 0 ? 0.07 : 0.04));
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  // Smoke / mist particles — tiny random dots that evoke wisps
-  const smokeData = ctx.createImageData(W, H);
+  // Smoke / mist particles — composited so they don't erase the background
+  const smokeC = createCanvas(W, H);
+  const smokeG = smokeC.getContext("2d");
+  const smokeData = smokeG.createImageData(W, H);
   const sd = smokeData.data;
   for (let i = 0; i < sd.length; i += 4) {
-    if (rng() < 0.004) {
+    if (rng() < 0.003) {
       const v = Math.floor(180 + rng() * 60);
-      const a = Math.floor(rng() * 28);
+      const a = Math.floor(rng() * 24);
       sd[i] = v; sd[i + 1] = v; sd[i + 2] = v; sd[i + 3] = a;
-    } else {
-      sd[i] = 0; sd[i + 1] = 0; sd[i + 2] = 0; sd[i + 3] = 0;
     }
   }
-  ctx.putImageData(smokeData, 0, 0);
+  smokeG.putImageData(smokeData, 0, 0);
+  ctx.drawImage(smokeC as unknown as Parameters<typeof ctx.drawImage>[0], 0, 0);
 
   // Heavy cinematic vignette — the signature dark-corners look
   const vignette = ctx.createRadialGradient(W / 2, H / 2, H * 0.18, W / 2, H / 2, H * 1.05);
   vignette.addColorStop(0, "rgba(0,0,0,0)");
-  vignette.addColorStop(1, "rgba(0,0,0,0.92)");
+  vignette.addColorStop(1, "rgba(0,0,0,0.88)");
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, W, H);
 
-  // Film grain — heavier than before, very fine texture
-  const grain = ctx.createImageData(W, H);
-  const gd = grain.data;
+  // Film grain — composited so it doesn't replace pixel alpha
+  const grainC = createCanvas(W, H);
+  const grainG = grainC.getContext("2d");
+  const grainImg = grainG.createImageData(W, H);
+  const gd = grainImg.data;
   for (let i = 0; i < gd.length; i += 4) {
     const v = Math.floor(rng() * 30);
-    gd[i] = v; gd[i + 1] = v; gd[i + 2] = v; gd[i + 3] = 26;
+    gd[i] = v; gd[i + 1] = v; gd[i + 2] = v; gd[i + 3] = 22;
   }
-  ctx.putImageData(grain, 0, 0);
+  grainG.putImageData(grainImg, 0, 0);
+  ctx.drawImage(grainC as unknown as Parameters<typeof ctx.drawImage>[0], 0, 0);
 
   // Premium edge frame — thin silver/gold double ring
   const inset = 10;

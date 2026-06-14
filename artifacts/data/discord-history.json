@@ -1,5 +1,155 @@
 [
   {
+    "ts": 1781428508852,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — Stop bleeding"
+  },
+  {
+    "ts": 1781428505923,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1781428503064,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1781428499835,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — RWA tokenisation"
+  },
+  {
+    "ts": 1781428496840,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟡 TRIM — $TRUMPDAY"
+  },
+  {
+    "ts": 1781428493808,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale rotated into $BUL"
+  },
+  {
+    "ts": 1781428490813,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $BUL — 21min head start"
+  },
+  {
+    "ts": 1781428487807,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1781428484856,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "📚 Quick Lesson — Take Profit Like A Pro"
+  },
+  {
+    "ts": 1781428478840,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $SIEGE 3.6x ✅"
+  },
+  {
+    "ts": 1781428475836,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 This is what you're actually missing every single day"
+  },
+  {
+    "ts": 1781428472928,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 VIP slots just reopened — I only have a few"
+  },
+  {
+    "ts": 1781428438793,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — $SPCX69 filled @ $732.9K mcap"
+  },
+  {
+    "ts": 1781428430774,
+    "channel": "alerts",
+    "ok": true,
+    "message": "📡 ALERT — VIP just got fed"
+  },
+  {
+    "ts": 1781428427811,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1781428424854,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1781428421731,
+    "channel": "alpha_lounge",
+    "ok": true,
+    "message": "🧠 Alpha Lounge — GameFi revival"
+  },
+  {
+    "ts": 1781428418747,
+    "channel": "live_trades",
+    "ok": true,
+    "message": "🟡 TRIM — $SIEGE"
+  },
+  {
+    "ts": 1781428415735,
+    "channel": "whale_tracker",
+    "ok": true,
+    "message": "🐋 Whale added $XRPS"
+  },
+  {
+    "ts": 1781428412751,
+    "channel": "early_access",
+    "ok": true,
+    "message": "🚀 Early Radar — $GAMBLING — 36min head start"
+  },
+  {
+    "ts": 1781428409805,
+    "channel": "trending_coins",
+    "ok": true,
+    "message": "🔥 Trending right now"
+  },
+  {
+    "ts": 1781428406783,
+    "channel": "general_chat",
+    "ok": true,
+    "message": "lmao someone pls tell newcomers to read the rules first"
+  },
+  {
+    "ts": 1781428400884,
+    "channel": "proof_results",
+    "ok": true,
+    "message": "🏆 RECEIPT — $GRINDFUN 2.5x ✅"
+  },
+  {
+    "ts": 1781428397773,
+    "channel": "join_vip",
+    "ok": true,
+    "message": "💎 This is what you're actually missing every single day"
+  },
+  {
+    "ts": 1781428394882,
+    "channel": "announcements",
+    "ok": true,
+    "message": "📢 Cleaned up the server — seats opened"
+  },
+  {
     "ts": 1781428331033,
     "channel": "vip_snipes",
     "ok": true,
@@ -1048,155 +1198,5 @@
     "channel": "vip_snipes",
     "ok": true,
     "message": "→ telegram: vip-snipes (msg 105)"
-  },
-  {
-    "ts": 1777570455791,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "💎 VIP SNIPE — $SOLAMA filled @ $63.6K mcap"
-  },
-  {
-    "ts": 1777570447632,
-    "channel": "alerts",
-    "ok": true,
-    "message": "📡 ALERT — Stop bleeding"
-  },
-  {
-    "ts": 1777570444763,
-    "channel": "gas_tracker",
-    "ok": true,
-    "message": "⛽ Gas tracker"
-  },
-  {
-    "ts": 1777570441835,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777570438654,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "🧠 Alpha Lounge — L1 rotation"
-  },
-  {
-    "ts": 1777570435642,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "🟢 BUY — $DISBELIEF"
-  },
-  {
-    "ts": 1777570432656,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "🐋 Whale bought $FREE"
-  },
-  {
-    "ts": 1777570429685,
-    "channel": "early_access",
-    "ok": true,
-    "message": "🚀 Early Radar — $FX6900 — 34min head start"
-  },
-  {
-    "ts": 1777570426629,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "🔥 Trending right now"
-  },
-  {
-    "ts": 1777570423652,
-    "channel": "general_chat",
-    "ok": true,
-    "message": "my wife asked why im up at 3am again"
-  },
-  {
-    "ts": 1777570420334,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "→ telegram: proof-results (msg 104)"
-  },
-  {
-    "ts": 1777570417841,
-    "channel": "proof_results",
-    "ok": true,
-    "message": "🏆 RECEIPT — $MARU 2.6x ✅"
-  },
-  {
-    "ts": 1777570416166,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "→ telegram: join-apex-vip (msg 103)"
-  },
-  {
-    "ts": 1777570414659,
-    "channel": "join_vip",
-    "ok": true,
-    "message": "💎 I trade WITH my members. Here's what that means."
-  },
-  {
-    "ts": 1777570411711,
-    "channel": "announcements",
-    "ok": true,
-    "message": "📢 Why people who DM me stop missing calls"
-  },
-  {
-    "ts": 1777570212690,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "→ telegram: vip-snipes (msg 102)"
-  },
-  {
-    "ts": 1777570209389,
-    "channel": "vip_snipes",
-    "ok": true,
-    "message": "💎 VIP SNIPE — $DISBELIEF filled @ $133.9K mcap"
-  },
-  {
-    "ts": 1777570201399,
-    "channel": "alerts",
-    "ok": true,
-    "message": "📡 ALERT — Liquidity unlock incoming"
-  },
-  {
-    "ts": 1777570198533,
-    "channel": "gas_tracker",
-    "ok": true,
-    "message": "⛽ Gas tracker"
-  },
-  {
-    "ts": 1777570195375,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777570192382,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "🧠 Alpha Lounge — Solana memecoin season"
-  },
-  {
-    "ts": 1777570189371,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "🔴 EXIT — $FOFAR"
-  },
-  {
-    "ts": 1777570186372,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "🐋 Whale added $DISBELIEF"
-  },
-  {
-    "ts": 1777570183373,
-    "channel": "early_access",
-    "ok": true,
-    "message": "🚀 Early Radar — $BP — 51min head start"
-  },
-  {
-    "ts": 1777570180364,
-    "channel": "trending_coins",
-    "ok": true,
-    "message": "🔥 Trending right now"
   }
 ]
