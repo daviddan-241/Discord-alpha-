@@ -1,5 +1,41 @@
 [
   {
+    "ts": 1781427509250,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "→ telegram: free-calls (msg 697)"
+  },
+  {
+    "ts": 1781427507744,
+    "channel": "free_calls",
+    "ok": true,
+    "message": "👀 VIP just filled — $GAMBLING (8m head start)"
+  },
+  {
+    "ts": 1781427468408,
+    "channel": "gas_tracker",
+    "ok": true,
+    "message": "⛽ Gas tracker"
+  },
+  {
+    "ts": 1781427331706,
+    "channel": "price_bot",
+    "ok": true,
+    "message": "📊 Live prices"
+  },
+  {
+    "ts": 1781427028948,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "→ telegram: vip-snipes (msg 830)"
+  },
+  {
+    "ts": 1781427027575,
+    "channel": "vip_snipes",
+    "ok": true,
+    "message": "💎 VIP SNIPE — $GAMBLING filled @ $44.6K mcap"
+  },
+  {
     "ts": 1781427019547,
     "channel": "alerts",
     "ok": true,
@@ -1162,41 +1198,5 @@
     "channel": "vip_snipes",
     "ok": true,
     "message": "💎 VIP SNIPE — $MYSTERY filled @ $2.52M mcap"
-  },
-  {
-    "ts": 1777566804460,
-    "channel": "alerts",
-    "ok": true,
-    "message": "📡 ALERT — VIP just got fed"
-  },
-  {
-    "ts": 1777566801580,
-    "channel": "gas_tracker",
-    "ok": true,
-    "message": "⛽ Gas tracker"
-  },
-  {
-    "ts": 1777566798600,
-    "channel": "price_bot",
-    "ok": true,
-    "message": "📊 Live prices"
-  },
-  {
-    "ts": 1777566795487,
-    "channel": "alpha_lounge",
-    "ok": true,
-    "message": "🧠 Alpha Lounge — Solana memecoin season"
-  },
-  {
-    "ts": 1777566792488,
-    "channel": "live_trades",
-    "ok": true,
-    "message": "🟢 BUY — $CATCOIN"
-  },
-  {
-    "ts": 1777566789527,
-    "channel": "whale_tracker",
-    "ok": true,
-    "message": "🐋 Whale fully exited $MYSTERY"
   }
 ]
