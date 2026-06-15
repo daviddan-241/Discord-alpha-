@@ -113,7 +113,7 @@ export type DiscordConfig = {
   webhooks: Record<string, string>;
   ownerHandle: string;
   /**
-   * Discord user mention like `<@1035212407213133856>` — when set, posts use
+   * Discord user mention like `<@1488644089791385711>` — when set, posts use
    * this in CTAs so the owner gets a real ping. Falls back to `ownerHandle`.
    */
   ownerMention: string;
@@ -129,7 +129,7 @@ export type DiscordConfig = {
   telegramBroadcastChatId: string;
   /** Per-channel override map (channel key → telegram chat id). */
   telegramChats: Record<string, string>;
-  /** Telegram username users DM for VIP access (e.g. `@Dave_211`). */
+  /** Telegram username users DM for VIP access (e.g. `@mr_D_A_NNY`). */
   telegramDmHandle: string;
   /**
    * Telegram chat ID for VIP-only posts (vip_snipes, early_access, alpha_lounge,
@@ -141,16 +141,16 @@ export type DiscordConfig = {
 
 const DEFAULT_CONFIG: DiscordConfig = {
   webhooks: {},
-  ownerHandle: "@linux_kernel01",
-  ownerMention: "<@1035212407213133856>",
+  ownerHandle: process.env["DISCORD_OWNER_HANDLE"] || "@goobler_123",
+  ownerMention: process.env["DISCORD_OWNER_MENTION"] || "<@1488644089791385711>",
   serverName: "Baldwin Calls",
   autoPost: true,
-  publicBaseUrl: "",
+  publicBaseUrl: process.env["PUBLIC_BASE_URL"] || "",
   telegramEnabled: true,
-  telegramBroadcastChatId: "",
+  telegramBroadcastChatId: process.env["TELEGRAM_BROADCAST_CHAT_ID"] || "-1003461143473",
   telegramChats: {},
-  telegramDmHandle: "@Dave_211",
-  telegramVipChatId: "-1003761346762",
+  telegramDmHandle: process.env["TELEGRAM_DM_HANDLE"] || "@mr_D_A_NNY",
+  telegramVipChatId: process.env["TELEGRAM_VIP_CHAT_ID"] || "-1003761346762",
 };
 
 /**
@@ -164,7 +164,7 @@ export function dmTarget(cfg: Pick<DiscordConfig, "ownerMention" | "ownerHandle"
 
 /** Telegram DM target for VIP CTAs. */
 export function tgDmTarget(cfg: Pick<DiscordConfig, "telegramDmHandle">): string {
-  return cfg.telegramDmHandle || "@Dave_211";
+  return cfg.telegramDmHandle || process.env["TELEGRAM_DM_HANDLE"] || "@mr_D_A_NNY";
 }
 
 /**
@@ -178,9 +178,17 @@ export function pingContent(_cfg: Pick<DiscordConfig, "ownerMention">): string {
 /** Channels that should be mirrored to Telegram. Everything else stays Discord-only to avoid Telegram spam. */
 export const TG_MIRROR_CHANNELS: ReadonlySet<ChannelKey> = new Set<ChannelKey>([
   "free_calls",
+  "trending_coins",
+  "live_trades",
+  "market_chat",
+  "general_chat",
+  "alerts",
+  "alpha_lounge",
   "vip_snipes",
   "proof_results",
   "join_vip",
+  "early_access",
+  "announcements",
 ]);
 
 /** Pick the right telegram chat id for a channel — per-channel override, then VIP group (for VIP channels), then broadcast fallback. */
@@ -192,10 +200,10 @@ export function telegramChatFor(
   if (perChannel) return perChannel;
   const isVip = VIP_CHANNEL_KEYS.includes(channel as ChannelKey);
   if (isVip) {
-    const vipChat = (cfg.telegramVipChatId || "").trim();
+    const vipChat = (cfg.telegramVipChatId || "").trim() || (process.env["TELEGRAM_VIP_CHAT_ID"] || "").trim();
     if (vipChat) return vipChat;
   }
-  return (cfg.telegramBroadcastChatId || "").trim();
+  return (cfg.telegramBroadcastChatId || "").trim() || (process.env["TELEGRAM_BROADCAST_CHAT_ID"] || "").trim();
 }
 
 let cached: DiscordConfig | null = null;

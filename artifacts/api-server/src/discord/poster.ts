@@ -1,6 +1,7 @@
 import { logger } from "../lib/logger";
 import { appendHistory, loadConfig, type ChannelKey, CHANNEL_META, publicBaseUrlFromEnv, TG_MIRROR_CHANNELS } from "./config";
 import { sendToTelegramForChannel, logTelegramResult } from "./telegram-poster";
+import { humanizeEmbed, humanDelay } from "./humanizer";
 
 export type Embed = {
   title?: string;
@@ -78,12 +79,21 @@ export async function sendToChannel(
     return { ok: false, error: msg };
   }
 
+  // Run every outbound embed through the anti-AI humanizer so posts feel
+  // organic (contractions, slang, random lowercase, light typos, no ChatGPT
+  // phrases). Jitter timestamps so Discord / Telegram can't fingerprint bot
+  // schedules.
+  const humanized = humanizeEmbed({ ...payload });
+
   // Default to silent (no @everyone / @here / @user pings). Individual payloads
   // can override `allowed_mentions` to opt-in for high-impact pings.
   const body: WebhookPayload = {
     allowed_mentions: { parse: [] },
-    ...payload,
+    ...humanized,
   };
+
+  // Human typing delay before sending (50–2400ms random)
+  await humanDelay();
 
   try {
     const res = await fetch(url, {
@@ -98,7 +108,7 @@ export async function sendToChannel(
       logger.error({ channel, status: res.status, text }, "discord post failed");
       return { ok: false, status: res.status, error: msg };
     }
-    const summary = payload.embeds?.[0]?.title ?? payload.content?.slice(0, 80) ?? "(empty)";
+    const summary = humanized.embeds?.[0]?.title ?? humanized.content?.slice(0, 80) ?? "(empty)";
     await appendHistory({ ts: Date.now(), channel, ok: true, message: summary });
     logger.info({ channel }, `discord: posted ${meta.label}`);
 
@@ -107,7 +117,7 @@ export async function sendToChannel(
     if (TG_MIRROR_CHANNELS.has(channel)) {
       void (async () => {
         try {
-          const tg = await sendToTelegramForChannel(channel, payload);
+          const tg = await sendToTelegramForChannel(channel, humanized);
           await logTelegramResult(channel, tg);
         } catch (err) {
           logger.error({ err, channel }, "telegram fan-out threw");

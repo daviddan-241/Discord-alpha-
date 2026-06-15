@@ -39,10 +39,22 @@ services:
       - key: PUBLIC_BASE_URL
         sync: false
 
-      # ── Telegram (optional) ──────────────────────────────────────────────────
+      # ── Owner / admin handles (ENV always wins over config file) ────────────
+      - key: DISCORD_OWNER_HANDLE
+        value: "@goobler_123"
+      - key: DISCORD_OWNER_MENTION
+        value: "<@1488644089791385711>"
+      - key: TELEGRAM_DM_HANDLE
+        value: "@mr_D_A_NNY"
+
+      # ── Telegram ─────────────────────────────────────────────────────────────
       # Bot token from @BotFather.  Leave blank to disable Telegram mirroring.
       - key: TELEGRAM_BOT_TOKEN
         sync: false
+      - key: TELEGRAM_BROADCAST_CHAT_ID
+        value: "-1003461143473"
+      - key: TELEGRAM_VIP_CHAT_ID
+        value: "-1003761346762"
 
       # ── Discord verify-bot (optional) ────────────────────────────────────────
       # All four must be set to enable the ✅ reaction → role auto-grant bot.

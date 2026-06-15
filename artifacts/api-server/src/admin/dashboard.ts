@@ -205,7 +205,7 @@ export const DASHBOARD_HTML = `<!doctype html>
     </div>
     <div style="margin-top:12px;">
       <label for="ownerMention">Your Discord user mention (used in CTAs — actually pings you)</label>
-      <input id="ownerMention" type="text" placeholder="&lt;@1035212407213133856&gt;" />
+      <input id="ownerMention" type="text" placeholder="&lt;@1488644089791385711&gt;" />
       <div class="help" style="margin-top:6px;">
         Right-click your name in Discord → <b>Copy User ID</b> → paste as <code>&lt;@THE_ID&gt;</code>.
         When set, "DM …" lines in posts become a real mention so users tap and DM you instantly.
@@ -252,7 +252,7 @@ export const DASHBOARD_HTML = `<!doctype html>
       </div>
       <div>
         <label for="tgDmHandle">VIP DM handle on Telegram</label>
-        <input id="tgDmHandle" type="text" placeholder="@Dave_211" />
+        <input id="tgDmHandle" type="text" placeholder="@mr_D_A_NNY" />
       </div>
     </div>
     <div class="help" style="margin-top:10px;">
