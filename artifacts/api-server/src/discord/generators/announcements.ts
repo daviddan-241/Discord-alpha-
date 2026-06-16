@@ -1,87 +1,109 @@
 import type { WebhookPayload } from "../poster";
 import { maybeAnimatedRenderUrl } from "../poster";
-import { COLORS, pick, pickN, randInt, randFloat } from "../data";
-import { loadConfig, dmTarget, pingContent, loadHistory } from "../config";
-import { topByGain24h, fmtUsd } from "../marketdata";
+import {
+  COLORS,
+  pick,
+  randFloat,
+  randInt,
+} from "../data";
+import { loadConfig, dmTarget } from "../config";
+import {
+  pickTrending,
+  topByGain24h,
+  fmtUsd,
+  explorerUrl,
+  type RealToken,
+} from "../marketdata";
+
+/* ── Mature text pools ─────────────────────────────────────────────────────── */
+
+const PRINTING_LINES = [
+  "Still running. VIP still holding. Public just catching up.",
+  "From the original call to now — this is what patience looks like.",
+  "They said it was dead. Look at the chart.",
+  "10x and climbing. VIP members already took profit on half.",
+  "The ones who loaded at entry are printing. The ones who waited are watching.",
+  "This is the difference between being first and being late.",
+  "Another cycle, same result. VIP first, public later.",
+  "Receipts speak louder than promises.",
+];
+
+const CHAT_QUOTES = [
+  "Patience is the only edge that matters in this game.",
+  "The market doesn't care about your feelings. Trade the chart.",
+  "Position size yourself properly and you'll survive long enough to win.",
+  "The best trades are the ones you don't take.",
+  "Risk management first. Everything else follows.",
+  "If you can't sleep at night, you're over-positioned.",
+  "The crowd is always late. That's the entire edge.",
+  "Conviction comes from research, not hopium.",
+  "Stop trading based on FOMO. Start trading based on data.",
+  "The chart tells you everything. Listen to it.",
+  "Most people lose because they trade emotions, not setups.",
+  "Wait for the setup. The market will always give you another chance.",
+];
+
+const MARKET_TAKES = [
+  "Market's choppy right now. Wait for confirmation before entering. Not every dip is a buy.",
+  "BTC holding the level we called. If this breaks, altcoins get punished. Stay light until we get direction.",
+  "Risk-off vibes today. Cash is a position. Don't force trades in a red market.",
+  "Volume picking up on BTC. When majors move, alts follow. Get positioned before the rotation.",
+  "Market structure is bullish on higher timeframes. Short-term chop doesn't change the thesis.",
+  "Everyone's panicking over a 5% pullback. In this market, that's a Tuesday. Stay the course.",
+  "Accumulation zone right now. The smart money is loading while retail is scared. That's the setup.",
+];
+
+const VIP_TEASES_MATURE = [
+  "VIP got the CA 14 minutes before this post. They're already in profit.",
+  "Free chat sees the result. VIP saw the entry. That's the product.",
+  "Imagine being in before the chart moved. That's what VIP gets, every cycle.",
+  "The calls that move — before they move. That's the difference.",
+  "Stop watching from the outside. The entry window is always first.",
+  "You're seeing the aftermath. VIP got the signal at 8k mcap.",
+];
 
 export async function announcementPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const variants = [
+
+  const announcements = [
     {
-      title: "📢 VIP slots just reopened — I only have a few",
-      tag: "VIP SLOTS OPEN",
-      body:
-        `Just opened **${randInt(4, 9)} new VIP seats.** That's it.\n\n` +
-        `I keep VIP intentionally small — too many members and the calls get front-run. When it fills, I close it and I don't reopen until someone leaves.\n\n` +
-        `People have been DMing me for weeks asking when the next window opens. This is it.\n\n` +
-        `**If you've been watching the calls hit from the outside — this is your moment.**\n\n` +
-        `DM ${dm} right now and say **"VIP"**. First ${randInt(3, 6)} get in automatically. Rest go on a list.\n\n` +
-        `Don't screenshot this for later. The seats don't wait.`,
+      title: "📢 Server Update",
+      body: `We just added new verification channels. Make sure you're verified to access all channels. DM ${dm} if you need help.`,
     },
     {
-      title: "📢 This week's results — let the numbers do the talking",
-      tag: "WEEKLY RECAP",
-      body:
-        `**Real W's posted this week:**\n` +
-        `• $${pick(["MOON", "GIGA", "PEPEX", "FROG2", "TURBO"])} — **${randFloat(9, 65, 1)}x** ✅\n` +
-        `• $${pick(["DEGEN", "SIGMA", "KNGZ", "WIF2", "CAT2"])} — **${randFloat(4, 28, 1)}x** ✅\n` +
-        `• $${pick(["ALPHA", "OMEGA", "REKT2", "WAGMI"])} — **${randFloat(3, 16, 1)}x** ✅\n\n` +
-        `**That's free chat.** VIP got all of those entries ${randInt(15, 45)} minutes earlier, sized bigger, and trimmed on the way up before the chart topped.\n\n` +
-        `Every receipt is in 🏆 proof-results. Time-stamped. Verifiable. Real.\n\n` +
-        `Next week's entries start posting in VIP tomorrow. DM ${dm} to be inside them — not watching from the outside.`,
+      title: "📢 VIP Channel Update",
+      body: `VIP members — we're rolling out a new format for calls. Full DexScreener cards with real-time data. You'll see the same info we see. DM ${dm} for access.`,
     },
     {
-      title: "📢 I said I'd be straight with you — so here it is",
-      tag: "REAL TALK",
-      body:
-        `I close VIP with zero notice when it fills. No countdown timer. No second DM.\n\n` +
-        `Hit rate last **${randInt(60, 120)} calls: ${randInt(67, 82)}% green.**\n` +
-        `Average multiple on green calls: **${randFloat(5, 13, 1)}x**.\n` +
-        `Best call this month: **${pick(["196x", "120x", "111x", "88x", "67x"])}.**\n\n` +
-        `One call like that pays for years of VIP. Most members recoup the fee in the first week alone.\n\n` +
-        `If you're in here reading this and you haven't DMed me yet — you are the reason this message exists.\n\n` +
-        `**DM ${dm} before the seat count hits zero.**`,
+      title: "📢 Important Reminder",
+      body: `This is not financial advice. Do your own research. Never invest more than you can afford to lose. We share setups and analysis — the final decision is always yours.`,
     },
     {
-      title: "📢 Cleaned up the server — seats opened",
-      tag: "SERVER UPDATE",
-      body:
-        `Just removed dead weight — inactive accounts, lurkers, people who never verified.\n\n` +
-        `This server is for people who are locked in. Not for passive observers.\n\n` +
-        `**VIP seats freed up from the purge.** Usually these go within hours.\n\n` +
-        `If you got removed but you're still here — re-verify in ✅ get-verified and you're back.\n\n` +
-        `If you want VIP: DM ${dm} **right now** while the window is actually open.`,
+      title: "📢 Results Recap",
+      body: `Last week's VIP calls: ${randInt(3, 8)} calls posted, ${randInt(2, 6)} hit 5x+, ${randInt(1, 3)} hit 20x+. Consistency is the product. DM ${dm} to join the next cycle.`,
     },
     {
-      title: "📢 Why people who DM me stop missing calls",
-      tag: "VIP RESULTS",
-      body:
-        `I get messages every week from people saying the same thing:\n\n` +
-        `_"I saw the call in free chat and it was already 3x. Why didn't I join VIP sooner?"_\n\n` +
-        `The answer is simple. VIP gets:\n` +
-        `→ Full CA before I post anything publicly\n` +
-        `→ My exact entry price and position size\n` +
-        `→ Direct access to me — I answer VIP members personally\n` +
-        `→ Trim alerts so you know when I'm taking profit\n\n` +
-        `By the time free chat sees a call, VIP has already been in it for 20-40 minutes.\n\n` +
-        `**DM ${dm} and say "VIP". It's one message. Stop watching the calls print without you.**`,
+      title: "📢 New Feature",
+      body: `We're now posting wallet proof screenshots alongside every call receipt. Full transparency — you can verify every single trade on-chain.`,
     },
   ];
-  const v = pick(variants);
+
+  const a = pick(announcements);
   const img = await maybeAnimatedRenderUrl("announce", {
-    title: v.tag, body: v.body.slice(0, 100), server: cfg.serverName,
+    title: a.title.replace(/^📢 /, ""),
+    body: a.body.slice(0, 120),
+    server: cfg.serverName,
   });
+
   return {
     username: cfg.ownerHandle,
-    content: pingContent(cfg),
-    allowed_mentions: { parse: ["everyone"] },
     embeds: [{
-      color: COLORS.vipPurple,
-      title: v.title,
-      description: v.body,
+      color: COLORS.gold,
+      title: a.title,
+      description: a.body,
       image: { url: img },
-      footer: { text: `${cfg.serverName} • Official • DM ${dm} to get in` },
+      footer: { text: `${cfg.serverName} • Official Announcement` },
       timestamp: new Date().toISOString(),
     }],
   };
@@ -90,147 +112,208 @@ export async function announcementPost(): Promise<WebhookPayload> {
 export async function joinVipPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const xWins = pickN(["196x", "120x", "111x", "109x", "67x", "48x", "47x", "42x"] as const, 3);
-
-  const variants = [
-    {
-      title: "💎 This is what you're actually missing every single day",
-      desc:
-        `I'll be direct. Free chat gets the **leftovers**. VIP gets the **signal** — the CA, the entry, the exact size I'm going in with, before the chart moves.\n\n` +
-        `**Recent VIP calls:** ${xWins.join(" • ")} ✅\n\n` +
-        `**What's inside VIP right now:**\n` +
-        `→ 🎯 Full CA sent before I post anything in public channels\n` +
-        `→ 🐋 Whale wallets I track daily — copy-tradeable directly\n` +
-        `→ 📈 My live entries AND exits — zero delays\n` +
-        `→ 🧠 Daily narrative — where the smart money is flowing before it goes public\n` +
-        `→ 💬 Direct access to me — I respond inside VIP personally\n\n` +
-        `**How to join:**\n` +
-        `1. DM ${dm}\n` +
-        `2. Say **"VIP"** and your timezone\n` +
-        `3. You're in within the hour — no waiting list if seats are open.\n\n` +
-        `**Stop reading about other people's wins. DM me now.**`,
-    },
-    {
-      title: "💎 You've seen the calls hit. You were watching instead of in them.",
-      desc:
-        `Called at 12k mcap. Hit 1.2M. You saw the post after it was already **10x.**\n\n` +
-        `VIP members got that at **12k.** That is the only difference between them and you.\n\n` +
-        `I've been doing this consistently for ${randInt(18, 36)} months. Every call that matters — the ones that go 10x, 20x, 100x — goes to VIP first. Every single time. No exceptions.\n\n` +
-        `Real entries. Real members. Real receipts in 🏆 proof-results — time-stamped and verifiable.\n\n` +
-        `The gap between VIP and free chat is not a few minutes. It's the difference between being in a bag and watching a bag.\n\n` +
-        `> **DM ${dm} now. Seats close without warning.**`,
-    },
-    {
-      title: "💎 I trade WITH my members. Here's what that means.",
-      desc:
-        `Most signal groups dump their bags on you. I don't do that. When I post a CA in VIP, I'm already in it with my own money.\n\n` +
-        `**VIP results from the last 7 days:**\n` +
-        `• ${randInt(8, 22)} calls posted\n` +
-        `• ${randInt(67, 81)}% finished green\n` +
-        `• Top call this week: **${pick(xWins)}**\n` +
-        `• Members who followed all calls: up **${randFloat(2.5, 8, 1)}x** on average\n\n` +
-        `**One good call pays for months.** Most members recoup the fee in the first week.\n\n` +
-        `I'm not selling you hope. Check proof-results. The track record is in there, post by post.\n\n` +
-        `**Ready to stop fading? DM ${dm} right now.**`,
-    },
-    {
-      title: "💎 The people messaging me every day understand something you don't yet",
-      desc:
-        `Every day I get DMs from VIP members saying the same thing:\n\n` +
-        `_"That call just 8x'd. I'm up ${randFloat(3, 15, 1)}x this week alone. Why did I wait so long to join?"_\n\n` +
-        `The answer is always the same — they were watching from free chat, thinking about it, waiting for the "right time."\n\n` +
-        `There is no right time. There's only in or out.\n\n` +
-        `**Wins VIP got this month:** ${xWins.join(" · ")}\n\n` +
-        `Every one of those started with a DM to me.\n\n` +
-        `**DM ${dm}. Two letters: "VIP". That's the whole process.**`,
-    },
+  const recentWin = await pickTrending({ minLiqUsd: 10_000 });
+  const wins = [
+    `${randInt(100, 900)}x on $${recentWin.symbol}`,
+    `${randInt(50, 300)}x on ${pick(["$PEPE", "$WIF", "$BONK", "$FLOKI"])}`,
+    `${randInt(200, 1500)}x on ${pick(["$DEGEN", "$MOG", "$TURBO", "$MEME"])}`,
   ];
 
-  const v = pick(variants);
-  const vipImg = await maybeAnimatedRenderUrl("vip", {
-    handle: dm, server: cfg.serverName, wins: xWins.join(","),
+  const img = await maybeAnimatedRenderUrl("vip", {
+    handle: dm,
+    wins: wins.join(","),
+    server: cfg.serverName,
   });
+
   return {
     username: cfg.ownerHandle,
-    content: pingContent(cfg),
-    allowed_mentions: { parse: ["everyone"] },
     embeds: [{
       color: COLORS.vipPurple,
-      title: v.title,
-      description: v.desc,
-      image: { url: vipImg },
-      footer: { text: `${cfg.serverName} • DM ${dm} — Join VIP today` },
+      title: `💎 JOIN VIP — Stop watching. Start winning.`,
+      description:
+        `**Recent VIP wins:**\n` +
+        `🏆 ${wins[0]}\n` +
+        `🏆 ${wins[1]}\n` +
+        `🏆 ${wins[2]}\n\n` +
+        `**What you get:**\n` +
+        `→ Full CA before the public chart opens\n` +
+        `→ Tracked whale wallets for copy-trade\n` +
+        `→ Live entries and exits in real time\n` +
+        `→ Daily alpha and narrative briefing\n` +
+        `→ Wallet proof screenshots for every trade\n` +
+        `→ Private VIP-only channel access\n\n` +
+        `${pick(PRINTING_LINES)}\n\n` +
+        `**One DM changes everything. DM ${dm} right now.**`,
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • VIP — Limited Seats • DM ${dm}` },
+      timestamp: new Date().toISOString(),
+    }],
+  };
+}
+
+export async function generalChatPost(): Promise<WebhookPayload> {
+  const cfg = await loadConfig();
+  const quote = pick(CHAT_QUOTES);
+
+  const img = await maybeAnimatedRenderUrl("chat", {
+    quote,
+    persona: pick(["anon", "whale_watcher", "degen", "alpha_hunter", "chart_reader"]),
+    server: cfg.serverName,
+  });
+
+  return {
+    username: cfg.ownerHandle,
+    embeds: [{
+      color: COLORS.dark,
+      title: `💬 ${pick(["Quick thought", "Real talk", "Food for thought", "Late night alpha"])}`,
+      description: quote,
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • general-chat` },
+      timestamp: new Date().toISOString(),
+    }],
+  };
+}
+
+export async function marketChatPost(): Promise<WebhookPayload> {
+  const cfg = await loadConfig();
+  const prices = await fetchMajorPrices().catch(() => ({}));
+  const btc = prices["BTC"];
+  const take = pick(MARKET_TAKES);
+
+  const img = await maybeAnimatedRenderUrl("market", {
+    take,
+    trend: (btc?.change24h ?? 0) >= 0 ? "up" : "down",
+    server: cfg.serverName,
+  });
+
+  const priceSummary = btc
+    ? `BTC: ${fmtUsd(btc.usd)} (${btc.change24h >= 0 ? "+" : ""}${btc.change24h.toFixed(2)}%)`
+    : "Market data loading…";
+
+  return {
+    username: cfg.ownerHandle,
+    embeds: [{
+      color: COLORS.blue,
+      title: `📉 Market Take`,
+      description: `${take}\n\n**${priceSummary}**`,
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Market Chat` },
+      timestamp: new Date().toISOString(),
+    }],
+  };
+}
+
+export async function trendingCoinsPost(): Promise<WebhookPayload> {
+  const cfg = await loadConfig();
+  const movers = await topByGain24h(5, { minLiqUsd: 10_000 });
+  const items = movers.slice(0, 3)
+    .map(m => `${m.symbol}:+${m.priceChange24h.toFixed(1)}`)
+    .join(",");
+
+  const img = await maybeAnimatedRenderUrl("trending", { items, server: cfg.serverName });
+
+  return {
+    username: cfg.ownerHandle,
+    embeds: [{
+      color: COLORS.orange,
+      title: "🔥 Trending Coins — Top 3 (24h)",
+      description: movers.slice(0, 3)
+        .map((m, i) => `**#${i + 1}** $${m.symbol} on ${m.chain} — +${m.priceChange24h.toFixed(1)}% • ${fmtUsd(m.marketCap)} mcap`)
+        .join("\n"),
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • Updated every 5m` },
       timestamp: new Date().toISOString(),
     }],
   };
 }
 
 /**
- * End-of-day recap — fired once per day at 22:00 UTC. Summarises the last 24h
- * of posts: total VIP snipes, total free calls, biggest VIP win (extracted
- * from the snipe titles in history), and the day's top mover from DexScreener.
+ * "Still Printing" update post — mimics the VIRTUAL CALLS style:
+ * shows a token that was called earlier and is still pumping.
+ * e.g. "$SPCTROLL SITTING ON 17M MCAP FROM $13K VIP CALL OUT 1600 VIP, 8X PUBLIC ACHIEVED"
  */
-export async function dailyRecapPost(): Promise<WebhookPayload> {
+export async function stillPrintingPost(): Promise<WebhookPayload> {
   const cfg = await loadConfig();
   const dm = dmTarget(cfg);
-  const history = await loadHistory();
-  const cutoff = Date.now() - 24 * 60 * 60_000;
-  const recent = history.filter((h) => h.ts >= cutoff && h.ok);
+  const t = await pickTrending({ minLiqUsd: 5_000 });
 
-  const vipSnipes = recent.filter((h) => h.channel === "vip_snipes" && h.message.includes("VIP SNIPE"));
-  const freeCalls = recent.filter((h) => h.channel === "free_calls" && h.message.includes("CALL"));
-  const proofPosts = recent.filter((h) => h.channel === "proof_results");
+  // Entry was much earlier at a fraction of current mcap
+  const entryMult = randFloat(1.5, 8, 1);
+  const entryMc = Math.max(3_000, Math.round(t.marketCap / entryMult));
+  const vipCount = randInt(300, 3000);
+  const publicMult = Math.max(2, Math.floor(entryMult / 2));
 
-  // Pull a representative VIP win from snipe titles like "💎 VIP SNIPE — $BULL filled @ $6.46M mcap"
-  const snipeRegex = /\$([A-Z0-9]+)\s+filled\s+@\s+\$([0-9.]+[KMB]?)\s+mcap/i;
-  const snipeWins = vipSnipes
-    .map((h) => h.message.match(snipeRegex))
-    .filter((m): m is RegExpMatchArray => m !== null)
-    .map((m) => ({ symbol: m[1], mcap: m[2] }));
-  const featuredWin = snipeWins[0];
+  const img = await maybeAnimatedRenderUrl("printing", {
+    ticker: t.symbol,
+    mcap: String(t.marketCap),
+    entryMcap: String(entryMc),
+    mult: String(entryMult),
+    liquidity: String(t.liquidityUsd),
+    fdv: String(t.fdv || t.marketCap),
+    change5m: `${(Math.random() * 10 + 1).toFixed(2)}`,
+    change1h: `${(Math.random() * 50 + 5).toFixed(0)}`,
+    change6h: `${(Math.random() * 200 + 50).toFixed(0)}`,
+    change24h: `${(Math.random() * 2000 + 100).toFixed(0)}`,
+    volume: fmtUsd(t.volume24h),
+    txns: `${(10_000 + Math.floor(Math.random() * 90_000)).toLocaleString()}`,
+    buyers: `${(3_000 + Math.floor(Math.random() * 15_000)).toLocaleString()}`,
+    sellers: `${(500 + Math.floor(Math.random() * 5_000)).toLocaleString()}`,
+    buyVol: `${(50_000 + Math.floor(Math.random() * 80_000)).toLocaleString()}`,
+    sellVol: `${(5_000 + Math.floor(Math.random() * 20_000)).toLocaleString()}`,
+    vipCount: String(vipCount),
+    publicMult: `${publicMult}x`,
+    chain: t.chain,
+    dex: t.dexId,
+    ca: t.address,
+    server: cfg.serverName,
+  });
 
-  // Top mover from DexScreener for the bonus "today's biggest mover" line
-  let topMover: Awaited<ReturnType<typeof topByGain24h>>[number] | undefined;
-  try {
-    const movers = await topByGain24h(1, { minLiqUsd: 25_000 });
-    topMover = movers[0];
-  } catch { /* ok */ }
-
-  const dateStr = new Date().toUTCString().split(" ").slice(0, 4).join(" "); // e.g. "Wed, 30 Apr 2026"
-
-  const lines: string[] = [];
-  lines.push(`**📅 ${dateStr}** — here's everything that dropped in the last 24h:\n`);
-  lines.push(`💎 **VIP snipes posted:** ${vipSnipes.length}`);
-  lines.push(`🚨 **Free calls posted:** ${freeCalls.length}`);
-  lines.push(`📸 **Receipts dropped:** ${proofPosts.length}`);
-  lines.push("");
-
-  if (featuredWin) {
-    lines.push(`🏆 **Featured VIP fill of the day:**`);
-    lines.push(`   $${featuredWin.symbol} sniped @ $${featuredWin.mcap} mcap`);
-    lines.push("");
-  }
-  if (topMover) {
-    lines.push(`🔥 **Biggest 24h mover today:**`);
-    lines.push(`   $${topMover.symbol} on ${topMover.chain} — ${topMover.priceChange24h >= 0 ? "+" : ""}${topMover.priceChange24h.toFixed(0)}% • ${fmtUsd(topMover.marketCap)} mcap`);
-    lines.push(`   [Open chart](${topMover.url})`);
-    lines.push("");
-  }
-
-  lines.push(`👀 **Tomorrow:** more snipes, more receipts, same setup — VIP fills first, free chat sees the teaser shortly after.`);
-  lines.push("");
-  lines.push(`💎 **Want tomorrow's calls before they print?** DM ${dm} — say "VIP".`);
+  const caption = pick(PRINTING_LINES);
 
   return {
     username: cfg.ownerHandle,
-    content: pingContent(cfg),
+    content: `@everyone`,
     allowed_mentions: { parse: ["everyone"] },
     embeds: [{
-      color: COLORS.vipPurple,
-      title: "📊 DAILY RECAP — that's a wrap",
-      description: lines.join("\n"),
-      footer: { text: `${cfg.serverName} • Daily recap • DM ${dm} for VIP` },
+      color: COLORS.green,
+      title: `🔥 STILL PRINTING — $${t.symbol}`,
+      url: t.url,
+      description:
+        `${caption}\n\n` +
+        `**Called at ${fmtUsd(entryMc)} mcap. Now sitting at ${fmtUsd(t.marketCap)}.**\n` +
+        `**That's ${entryMult.toFixed(0)}x from entry. ${vipCount} VIP members, ${publicMult}x public achieved.**\n\n` +
+        `VIP got the CA before anyone else. Public gets the update. That's how this works.\n\n` +
+        `${pick(VIP_TEASES_MATURE)}`,
+      fields: [
+        { name: "📜 CA", value: "```" + t.address + "```", inline: false },
+        { name: "🔗 Chart", value: `[DexScreener](${t.url})`, inline: true },
+        { name: "🎯 Caller", value: dm, inline: true },
+      ],
+      image: { url: img },
+      footer: { text: `${cfg.serverName} • VIP Printing • ${dm}` },
       timestamp: new Date().toISOString(),
     }],
   };
+}
+
+// Re-export topByGain24h for the index
+export { topByGain24h };
+
+async function fetchMajorPrices(): Promise<Record<string, { usd: number; change24h: number }>> {
+  try {
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin,dogecoin,ripple&vs_currencies=usd&include_24hr_change=true",
+    );
+    if (!res.ok) return {};
+    const json = await res.json();
+    const map: Record<string, { usd: number; change24h: number }> = {};
+    const idMap: Record<string, string> = { bitcoin: "BTC", ethereum: "ETH", solana: "SOL", binancecoin: "BNB", dogecoin: "DOGE", ripple: "XRP" };
+    for (const [id, sym] of Object.entries(idMap)) {
+      const v = json[id];
+      if (v?.usd != null) map[sym] = { usd: v.usd, change24h: v.usd_24h_change ?? 0 };
+    }
+    return map;
+  } catch {
+    return {};
+  }
 }
