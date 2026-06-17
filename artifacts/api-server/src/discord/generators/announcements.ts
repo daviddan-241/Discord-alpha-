@@ -12,3 +12,19 @@ export async function dailyRecapPost(): Promise<any> {
   };
 }
 
+
+export async function announcementPost(): Promise<any> {
+  return {
+    username: "Announcement",
+    content: "New announcement coming soon.",
+    embeds: [],
+  };
+}
+
+export async function joinVipPost(): Promise<any> {
+  return {
+    username: "Join VIP",
+    content: "Join our VIP for exclusive alpha.",
+    embeds: [],
+  };
+}
