@@ -74,23 +74,4 @@ export async function dailyRecapPost(): Promise<any> {
   };
 }
 
-<<<<<<< HEAD
-
-export async function announcementPost(): Promise<any> {
-  return {
-    username: "Announcement",
-    content: "New announcement coming soon.",
-    embeds: [],
-  };
-}
-
-export async function joinVipPost(): Promise<any> {
-  return {
-    username: "Join VIP",
-    content: "Join our VIP for exclusive alpha.",
-    embeds: [],
-  };
-}
-=======
 export { topByGain24h };
->>>>>>> 8ac21a1 (fix: replace corrupted announcements.ts file)
