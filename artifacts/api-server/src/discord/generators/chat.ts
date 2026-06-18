@@ -348,8 +348,8 @@ export async function trendingCoinsPost(): Promise<WebhookPayload> {
     username: cfg.ownerHandle,
     embeds: [{
       color: COLORS.orange,
-      title: "🔥 Trending right now",
-      description: "Top movers in the last 24h across DexScreener.",
+      title: "Top movers right now",
+      description: "Top movers across DexScreener right now.",
       fields: top.flatMap((t, i) => [
         {
           name: `${i + 1}. $${t.symbol}`,

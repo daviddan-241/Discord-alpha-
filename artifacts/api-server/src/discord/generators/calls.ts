@@ -463,7 +463,7 @@ export async function liveTradePost(): Promise<WebhookPayload> {
   const actionLine = pick(
     direction === "BUY"
       ? [
-          `My wallet just filled. First position. I'm watching this closely.`,
+          `Wallet just moved. Watching this one.`,
           `Added here. Conviction is high. Watch the level.`,
           `Fresh entry. Chart is setting up exactly as expected.`,
         ]
